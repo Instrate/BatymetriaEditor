@@ -10,96 +10,188 @@ namespace SceneEditor.editor
 {
     static class WallsCubic
     {
+        //public static float[] coords = {
+        //    // bottom
+        //    0.5f, -0.5f, -0.5f,
+        //    -0.5f, -0.5f, -0.5f,
+        //    -0.5f, 0.5f, -0.5f,
+        //    0.5f, 0.5f, -0.5f,
+
+        //    // top
+        //    0.5f, -0.5f, 0.5f,
+        //    -0.5f, -0.5f, 0.5f,
+        //    -0.5f, 0.5f, 0.5f,
+        //    0.5f, 0.5f, 0.5f,
+
+        //    // back
+        //    -0.5f, 0.5f, -0.5f,
+        //    -0.5f, 0.5f, 0.5f,
+        //    -0.5f, -0.5f, 0.5f,
+        //    -0.5f, -0.5f, -0.5f,
+
+        //    // front
+        //    0.5f, -0.5f, -0.5f,
+        //    0.5f, -0.5f, 0.5f,
+        //    0.5f, 0.5f, 0.5f,
+        //    0.5f, 0.5f, -0.5f,
+
+        //    // left
+        //    -0.5f, -0.5f, -0.5f,
+        //    -0.5f, -0.5f, 0.5f,
+        //    0.5f, -0.5f, 0.5f,
+        //    0.5f, -0.5f, -0.5f,
+
+        //    // right
+        //    0.5f, 0.5f, -0.5f,
+        //    0.5f, 0.5f, 0.5f,
+        //    -0.5f, 0.5f, 0.5f,
+        //    -0.5f, 0.5f, -0.5f 
+        //};
+
+        //public static float[] color =
+        //{
+        //    1.0f, 1.0f, 1.0f,
+        //    1.0f, 1.0f, 1.0f,
+        //    1.0f, 1.0f, 1.0f,
+        //    1.0f, 1.0f, 1.0f
+        //};
+
+        //public static float[] normal =
+        //{
+        //    0.0f,  0.0f, -1.0f,
+        //    0.0f,  0.0f, -1.0f,
+        //    0.0f,  0.0f, -1.0f,
+        //    0.0f,  0.0f, -1.0f,
+
+
+        //    0.0f,  0.0f,  1.0f,
+        //    0.0f,  0.0f,  1.0f,
+        //    0.0f,  0.0f,  1.0f,
+        //    0.0f,  0.0f,  1.0f,
+
+        //    -1.0f,  0.0f,  0.0f,
+        //    -1.0f,  0.0f,  0.0f,
+        //    -1.0f,  0.0f,  0.0f,
+        //    -1.0f,  0.0f,  0.0f,
+
+        //    1.0f,  0.0f,  0.0f,
+        //    1.0f,  0.0f,  0.0f,
+        //    1.0f,  0.0f,  0.0f,
+        //    1.0f,  0.0f,  0.0f,
+
+        //    0.0f, -1.0f,  0.0f,
+        //    0.0f, -1.0f,  0.0f,
+        //    0.0f, -1.0f,  0.0f,
+        //    0.0f, -1.0f,  0.0f,
+
+        //    0.0f,  1.0f,  0.0f,
+        //    0.0f,  1.0f,  0.0f,
+        //    0.0f,  1.0f,  0.0f,
+        //    0.0f,  1.0f,  0.0f
+        //};
+
+        //public static float[] texture =
+        //{
+        //    // bottom
+        //    1.0f, 1.0f,
+        //    1.0f, 0.0f,
+        //    0.0f, 0.0f,
+        //    0.0f, 1.0f,
+
+        //    // top
+        //    1.0f, 1.0f,
+        //    1.0f, 0.0f,
+        //    0.0f, 0.0f,
+        //    0.0f, 1.0f,
+
+        //    // back
+        //    1.0f, 1.0f,
+        //    1.0f, 0.0f,
+        //    0.0f, 0.0f,
+        //    0.0f, 1.0f,
+
+        //    // front
+        //    1.0f, 1.0f,
+        //    1.0f, 0.0f,
+        //    0.0f, 0.0f,
+        //    0.0f, 1.0f,
+
+        //    1.0f, 1.0f,
+        //    1.0f, 0.0f,
+        //    0.0f, 0.0f,
+        //    0.0f, 1.0f,
+
+        //    1.0f, 1.0f,
+        //    1.0f, 0.0f,
+        //    0.0f, 0.0f,
+        //    0.0f, 1.0f
+        //};
+
+        //public static uint[] indices = {
+        //    0, 1, 3,
+        //    1, 2, 3,
+
+        //    4, 5, 7,
+        //    5, 6, 7,
+
+        //    1, 2, 6,
+        //    1, 5, 6,
+
+        //    0, 3, 4,
+        //    3, 4, 7,
+
+        //    0, 1, 5,
+        //    0, 4, 5,
+
+        //    2, 3, 7,
+        //    2, 6, 7
+        //};
+
         public static float[] coords = {
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f, -0.5f,
+             0.5f,  0.5f, -0.5f,
+             0.5f,  0.5f, -0.5f,
+            -0.5f,  0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
 
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,
+             0.5f, -0.5f,  0.5f,
+             0.5f,  0.5f,  0.5f,
+             0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
+            -0.5f, -0.5f,  0.5f,
 
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
 
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,
+             0.5f,  0.5f, -0.5f,
+             0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f,  0.5f,
+             0.5f,  0.5f,  0.5f,
 
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f,  0.5f,
+             0.5f, -0.5f,  0.5f,
+            -0.5f, -0.5f,  0.5f,
+            -0.5f, -0.5f, -0.5f,
 
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+            -0.5f,  0.5f, -0.5f,
+             0.5f,  0.5f, -0.5f,
+             0.5f,  0.5f,  0.5f,
+             0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f, -0.5f
         };
 
-        public static float[] coords_no_texture = {
-            -0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-             0.5f,  0.5f, -0.5f,
-             0.5f,  0.5f, -0.5f,
-            -0.5f,  0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
-
-            -0.5f, -0.5f,  0.5f,
-             0.5f, -0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-            -0.5f, -0.5f,  0.5f,
-
-            -0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
-            -0.5f, -0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-
-             0.5f,  0.5f,  0.5f,
-             0.5f,  0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f,
-
-            -0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f,  0.5f,
-             0.5f, -0.5f,  0.5f,
-            -0.5f, -0.5f,  0.5f,
-            -0.5f, -0.5f, -0.5f,
-
-            -0.5f,  0.5f, -0.5f,
-             0.5f,  0.5f, -0.5f,
-             0.5f,  0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f, -0.5f,
-        };
-
-        public static float[] color =
-        {
+        public static float[] color = {
             1.0f, 1.0f, 1.0f,
             1.0f, 1.0f, 1.0f,
             1.0f, 1.0f, 1.0f,
@@ -108,69 +200,92 @@ namespace SceneEditor.editor
             1.0f, 1.0f, 1.0f
         };
 
-        public static float[] normal =
-        {
-            0.0f,  0.0f, -1.0f,
-            0.0f,  0.0f, -1.0f,
-            0.0f,  0.0f, -1.0f,
-            0.0f,  0.0f, -1.0f,
-            0.0f,  0.0f, -1.0f,
-            0.0f,  0.0f, -1.0f,
+        public static float[] texture = {
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f,
 
-            0.0f,  0.0f,  1.0f,
-            0.0f,  0.0f,  1.0f,
-            0.0f,  0.0f,  1.0f,
-            0.0f,  0.0f,  1.0f,
-            0.0f,  0.0f,  1.0f,
-            0.0f,  0.0f,  1.0f,
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f,
 
-            -1.0f,  0.0f,  0.0f,
-            -1.0f,  0.0f,  0.0f,
-            -1.0f,  0.0f,  0.0f,
-            -1.0f,  0.0f,  0.0f,
-            -1.0f,  0.0f,  0.0f,
-            -1.0f,  0.0f,  0.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f,
+            1.0f, 0.0f,
 
-            1.0f,  0.0f,  0.0f,
-            1.0f,  0.0f,  0.0f,
-            1.0f,  0.0f,  0.0f,
-            1.0f,  0.0f,  0.0f,
-            1.0f,  0.0f,  0.0f,
-            1.0f,  0.0f,  0.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f,
+            1.0f, 0.0f,
 
-            0.0f, -1.0f,  0.0f,
-            0.0f, -1.0f,  0.0f,
-            0.0f, -1.0f,  0.0f,
-            0.0f, -1.0f,  0.0f,
-            0.0f, -1.0f,  0.0f,
-            0.0f, -1.0f,  0.0f,
+            0.0f, 1.0f,
+            1.0f, 1.0f,
+            1.0f, 0.0f,
+            1.0f, 0.0f,
+            0.0f, 0.0f,
+            0.0f, 1.0f,
 
-            0.0f,  1.0f,  0.0f,
-            0.0f,  1.0f,  0.0f,
-            0.0f,  1.0f,  0.0f,
-            0.0f,  1.0f,  0.0f,
-            0.0f,  1.0f,  0.0f,
-            0.0f,  1.0f,  0.0f,
+            0.0f, 1.0f,
+            1.0f, 1.0f,
+            1.0f, 0.0f,
+            1.0f, 0.0f,
+            0.0f, 0.0f,
+            0.0f, 1.0f
         };
 
-        //public static float[] coords = {
-        //     0.5f,  0.5f, 0f,
-        //     0.5f, -0.5f, 0f,
-        //    -0.5f, -0.5f, 0f,
-        //    -0.5f,  0.5f, 0f
-        //};
+        public static float[] normal = {
+            0.0f,  0.0f, -1.0f,
+            0.0f,  0.0f, -1.0f,
+            0.0f,  0.0f, -1.0f,
+            0.0f,  0.0f, -1.0f,
+            0.0f,  0.0f, -1.0f,
+            0.0f,  0.0f, -1.0f,
 
-        //public static float[] texture =
-        //{
-        //    1.0f, 1.0f,
-        //    1.0f, 0.0f,
-        //    0.0f, 0.0f,
-        //    0.0f, 1.0f
-        //};
+            0.0f,  0.0f,  1.0f,
+            0.0f,  0.0f,  1.0f,
+            0.0f,  0.0f,  1.0f,
+            0.0f,  0.0f,  1.0f,
+            0.0f,  0.0f,  1.0f,
+            0.0f,  0.0f,  1.0f,
 
-        public static uint[] indices = {
-            0, 1, 3,
-            1, 2, 3
+            -1.0f,  0.0f,  0.0f,
+            -1.0f,  0.0f,  0.0f,
+            -1.0f,  0.0f,  0.0f,
+            -1.0f,  0.0f,  0.0f,
+            -1.0f,  0.0f,  0.0f,
+            -1.0f,  0.0f,  0.0f,
+
+             1.0f,  0.0f,  0.0f,
+             1.0f,  0.0f,  0.0f,
+             1.0f,  0.0f,  0.0f,
+             1.0f,  0.0f,  0.0f,
+             1.0f,  0.0f,  0.0f,
+             1.0f,  0.0f,  0.0f,
+
+             0.0f, -1.0f,  0.0f,
+             0.0f, -1.0f,  0.0f,
+             0.0f, -1.0f,  0.0f,
+             0.0f, -1.0f,  0.0f,
+             0.0f, -1.0f,  0.0f,
+             0.0f, -1.0f,  0.0f,
+
+             0.0f,  1.0f,  0.0f,
+             0.0f,  1.0f,  0.0f,
+             0.0f,  1.0f,  0.0f,
+             0.0f,  1.0f,  0.0f,
+             0.0f,  1.0f,  0.0f,
+             0.0f,  1.0f,  0.0f
         };
     }
 
@@ -194,7 +309,7 @@ namespace SceneEditor.editor
 
         private void concatSet(float[]? builder = default, Vector3? Color = default)
         {
-            float[] coords = builder == default ? WallsCubic.coords_no_texture : builder;
+            float[] coords = builder == default ? WallsCubic.coords : builder;
 
             float[] color = WallsCubic.color;
             if (Color != null)
@@ -205,7 +320,7 @@ namespace SceneEditor.editor
                 }
             }
 
-            int size = WallsCubic.coords_no_texture.Length + WallsCubic.color.Length * 6 + WallsCubic.normal.Length;
+            int size = WallsCubic.coords.Length + WallsCubic.color.Length * 6 + WallsCubic.normal.Length + WallsCubic.texture.Length;
             offset = size / 36;
 
             vertices = new float[size];
@@ -213,9 +328,11 @@ namespace SceneEditor.editor
             {
                 for (int j = 0; j < offset; j++)
                 {
-                    vertices[i * offset + j] = j < 3 ? coords[i * 3 + j] : j < 6 ? color[i % 6 * 3 + j - 3] : WallsCubic.normal[i * 3 + j - 6];
+                    //Console.WriteLine("[" + i + "][" + j + "]");
+                    vertices[i * offset + j] = j < 3 ? coords[i * 3 + j] : j < 6 ? color[i % 6 * 3 + j - 3] : j < 8 ? WallsCubic.texture[i * 2 + j - 6] : WallsCubic.normal[i * 3 + j - 8];
                 }
             }
+           
         }
 
         private float[] _buildVertice(Vector2 v1, Vector2 v2, Vector4 v3)
@@ -277,18 +394,21 @@ namespace SceneEditor.editor
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
 
-
-            GL.EnableVertexAttribArray(0);
+            // coord
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), IntPtr.Zero);
+            GL.EnableVertexAttribArray(0);
 
-            GL.EnableVertexAttribArray(1);
+            // color
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 3 * sizeof(float));
+            GL.EnableVertexAttribArray(1);
 
-            //GL.EnableVertexAttribArray(2);
-            //GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, offset * sizeof(float), 3 * sizeof(float));
+            // texture
+            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, offset * sizeof(float), 6 * sizeof(float));
+            GL.EnableVertexAttribArray(2);
 
+            // normal
+            GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 8 * sizeof(float));
             GL.EnableVertexAttribArray(3);
-            GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 6 * sizeof(float));
 
             if (pos != default)
             {

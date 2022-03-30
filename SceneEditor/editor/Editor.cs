@@ -68,9 +68,9 @@ namespace SceneEditor.editor
         {
             selfSize = windowSize;
 
-            //textureHandlers = new int[2];
-            //textureHandlers[0] = TextureLoader.LoadFromFile(TexturePath.wall);
-            //textureHandlers[1] = TextureLoader.LoadFromFile(TexturePath.oriental_tiles);
+            textureHandlers = new int[2];
+            textureHandlers[0] = TextureLoader.LoadFromFile(TexturePath.wall);
+            textureHandlers[1] = TextureLoader.LoadFromFile(TexturePath.oriental_tiles);
 
             //sqr = new Square(textureSet: new string[] { TexturePath.wall, TexturePath.morocco_blue }, pos: new Vector3() { Z = 0f });
 
@@ -84,18 +84,19 @@ namespace SceneEditor.editor
             //    square.Scale(new Vector3(2f));
             //}
 
-            //sqr.Scale(new Vector3(10f));
+            //sqr.Scale(new Vector3(20f));
 
-            //bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.morocco_blue, TexturePath.cork_board });
+            bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.morocco_blue, TexturePath.cork_board });
 
-            cubes = new Cube[1] {
-                new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0f, 0f)),
-                //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f)),
-                //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f)),
-                //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f))
-            };
+            //cubes = new Cube[0] {
+            //    new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 1f, 1f)),
+            //    new Cube(pos: new Vector3() { X = 1f, Z = 2f}, color: new Vector3(1.0f, 1f, 1.0f))
+            //    //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f)),
+            //    //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f)),
+            //    //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f))
+            //};
 
-            lightBubble = new Cube(pos: new Vector3() { Z = 3.3f , X = -1.9f, Y = 0.9f});
+            lightBubble = new Cube(pos: new Vector3() { Z = 20f , X = 0, Y = 0});
             lightBubble.Scale(new Vector3(0.1f));
 
             //cubes = new Cube[4] { 
@@ -199,17 +200,17 @@ namespace SceneEditor.editor
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             //texture buffer loading
-            //for(int i = 0; i < textureHandlers.Length && i < 32; i++)
-            //{
-            //    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-            //}
+            for (int i = 0; i < textureHandlers.Length && i < 32; i++)
+            {
+                TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
+            }
 
             //model = Matrix4.CreateRotationX(0.5f) * Matrix4.CreateRotationY(1f) * timeDelta;
 
-            foreach (var cube in cubes)
-            {
-                cube.Rotate(new Vector3() { X = 0.0f, Y = 0f, Z = 0.0f } * timeDelta);
-            }
+            //foreach (var cube in cubes)
+            //{
+            //    cube.Rotate(new Vector3() { X = 0.0f, Y = 0f, Z = 0.0f } * timeDelta);
+            //}
 
             //foreach(var square in test)
             //{
@@ -242,25 +243,27 @@ namespace SceneEditor.editor
             //}
 
             //lightPos = new Vector3() { X = 1 + MathF.Sin(elapsedTime) * 2, Y = MathF.Sin(elapsedTime / 2) , Z = 1};
-            lightBubble.Move(new Vector3() { X = MathF.Sin(elapsedTime) / 20, Y = MathF.Cos(elapsedTime) / 20 });
+            //lightBubble.Move(new Vector3() { X = MathF.Sin(elapsedTime) / 20, Y = MathF.Cos(elapsedTime) / 20 });
             
 
             shader.Use();
             shader.SetMatrix4("model", model);
-            shader.SetVector3("lightColor", new Vector3(c.R, c.G, c.B));
+            //shader.SetVector3("lightColor", new Vector3(c.R, c.G, c.B));
+            shader.SetVector3("lightColor", new Vector3(1));
             shader.SetVector3("lightPos", lightBubble.position - new Vector3(0, 0, 0.2f));
             shader.SetVector3("viewPos", cameras[activeCam].cam.Position);
 
             RenderObject(lightBubble);
-            
+
             //for (int i = 0; i < textureHandlers.Length && i < 32; i++)
             //{
             //    shader.SetInt("texture" + (i+1).ToString(), i);
             //}
 
-            //RenderObject(bottom);
+            //RenderObject(sqr);
+            RenderObject(bottom);
             //RenderObject(test);
-            RenderObject(cubes);
+            //RenderObject(cubes);
             
 
             GL.Finish();

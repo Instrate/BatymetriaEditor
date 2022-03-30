@@ -5,11 +5,11 @@ in vec3 vertexColor;
 in vec3 Normal;
 in vec3 FragPos; 
 in vec3 LightPos;
-//in vec2 TexCoord;
-//in float height;
-//
-//uniform sampler2D texture1;
-//uniform sampler2D texture2;
+in vec2 TexCoord;
+in float height;
+
+uniform sampler2D texture1;
+uniform sampler2D texture2;
 
 uniform vec3 lightColor = vec3(1);
 
@@ -26,20 +26,19 @@ uniform Material material;
 
 void main()
 {
-//    float gradient = height * 0.2 + 0.6;
-//    float textureGradient = height * 0.2 + 0.2;
-//    if(height < 0.3){
-//        gradient = 0.3;
-//    }
-//    else if (height > 0.95){
-//        gradient = 0.95;
-//    }
+    float gradient = height * 0.1 + 0.7;
+    float textureGradient = height * 0.2 + 0.2;
+    if(height < 0.3){
+        gradient = 0.3;
+    }
+    else if (height > 0.95){
+        gradient = 0.95;
+    }
 
-    //vec4 oTexture = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), textureGradient);
-
+    //float textureGradient = 0.5;
     //FragColor = oTexture * gradient * vec4(vertexColor, 1);
 
-    float ambientStrength = 0.1;
+    float ambientStrength = 0.2;
     vec3 ambient = ambientStrength * lightColor;
 
     vec3 norm = normalize(Normal);
@@ -56,6 +55,6 @@ void main()
 
     vec3 resultColor = (ambient + diffuse + specular) * vertexColor;
 
-
-    FragColor = vec4(resultColor, 1);
+    vec4 oTexture = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), textureGradient);
+    FragColor = oTexture  * gradient * vec4(resultColor, 1);
 }
