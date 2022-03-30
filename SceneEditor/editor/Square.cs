@@ -235,17 +235,16 @@ namespace SceneEditor.editor
             //texture loading
             if (textureHandlers != null && textureHandlers.Length > 0)
             {
-                int i;
-                for (i = 0; i < textureHandlers.Length && i < 32; i++)
+                
+                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
                 {
                     TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
                 }
             }
 
-            //geometry and color changes
+            //geometry
             var id = GL.GetUniformLocation(shaderHandle, "transform");
             GL.UniformMatrix4(id, false, ref transform);
-
 
             // drawing processed geometry
             GL.BindVertexArray(VAO);

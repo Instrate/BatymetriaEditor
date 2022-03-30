@@ -94,9 +94,9 @@ namespace SceneEditor.editor
                 }
                 else
                 {
-                    float start = -10;
-                    float end = 10;
-                    float step = 0.5f;
+                    float start = -5;
+                    float end = 5;
+                    float step = 0.2f;
                     X = Functions.Arrange(start, end, step);
                     Y = Functions.Arrange(start, end, step);
                     Z = Functions.FigureTest(X, Y);
@@ -130,8 +130,7 @@ namespace SceneEditor.editor
             //texture loading
             if (textureHandlers != null && textureHandlers.Length > 0)
             {
-                int i;
-                for (i = 0; i < textureHandlers.Length && i < 32; i++)
+                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
                 {
                     TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
                 }

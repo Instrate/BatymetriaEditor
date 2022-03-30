@@ -96,7 +96,7 @@ namespace SceneEditor.editor
             //    //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f))
             //};
 
-            lightBubble = new Cube(pos: new Vector3() { Z = 20f , X = 0, Y = 0});
+            lightBubble = new Cube(pos: new Vector3() { Z = 30f , X = 0, Y = 0});
             lightBubble.Scale(new Vector3(0.1f));
 
             //cubes = new Cube[4] { 
@@ -253,12 +253,12 @@ namespace SceneEditor.editor
             shader.SetVector3("lightPos", lightBubble.position - new Vector3(0, 0, 0.2f));
             shader.SetVector3("viewPos", cameras[activeCam].cam.Position);
 
-            RenderObject(lightBubble);
+            for (int i = 0; i < textureHandlers.Length && i < 32; i++)
+            {
+                shader.SetInt("texture" + (i + 1).ToString(), i);
+            }
 
-            //for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-            //{
-            //    shader.SetInt("texture" + (i+1).ToString(), i);
-            //}
+            RenderObject(lightBubble);
 
             //RenderObject(sqr);
             RenderObject(bottom);
