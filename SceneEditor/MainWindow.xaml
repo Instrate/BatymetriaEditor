@@ -1,0 +1,108 @@
+﻿<Window x:Class="SceneEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SceneEditor"
+        xmlns:glWpfControl="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
+        mc:Ignorable="d"
+        Title="BatymetriaEditor (by Bohdan Savchuk)" Width="1280" Height="720" WindowStyle="ThreeDBorderWindow">
+    <Grid x:Name="panelRoot" Background="Silver" Focusable="True">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"></ColumnDefinition>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Rectangle Fill="DimGray" Grid.Column="0"></Rectangle>
+        <Rectangle Fill="SlateGray" Grid.Column="1"></Rectangle>
+
+        <Grid x:Name="panelBench" Background="FloralWhite" Grid.Column="0" Grid.Row="0" Focusable="True">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <Rectangle Fill="GreenYellow" Grid.Row="0"></Rectangle>
+            <Rectangle Fill="DarkSeaGreen" Grid.Row="1"></Rectangle>
+            <GridSplitter Grid.Row="0" BorderThickness="2" BorderBrush="Black" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
+
+            <Grid Grid.Row="0" x:Name="panelTabs">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+
+                <glWpfControl:NonReloadingTabControl Grid.Row="0" Margin="5" x:Name="tabWindows" Background="Wheat">
+                    <TabItem Header="Main" x:Name="glControl1">
+                        <glWpfControl:GLWpfControl x:Name="glMain" Margin="5" Focusable="True" Render="OnRender" Cursor="Hand" PreviewMouseWheel="OnPreviewMouseWheel"/>
+                    </TabItem>
+                </glWpfControl:NonReloadingTabControl>
+
+                <StatusBar Grid.Row="1" Height="45" Margin="5">
+                    <StatusBarItem>
+                        <TextBlock x:Name="textFps"></TextBlock>
+                    </StatusBarItem>
+                    <StatusBarItem>
+                        <TextBlock x:Name="textKey"></TextBlock>
+                    </StatusBarItem>
+                    <StatusBarItem>
+                        <TextBlock x:Name="textMouse"></TextBlock>
+                    </StatusBarItem>
+                </StatusBar>
+            </Grid>
+
+            <TabControl Grid.Row="1" Margin="5">
+                <TabItem Header="Output">
+                    <ListView x:Name="listViewProcess"/>
+                </TabItem>
+            </TabControl>
+
+        </Grid>
+
+        <Grid x:Name="panelInfo" Background="CadetBlue" Grid.Column="1" Focusable="True">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*"></RowDefinition>
+                <RowDefinition Height="1*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <GridSplitter Grid.Row="0" BorderThickness="2" BorderBrush="Black" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
+
+            <Grid Grid.Row="1">
+                <TabControl Margin="5">
+                    <TabItem Header="Settings">
+                        <ListBox Width="Auto" x:Name="SettingsApp">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Expander Header="{Binding Path = setting}">
+                                        <DockPanel>
+                                            <ListBox>
+                                                <ListBox.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <DockPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ListBox.ItemsPanel>
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <DockPanel>
+                                                            <TextBlock DockPanel.Dock="Left" Text="{Binding Path=setting.name}"/>
+                                                            <TextBox DockPanel.Dock="Right" Text="{Binding Path=setting.value}"/>
+                                                        </DockPanel>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </DockPanel>
+                                    </Expander>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </TabItem>
+                    <TabItem Header="Scene">
+
+                    </TabItem>
+                </TabControl>
+            </Grid>
+
+        </Grid>
+
+        <GridSplitter Grid.Column="0" BorderThickness="2" BorderBrush="Black"></GridSplitter>
+
+
+    </Grid>
+</Window>
