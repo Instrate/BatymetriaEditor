@@ -171,9 +171,10 @@ namespace SceneEditor.editor
         {
             selfSize = windowSize;
 
-            textureHandlers = new int[2];
+            textureHandlers = new int[3];
             textureHandlers[0] = TextureLoader.LoadFromFile(TexturePath.wall);
             textureHandlers[1] = TextureLoader.LoadFromFile(TexturePath.oriental_tiles);
+            textureHandlers[2] = TextureLoader.LoadFromFile(TexturePath.criss_cross);
 
             sqr = new Square(textureSet: new string[] { TexturePath.wall, TexturePath.morocco_blue }, pos: new Vector3() { Z = -1f });
 
@@ -195,7 +196,7 @@ namespace SceneEditor.editor
 
             //sqr.Scale(new Vector3(20f));
 
-            bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board });
+            bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
             //trg = new Triangle(pos: new Vector3(0, 0, 2.5f));
             //trg.Scale(new Vector3(2));
@@ -252,6 +253,7 @@ namespace SceneEditor.editor
             model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(0f));
             modelCramble = Matrix4.Transpose(model.Inverted());
             shader.SetMatrix4("model_cramble", modelCramble);
+
             view = cameras[activeCam].cam.GetViewMatrix();
             shader.SetMatrix4("view", view);
             shader.SetMatrix4("projection", cameras[activeCam].cam.GetProjectionMatrix());

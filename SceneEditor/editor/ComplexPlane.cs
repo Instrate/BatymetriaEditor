@@ -66,7 +66,7 @@ namespace SceneEditor.editor
                     float y = Y[j];
                     //res[i][j] = MathF.Sin(x);
                     //res[i][j] = x;
-                    res[i][j] = MathF.Atan((x + y) / 2) * MathF.Sin(MathF.Cos(x / 2)) * MathF.Cosh(MathF.Sin(y / 2));
+                    res[i][j] = 1.3f * MathF.Atan((x + y) / 2) * MathF.Sin(MathF.Cos(x / 2)) * MathF.Cosh(MathF.Sin(y / 2));
                 }
             }
             res = RaiseToZero(res);
@@ -94,8 +94,8 @@ namespace SceneEditor.editor
                 }
                 else
                 {
-                    float start = -5f;
-                    float end = 5f;
+                    float start = -20f;
+                    float end = 20f;
                     float step = 0.5f;
                     X = Functions.Arrange(start, end, step);
                     Y = Functions.Arrange(start, end, step);
