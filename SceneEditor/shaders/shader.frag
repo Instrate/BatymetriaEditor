@@ -27,10 +27,10 @@ uniform Material material;
 
 void main()
 {
-    float gradient = height * 0.05 + 0.7;
+    float gradient = height * 0.15 + 0.8;
     float textureGradient = height * 0.2 + 0.2;
-    if(height < 0.3){
-        gradient = 0.3;
+    if(height < 0.8){
+        gradient = 0.8;
     }
     else if (height > 0.95){
         gradient = 0.95;
@@ -39,7 +39,7 @@ void main()
     //float textureGradient = 0.5;
     //FragColor = oTexture * gradient * vec4(vertexColor, 1);
 
-    float ambientStrength = 0.5;
+    float ambientStrength = 0.8;
     vec3 ambient = ambientStrength * lightColor;
 
     vec3 norm = normalize(Normal);

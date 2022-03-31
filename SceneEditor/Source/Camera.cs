@@ -28,10 +28,13 @@ namespace LearnOpenTK.Common
         // The field of view of the camera (radians)
         private float _fov = MathHelper.PiOver2;
 
-        public Camera(Vector3 position, float aspectRatio)
+        bool isOrtogonal = false;
+
+        public Camera(Vector3 position, float aspectRatio, bool isOrtogonal)
         {
             Position = position;
             AspectRatio = aspectRatio;
+            this.isOrtogonal = isOrtogonal;
         }
 
         // The position of the camera
@@ -67,7 +70,8 @@ namespace LearnOpenTK.Common
             get => MathHelper.RadiansToDegrees(_yaw);
             set
             {
-                _yaw = MathHelper.DegreesToRadians(value);
+                float newYaw = value % 360;
+                _yaw = MathHelper.DegreesToRadians(newYaw);
                 UpdateVectors();
             }
         }
@@ -94,7 +98,7 @@ namespace LearnOpenTK.Common
         // Get the projection matrix using the same method we have used up until this point
         public Matrix4 GetProjectionMatrix()
         {
-            return Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 100f);
+            return isOrtogonal ? Matrix4.CreateOrthographic(800, 600, 0.1f, 100f) : Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 100f);
         }
 
         // This function is going to update the direction vertices using some of the math learned in the web tutorials

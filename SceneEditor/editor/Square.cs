@@ -48,6 +48,25 @@ namespace SceneEditor.editor
             0, 1, 3,
             1, 2, 3
         };
+
+        public static float[] vertices = _buildVertices();
+
+        public static int offset = 11;
+
+        private static float[] _buildVertices()
+        {
+            int size = Tile.coords.Length + Tile.color.Length + Tile.texture.Length;
+
+            float[] vertices = new float[size];
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < offset; j++)
+                {
+                    vertices[i * offset + j] = j < 3 ? coords[i * 3 + j] : j < 6 ? Tile.color[i * 3 + j - 3] : j < 8 ? Tile.texture[i * 2 + j - 6] : Tile.normal[i * 3 + j - 8];
+                }
+            }
+            return default;
+        }
     }
 
     public class Square : IDrawable
@@ -72,6 +91,9 @@ namespace SceneEditor.editor
         private void concatSet(float[]? builder = default, Vector3? Color = default)
         {
             float[] coords = builder == default ? Tile.coords : builder;
+            
+            //Console.WriteLine(builder);
+
             float[] color = Tile.color;
             if(Color != null)
             {
@@ -124,6 +146,8 @@ namespace SceneEditor.editor
 
         private Vector4 GetCorrectPosition(Vector4 heigths)
         {
+            //Console.WriteLine(heigths + "\n");
+            
             float min = heigths[0];
             for(int i = 1; i < 4; i++)
             {
@@ -137,6 +161,8 @@ namespace SceneEditor.editor
                 heigths[i] -= min;
             }
             position.Z = min;
+
+
             Move(position);
             return heigths;
         }
@@ -151,7 +177,6 @@ namespace SceneEditor.editor
             else
             {
                 // change the application not to vertices but to position
-                
                 concatSet(_buildVertice(builder[0], builder[1], heights == default ? Vector4.Zero : GetCorrectPosition(heights.Value)), color);
             }
 
@@ -205,15 +230,10 @@ namespace SceneEditor.editor
 
         public void Rotate(Vector3 angles)
         {
-            Matrix4 X;
-            Matrix4 Y;
-            Matrix4 Z;
-            Matrix4.CreateRotationX(angles.X, out X);
-            Matrix4.CreateRotationY(angles.Y, out Y);
-            Matrix4.CreateRotationZ(angles.Z, out Z);
-
+            Matrix4 X = Matrix4.CreateRotationX(angles.X);
+            Matrix4 Y = Matrix4.CreateRotationY(angles.Y);
+            Matrix4 Z = Matrix4.CreateRotationZ(angles.Z);
             rotation = rotation * X * Y * Z;
-
             TransformCombiner();
         }
 

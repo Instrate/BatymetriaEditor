@@ -195,6 +195,8 @@ namespace SceneEditor
             
         }
 
+        private float tickerFrames = 0;
+
         private void OnRender(TimeSpan delta)
         {
             // textFps.Text = "FPS: " + 1.0f / delta.TotalSeconds;/*+ 1.0f / delta.TotalSeconds * 1000;*/
@@ -203,8 +205,18 @@ namespace SceneEditor
             {
                 textFps.Text = "FPS: " + (Math.Truncate(1.0f / delta.TotalSeconds)).ToString();
                 ticker = 0;
+                scene.Render();
             }
-            scene.Render();   
+
+            tickerFrames += (float)delta.TotalSeconds;
+            if(tickerFrames < 1f / 24)
+            {
+                scene.Render();
+            }
+            else
+            {
+                tickerFrames = 0;
+            }
         }
 
         private void onResize(object sender, SizeChangedEventArgs e)

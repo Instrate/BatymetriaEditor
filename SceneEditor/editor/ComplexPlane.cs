@@ -64,8 +64,9 @@ namespace SceneEditor.editor
                 {
                     float x = X[i];
                     float y = Y[j];
-                    //res[i][j] = MathF.Cos(MathF.Sin(x) * MathF.Cos(y)) + MathF.Sin(y);
-                    res[i][j] = MathF.Atan(x + y) * MathF.Sin(MathF.Cos(x)) * MathF.Cosh(MathF.Sin(y));
+                    //res[i][j] = MathF.Sin(x);
+                    //res[i][j] = x;
+                    res[i][j] = MathF.Atan((x + y) / 2) * MathF.Sin(MathF.Cos(x / 2)) * MathF.Cosh(MathF.Sin(y / 2));
                 }
             }
             res = RaiseToZero(res);
@@ -76,7 +77,6 @@ namespace SceneEditor.editor
     internal class ComplexPlaneTile : IRenderable
     {
         public Square[] tiles;
-
 
         public Vector3 position = Vector3.Zero;
 
@@ -94,9 +94,9 @@ namespace SceneEditor.editor
                 }
                 else
                 {
-                    float start = -5;
-                    float end = 5;
-                    float step = 0.2f;
+                    float start = -5f;
+                    float end = 5f;
+                    float step = 0.5f;
                     X = Functions.Arrange(start, end, step);
                     Y = Functions.Arrange(start, end, step);
                     Z = Functions.FigureTest(X, Y);

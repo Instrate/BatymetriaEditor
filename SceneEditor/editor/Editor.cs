@@ -31,6 +31,108 @@ namespace SceneEditor.editor
         public static string pxtile { get => resourcesPath + "px_by_Gre3g.png"; }
         public static string criss_cross { get => resourcesPath + "criss-cross.png"; }
         public static string cork_board { get => resourcesPath + "cork-board.png"; }
+        public static string dark_paths { get => resourcesPath + "dark-paths.png"; }
+    }
+
+    public class Axis : IRenderable
+    {
+        Cube[] axis = new Cube[3];
+
+        public int[] textureHandlers;
+
+        public Axis(string[]? textureSet = null)
+        {
+            for(int i = 0; i < 3; i++)
+            {
+                Vector3 color = Vector3.Zero;
+                color[i] = 1;
+                axis[i] = new Cube(color: color);
+            }
+
+            float scaling = 0.05f;
+            float sizeScale = 2f;
+
+            axis[0].Scale(new Vector3(sizeScale, scaling, scaling));
+            axis[1].Scale(new Vector3(scaling, sizeScale, scaling));
+            axis[2].Scale(new Vector3(scaling, scaling, sizeScale));
+
+            axis[0].Move(new Vector3() { X = 0.5f * sizeScale - scaling / 2 });
+            axis[1].Move(new Vector3() { Y = 0.5f * sizeScale - scaling / 2 });
+            axis[2].Move(new Vector3() { Z = 0.5f * sizeScale - scaling / 2 });
+
+            //foreach (var ax in axis)
+            //{
+            //    ax.Move(new Vector3(0, 0, 3f));
+            //}
+
+            if (textureSet != null)
+            {
+                textureHandlers = new int[textureSet.Length];
+                for (int i = 0; i < textureSet.Length; i++)
+                {
+                    textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
+                }
+            }
+        }
+
+        public void Render(int shaderHandle)
+        {
+            if (textureHandlers != null && textureHandlers.Length > 0)
+            {
+
+                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
+                {
+                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
+                }
+            }
+
+            foreach (var c in axis)
+            {
+                c.Render(shaderHandle);
+            }
+        }
+
+        public void MoveAlongWithCamera(CameraControl camera)
+        {
+            
+            //Vector3 fix = new Vector3(-0.2f, -0.2f, 0);
+            //Vector3 shifts = camera.cam.Position - axis[0].position;
+
+            //foreach (var ax in axis)
+            //{
+            //    ax.Move(shifts);
+            //}
+
+            
+        }
+
+        public void RotateAlongWithCamera(CameraControl camera)
+        {
+            //float pitch = camera.cam.Pitch;
+            //float yaw = camera.cam.Yaw;
+
+            //Vector3 shifts = camera.cam.Position - axis[0].position;
+
+            //Vector3 YAW = new Vector3(-1, 0, 0);
+
+            //float Yaw = MathHelper.RadiansToDegrees(Vector3.CalculateAngle(shifts, YAW));
+
+            //var x = shifts.X;
+            //var y = shifts.Y;
+            //var Yawdif = yaw - Yaw;
+
+            //Vector3 posH = new Vector3(MathF.Cos(Yawdif) * x - MathF.Sin(Yawdif) * y, MathF.Sin(Yawdif) * x + MathF.Cos(Yawdif) * y, 0);
+
+            //Console.WriteLine("Yawdif: " + Yawdif);
+            //Console.WriteLine("A: " + shifts);
+            //Console.WriteLine("pos: " + axis[0].position);
+            //Console.WriteLine("Shift: " + posH + "\n");
+
+            //foreach (var ax in axis)
+            //{
+            //    ax.Move(shifts - posH);
+            //}
+        }
     }
 
     public class Editor
@@ -44,7 +146,7 @@ namespace SceneEditor.editor
         int[] textureHandlers;
 
         Square sqr;
-        //Square[] test;
+        Square[] test;
         ComplexPlaneTile bottom;
         Cube[] cubes;
 
@@ -54,6 +156,7 @@ namespace SceneEditor.editor
 
         Vector3 lightPos;
         Cube lightBubble;
+        Axis axis;
 
         //public List<TextureUnit> test = TextureLoader.units_all;
 
@@ -72,12 +175,18 @@ namespace SceneEditor.editor
             textureHandlers[0] = TextureLoader.LoadFromFile(TexturePath.wall);
             textureHandlers[1] = TextureLoader.LoadFromFile(TexturePath.oriental_tiles);
 
-            //sqr = new Square(textureSet: new string[] { TexturePath.wall, TexturePath.morocco_blue }, pos: new Vector3() { Z = 0f });
+            sqr = new Square(textureSet: new string[] { TexturePath.wall, TexturePath.morocco_blue }, pos: new Vector3() { Z = -1f });
 
-            //test = new Square[2] { 
-            //    new Square(textureSet: new string[] { TexturePath.wall, TexturePath.pxtile }, pos: new Vector3() { Z = 0f }),
-            //    new Square(textureSet: new string[] { TexturePath.wall, TexturePath.pxtile }, pos: new Vector3() { Z = 1f })
+            //test = new Square[2] {
+            //    new Square(textureSet: new string[] { TexturePath.wall, TexturePath.pxtile }, pos: new Vector3() {}),
+            //    new Square(textureSet: new string[] { TexturePath.wall, TexturePath.pxtile }, pos: new Vector3() {})
             //};
+
+            //test[0].Move(new Vector3(1,0,2));
+            //test[1].Move(new Vector3(0,0,3));
+
+            //test[0].Scale(new Vector3(1.5f, 1, 1));
+            //test[0].Scale(new Vector3(1.5f, 1, 1));
 
             //foreach(var square in test)
             //{
@@ -86,7 +195,15 @@ namespace SceneEditor.editor
 
             //sqr.Scale(new Vector3(20f));
 
-            bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.morocco_blue, TexturePath.cork_board });
+            bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board });
+
+            //trg = new Triangle(pos: new Vector3(0, 0, 2.5f));
+            //trg.Scale(new Vector3(2));
+
+            //sqrt[0].Move(new Vector3(1, 0, 0));
+            //sqrt[1].Move(new Vector3(1, 1, 0));
+            //sqrt[2].Move(new Vector3(0, 1, 0));
+
 
             //cubes = new Cube[0] {
             //    new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 1f, 1f)),
@@ -96,7 +213,9 @@ namespace SceneEditor.editor
             //    //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f))
             //};
 
-            lightBubble = new Cube(pos: new Vector3() { Z = 30f , X = 0, Y = 0});
+            axis = new Axis();
+
+            lightBubble = new Cube(pos: new Vector3() { Z = 7f , X = 0, Y = 0});
             lightBubble.Scale(new Vector3(0.1f));
 
             //cubes = new Cube[4] { 
@@ -123,8 +242,10 @@ namespace SceneEditor.editor
             activeCam = 0;
 
             cameras = new CameraControl[1];
-            cameras[activeCam] = new CameraControl(new Vector2i() { X = 800, Y = 600 });
+            cameras[activeCam] = new CameraControl(new Vector2i() { X = 800, Y = 600 }, false);
             cameras[activeCam].cam.Fov = 90f;
+
+            //axis.MoveAlongWithCamera(cameras[activeCam]);
 
             //var ortho = Matrix4.CreateOrthographic((float)selfSize.Width, (float)selfSize.Height, 0.1f, 100f);
 
@@ -151,7 +272,29 @@ namespace SceneEditor.editor
                     camsBuffer[i] = cameras[i];
                 }
                 camsBuffer[cameras.Length] = new CameraControl(SizeToVector2i(selfSize));
+                
+                activeCam = cameras.Length;
+                cameras = camsBuffer;
+                cameras[activeCam].cam.Fov = 90f;
+
+                view = cameras[activeCam].cam.GetViewMatrix();
+                shader.SetMatrix4("view", view);
             }
+        }
+
+        public void cameraChange(int shift = 0)
+        {
+            activeCam += shift;
+            if(activeCam == cameras.Length)
+            {
+                activeCam = 0;
+            }
+            if(activeCam < 0)
+            {
+                activeCam = cameras.Length - 1;
+            }
+            view = cameras[activeCam].cam.GetViewMatrix();
+            shader.SetMatrix4("view", cameras[activeCam].cam.GetViewMatrix());
         }
 
         public void OnResize(Size windowSizeNew)
@@ -196,7 +339,7 @@ namespace SceneEditor.editor
             var c = Color4.FromHsv(new Vector4(hue, 0.75f, 0.75f, 1));
             //GL.ClearColor(c);
             //GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-            GL.ClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            GL.ClearColor(0.4f, 0.4f, 0.4f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             //texture buffer loading
@@ -205,52 +348,13 @@ namespace SceneEditor.editor
                 TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
             }
 
-            //model = Matrix4.CreateRotationX(0.5f) * Matrix4.CreateRotationY(1f) * timeDelta;
-
-            //foreach (var cube in cubes)
-            //{
-            //    cube.Rotate(new Vector3() { X = 0.0f, Y = 0f, Z = 0.0f } * timeDelta);
-            //}
-
-            //foreach(var square in test)
-            //{
-            //    //square.Rotate(new Vector3() { X = 0.5f, Y = 0, Z = 0 } * timeDelta);
-            //    //square.Move()
-            //}
-
-            //if(testTime > 1)
-            //{
-            //    test[0].Move(new Vector3() { Y = (timeDelta * 1.01f - 0.5f) });
-            //    testTime -= timeDelta;
-            //    if (testTime < 1)
-            //    {
-            //        testTime = 0;
-            //    }
-            //}
-            //else
-            //{
-            //    test[0].Move(new Vector3() { Y = -(timeDelta * 1.01f - 0.5f) });
-            //    testTime += timeDelta;
-            //    if(testTime > 1)
-            //    {
-            //        testTime = 2;
-            //    }
-            //}
-
-            //foreach(Cube cube in cubes)
-            //{
-            //    cube.Rotate(new Vector3() { Z = -timeDelta });
-            //}
-
-            //lightPos = new Vector3() { X = 1 + MathF.Sin(elapsedTime) * 2, Y = MathF.Sin(elapsedTime / 2) , Z = 1};
-            //lightBubble.Move(new Vector3() { X = MathF.Sin(elapsedTime) / 20, Y = MathF.Cos(elapsedTime) / 20 });
-            
 
             shader.Use();
             shader.SetMatrix4("model", model);
             //shader.SetVector3("lightColor", new Vector3(c.R, c.G, c.B));
             shader.SetVector3("lightColor", new Vector3(1));
-            shader.SetVector3("lightPos", lightBubble.position - new Vector3(0, 0, 0.2f));
+            shader.SetVector3("lightPos", lightBubble.position - new Vector3(0, 0, -0.2f));
+            //shader.SetVector3("lightPos", cameras[activeCam].cam.Position);
             shader.SetVector3("viewPos", cameras[activeCam].cam.Position);
 
             for (int i = 0; i < textureHandlers.Length && i < 32; i++)
@@ -258,13 +362,14 @@ namespace SceneEditor.editor
                 shader.SetInt("texture" + (i + 1).ToString(), i);
             }
 
+            RenderObject(axis);
+
             RenderObject(lightBubble);
 
             //RenderObject(sqr);
             RenderObject(bottom);
             //RenderObject(test);
             //RenderObject(cubes);
-            
 
             GL.Finish();
         }
@@ -315,7 +420,21 @@ namespace SceneEditor.editor
                 cameras[activeCam].OnKeyDown(e, timeDelta);
                 view = cameras[activeCam].cam.GetViewMatrix();
                 shader.SetMatrix4("view", cameras[activeCam].cam.GetViewMatrix());
-
+            }
+            else
+            {
+                if (key == Key.OemPlus)
+                {
+                    addCamera();
+                }
+                if (key == Key.Up)
+                {
+                    cameraChange(1);
+                }
+                if (key == Key.Down)
+                {
+                    cameraChange(-1);
+                }
             }
             
         }
@@ -328,6 +447,11 @@ namespace SceneEditor.editor
 
                 view = cameras[activeCam].cam.GetViewMatrix();
                 shader.SetMatrix4("view", view);
+
+                if (mouse.LeftButton == MouseButtonState.Pressed)
+                {
+                    //axis.RotateAlongWithCamera(cameras[activeCam]);
+                }
             }
             else
             {

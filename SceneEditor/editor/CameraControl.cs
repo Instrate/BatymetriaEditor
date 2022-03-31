@@ -18,7 +18,7 @@ namespace SceneEditor.editor
         public Camera cam;
         private Vector2i _camSize;
         public float cameraSpeed = 4f;
-        public float sensitivity = 0.3f;
+        public float sensitivity = 0.4f;
 
         public bool grabedMouse;
         bool _firstMove;
@@ -27,10 +27,12 @@ namespace SceneEditor.editor
 
         //public int viewStyle = 0;
 
-        public CameraControl(Vector2i size)
+        public CameraControl(Vector2i size, bool isOrtogonal = false)
         {
             _camSize = size;
-            cam = new Camera(Vector3.UnitZ * 4, size.X / (float)size.Y);
+            cam = new Camera(Vector3.UnitZ * 4, size.X / (float)size.Y, isOrtogonal);
+
+            cam.Yaw = 0;
 
             _firstMove = true;
             grabedMouse = false;

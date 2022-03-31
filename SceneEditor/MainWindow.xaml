@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SceneEditor"
         xmlns:glWpfControl="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
         mc:Ignorable="d"
-        Title="BatymetriaEditor (by Bohdan Savchuk)" Width="1280" Height="720" WindowStyle="ThreeDBorderWindow">
+        Title="BatymetriaEditor (by Bohdan Savchuk)" Width="1600" Height="900" WindowStyle="ThreeDBorderWindow">
     <Grid x:Name="panelRoot" Background="Silver" Focusable="True">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"></ColumnDefinition>

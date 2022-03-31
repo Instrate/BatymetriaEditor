@@ -45,8 +45,6 @@ namespace SceneEditor.editor
                     data.Scan0);
             }
 
-            Console.WriteLine(borderColor);
-
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)LODbiasMIN);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)LODbiasMAG);
 
