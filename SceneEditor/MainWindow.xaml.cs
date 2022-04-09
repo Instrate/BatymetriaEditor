@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.Collections.ObjectModel;
 
 using SceneEditor.editor;
+using System.Threading;
 
 namespace SceneEditor
 {
@@ -30,13 +31,14 @@ namespace SceneEditor
     /// </summary>
     public partial class MainWindow : Window
     {
-        
-        
+
+        MultiThreader Trender;
 
         private Editor scene;
 
         float ticker = 0;
 
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -88,6 +90,8 @@ namespace SceneEditor
                 glMain.Start(windowSettings);
 
                 EventInform(listViewProcess, "Editor has been started successfuly");
+
+                
             }
             catch (Exception ex)
             {
@@ -175,7 +179,7 @@ namespace SceneEditor
 
             scene = new Editor(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
 
-
+            Trender = new MultiThreader(8, scene.Render);
             //for (int i = 0; i < scene.test.Count; i++)
             //{
             //    EventInform(listViewProcess, "[" + (i + 1).ToString() + "]: " + scene.test[i].ToString()); 
@@ -192,11 +196,12 @@ namespace SceneEditor
             //{
             //    (SettingsApp.ItemsSource as ObservableCollection<object>).Add("Lol");
             //}
-            
+
         }
 
         private float tickerFrames = 0;
 
+        [MTAThread]
         private void OnRender(TimeSpan delta)
         {
             // textFps.Text = "FPS: " + 1.0f / delta.TotalSeconds;/*+ 1.0f / delta.TotalSeconds * 1000;*/
@@ -208,9 +213,12 @@ namespace SceneEditor
                 scene.Render();
             }
 
+            //Trender.activateFreeThread();
+
             tickerFrames += (float)delta.TotalSeconds;
-            if(tickerFrames < 1f / 24)
+            if(tickerFrames < 1f / 30)
             {
+                //
                 scene.Render();
             }
             else

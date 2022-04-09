@@ -176,7 +176,7 @@ namespace SceneEditor.editor
             textureHandlers[1] = TextureLoader.LoadFromFile(TexturePath.oriental_tiles);
             textureHandlers[2] = TextureLoader.LoadFromFile(TexturePath.criss_cross);
 
-            sqr = new Square(textureSet: new string[] { TexturePath.wall, TexturePath.morocco_blue }, pos: new Vector3() { Z = -1f });
+            sqr = new Square(textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile }, pos: new Vector3() { X = 1f, Z = 1f });
 
             //test = new Square[2] {
             //    new Square(textureSet: new string[] { TexturePath.wall, TexturePath.pxtile }, pos: new Vector3() {}),
@@ -194,7 +194,8 @@ namespace SceneEditor.editor
             //    square.Scale(new Vector3(2f));
             //}
 
-            //sqr.Scale(new Vector3(20f));
+            sqr.Scale(new Vector3(10f, 10f, 1));
+            sqr.Rotate(new Vector3(MathHelper.DegreesToRadians(90f), 0, 0));
 
             bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
@@ -299,6 +300,7 @@ namespace SceneEditor.editor
             shader.SetMatrix4("view", cameras[activeCam].cam.GetViewMatrix());
         }
 
+        [MTAThread]
         public void OnResize(Size windowSizeNew)
         {
             selfSize = windowSizeNew;
@@ -330,6 +332,7 @@ namespace SceneEditor.editor
         }
 
         // rewrite shader usage for elements
+        [MTAThread]
         public void Render()
         {
             var elapsed = (float)_stopwatch.Elapsed.TotalSeconds;
@@ -368,7 +371,7 @@ namespace SceneEditor.editor
 
             RenderObject(lightBubble);
 
-            //RenderObject(sqr);
+            RenderObject(sqr);
             RenderObject(bottom);
             //RenderObject(test);
             //RenderObject(cubes);
@@ -376,6 +379,7 @@ namespace SceneEditor.editor
             GL.Finish();
         }
 
+        [MTAThread]
         private void RenderObject(IRenderable renderable)
         {
             renderable.Render(shader.Handle);
@@ -389,6 +393,7 @@ namespace SceneEditor.editor
             }
         }
 
+        [MTAThread]
         private void RenderObject(IRenderable[] renderable)
         {
             for (int i = 0; i < renderable.Length; i++)
@@ -405,6 +410,7 @@ namespace SceneEditor.editor
             }
         }
 
+        [MTAThread]
         public void OnKeyDown(KeyEventArgs e)
         {
             var key = e.Key;
@@ -437,10 +443,15 @@ namespace SceneEditor.editor
                 {
                     cameraChange(-1);
                 }
+                if (key == Key.I)
+                {
+                    bottom.Interp(0.9f, 1);
+                }
             }
             
         }
 
+        [MTAThread]
         public void OnMouseMove(MouseEventArgs mouse, Point pointGL, Point pointScreen)
         {
             if (cameras[activeCam].grabedMouse)
