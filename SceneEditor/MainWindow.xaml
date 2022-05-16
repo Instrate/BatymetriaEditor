@@ -8,6 +8,7 @@
         mc:Ignorable="d"
         Title="BatymetriaEditor (by Bohdan Savchuk)" Width="1600" Height="900" WindowStyle="ThreeDBorderWindow">
     <Grid x:Name="panelRoot" Background="Silver" Focusable="True">
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"></ColumnDefinition>
             <ColumnDefinition Width="1*"></ColumnDefinition>
@@ -64,6 +65,16 @@
             </Grid.RowDefinitions>
             <GridSplitter Grid.Row="0" BorderThickness="2" BorderBrush="Black" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
 
+            <Grid Grid.Row="0">
+                <TabControl Margin="5">
+                    <TabItem Header="Structure">
+                        <TreeView>
+                            
+                        </TreeView>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+            
             <Grid Grid.Row="1">
                 <TabControl Margin="5">
                     <TabItem Header="Settings">

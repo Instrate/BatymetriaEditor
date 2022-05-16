@@ -146,9 +146,10 @@ namespace SceneEditor.editor
         int[] textureHandlers;
 
         Square sqr;
-        Square[] test;
         ComplexPlaneTile bottom;
         Cube[] cubes;
+
+        Line line;
 
         public CameraControl[] cameras;
 
@@ -177,17 +178,6 @@ namespace SceneEditor.editor
             textureHandlers[2] = TextureLoader.LoadFromFile(TexturePath.criss_cross);
 
             sqr = new Square(textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile }, pos: new Vector3() { X = 1f, Z = 1f });
-
-            //test = new Square[2] {
-            //    new Square(textureSet: new string[] { TexturePath.wall, TexturePath.pxtile }, pos: new Vector3() {}),
-            //    new Square(textureSet: new string[] { TexturePath.wall, TexturePath.pxtile }, pos: new Vector3() {})
-            //};
-
-            //test[0].Move(new Vector3(1,0,2));
-            //test[1].Move(new Vector3(0,0,3));
-
-            //test[0].Scale(new Vector3(1.5f, 1, 1));
-            //test[0].Scale(new Vector3(1.5f, 1, 1));
 
             //foreach(var square in test)
             //{
@@ -236,7 +226,7 @@ namespace SceneEditor.editor
             //cubes[1].Rotate(new Vector3() { X = MathHelper.DegreesToRadians(45f), Y = 0, Z = MathHelper.DegreesToRadians(90f) });
             //cubes[3].Rotate(new Vector3() { X = 0, Y = MathHelper.DegreesToRadians(45f), Z = MathHelper.DegreesToRadians(90f) });
 
-
+            line = new Line(new Vector3(0, 0, 0), new Vector3(0, 0, 20));
 
             shader = new Shader(ShaderPath.lightVert, ShaderPath.frag);
             shader.Use();
@@ -367,14 +357,17 @@ namespace SceneEditor.editor
                 shader.SetInt("texture" + (i + 1).ToString(), i);
             }
 
-            RenderObject(axis);
+            //RenderObject(axis);
 
             RenderObject(lightBubble);
 
-            RenderObject(sqr);
+            //RenderObject(sqr);
             RenderObject(bottom);
+            RenderObject(line);
             //RenderObject(test);
             //RenderObject(cubes);
+
+            
 
             GL.Finish();
         }
@@ -435,17 +428,41 @@ namespace SceneEditor.editor
                 {
                     addCamera();
                 }
-                if (key == Key.Up)
+                if (key == Key.NumPad9)
                 {
                     cameraChange(1);
                 }
-                if (key == Key.Down)
+                if (key == Key.NumPad3)
                 {
                     cameraChange(-1);
                 }
                 if (key == Key.I)
                 {
                     bottom.Interp(0.9f, 1);
+                }
+                if (key == Key.PageUp)
+                {
+                    bottom.MoveVisibleMesh(0, 0, 0, 0, 1, 1);
+                }
+                if (key == Key.PageDown)
+                {
+                    bottom.MoveVisibleMesh(0, 0, 0, 0, -1, -1);
+                }
+                if (key == Key.Up)
+                {
+                    bottom.MoveVisibleMesh(0, 1, 0, 0, 0, 0);
+                }
+                if (key == Key.Down)
+                {
+                    bottom.MoveVisibleMesh(0, -1, 0, 0, 0, 0);
+                }
+                if (key == Key.Left)
+                {
+                    bottom.MoveVisibleMesh(-1, 0, 0, 0, 0, 0);
+                }
+                if (key == Key.Right)
+                {
+                    bottom.MoveVisibleMesh(1, 0, 0, 0, 0, 0);
                 }
             }
             
