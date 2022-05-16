@@ -151,6 +151,8 @@ namespace SceneEditor.editor
 
         Line line;
 
+        Mesh mesh;
+
         public CameraControl[] cameras;
 
         public int activeCam;
@@ -227,6 +229,7 @@ namespace SceneEditor.editor
             //cubes[3].Rotate(new Vector3() { X = 0, Y = MathHelper.DegreesToRadians(45f), Z = MathHelper.DegreesToRadians(90f) });
 
             line = new Line(new Vector3(0, 0, 0), new Vector3(0, 0, 20));
+            mesh = new Mesh();
 
             shader = new Shader(ShaderPath.lightVert, ShaderPath.frag);
             shader.Use();
@@ -357,13 +360,15 @@ namespace SceneEditor.editor
                 shader.SetInt("texture" + (i + 1).ToString(), i);
             }
 
+            RenderObject(mesh);
+
             //RenderObject(axis);
 
             RenderObject(lightBubble);
 
             //RenderObject(sqr);
             RenderObject(bottom);
-            RenderObject(line);
+            //RenderObject(line);
             //RenderObject(test);
             //RenderObject(cubes);
 
@@ -408,9 +413,9 @@ namespace SceneEditor.editor
         {
             var key = e.Key;
 
-            var shift = 0.125f;
-            float rotation = (MathF.Pow(2, -4) * MathF.PI);
-            float scale = 1.0625f;
+            //var shift = 0.125f;
+            //float rotation = (MathF.Pow(2, -4) * MathF.PI);
+            //float scale = 1.0625f;
            
             if(key == Key.F)
             {
@@ -438,7 +443,7 @@ namespace SceneEditor.editor
                 }
                 if (key == Key.I)
                 {
-                    bottom.Interp(0.9f, 1);
+                    bottom.Interp(0.9f, 0);
                 }
                 if (key == Key.PageUp)
                 {

@@ -25,7 +25,11 @@ namespace SceneEditor.editor
 
         public Line(Vector3 start = default, Vector3 end = default)
         {
-            vertices = new float[6] { start.X, start.Y, start.Z, end.X, end.Y, end.Z };
+            vertices = new float[12] 
+            { 
+                start.X, start.Y, start.Z, 0f, 0f, 0f,
+                end.X, end.Y, end.Z, 0f, 0f, 0f
+            };
 
             VAO = GL.GenVertexArray();
             VBO = GL.GenBuffer();
@@ -35,13 +39,17 @@ namespace SceneEditor.editor
 
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
 
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-            
+            GL.EnableVertexAttribArray(0);
+            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+
+            GL.EnableVertexAttribArray(1);
+            GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
+
         }
 
         public void Move(Vector3 shifts)
         {
-            throw new NotImplementedException();
+            
         }
 
         public void Render(int shaderHandle)
@@ -52,22 +60,22 @@ namespace SceneEditor.editor
 
         public void Rotate(Vector3 angles)
         {
-            throw new NotImplementedException();
+           
         }
 
         public void Scale(Vector3 scalar)
         {
-            throw new NotImplementedException();
+     
         }
 
         public void TransformClean()
         {
-            throw new NotImplementedException();
+      
         }
 
         public void TransformCombiner()
         {
-            throw new NotImplementedException();
+
         }
     }
 }
