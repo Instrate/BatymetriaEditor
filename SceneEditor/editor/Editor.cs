@@ -180,58 +180,17 @@ namespace SceneEditor.editor
             textureHandlers[1] = TextureLoader.LoadFromFile(TexturePath.oriental_tiles);
             textureHandlers[2] = TextureLoader.LoadFromFile(TexturePath.criss_cross);
 
-            sqr = new Square(textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile }, pos: new Vector3() { X = 1f, Z = 1f });
-
-            //foreach(var square in test)
-            //{
-            //    square.Scale(new Vector3(2f));
-            //}
-
-            //sqr.Scale(new Vector3(10f, 10f, 1));
-            //sqr.Rotate(new Vector3(MathHelper.DegreesToRadians(90f), 0, 0));
+            //sqr = new Square(textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile }, pos: new Vector3() { X = 1f, Z = 1f });
 
             bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
-            section = new Section(new Vector3(3,0,4), new Vector3(0, 8f, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
-
-            //trg = new Triangle(pos: new Vector3(0, 0, 2.5f));
-            //trg.Scale(new Vector3(2));
-
-            //sqrt[0].Move(new Vector3(1, 0, 0));
-            //sqrt[1].Move(new Vector3(1, 1, 0));
-            //sqrt[2].Move(new Vector3(0, 1, 0));
-
-
-            //cubes = new Cube[0] {
-            //    new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 1f, 1f)),
-            //    new Cube(pos: new Vector3() { X = 1f, Z = 2f}, color: new Vector3(1.0f, 1f, 1.0f))
-            //    //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f)),
-            //    //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f)),
-            //    //new Cube(pos: new Vector3() { Z = 2f }, color: new Vector3(1.0f, 0.5f, 0.31f))
-            //};
+            section = new Section(new Vector3(0,0,3), new Vector3(3, 8, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
 
             axis = new Axis();
 
             lightBubble = new Cube(pos: new Vector3() { Z = 7f , X = 0, Y = 0});
             lightBubble.Scale(new Vector3(0.1f));
 
-            //cubes = new Cube[4] { 
-            //    new Cube(pos: new Vector3() { Z = 2f }, textureSet: new string[] { TexturePath.pxtile, TexturePath.pxtile }),
-            //    new Cube(pos: new Vector3() { Z = 2f }, textureSet: new string[] { TexturePath.pxtile, TexturePath.pxtile }),
-            //    new Cube(pos: new Vector3() { Z = 2f }, textureSet: new string[] { TexturePath.pxtile, TexturePath.pxtile }),
-            //    new Cube(pos: new Vector3() { Z = 2f }, textureSet: new string[] { TexturePath.pxtile, TexturePath.pxtile })
-            //}; 
-
-            //foreach(var cube in cubes)
-            //{
-            //    cube.Scale(new Vector3(1.5f));
-            //}
-
-            //cubes[0].Rotate(new Vector3() { X = MathHelper.DegreesToRadians(45f), Y = MathHelper.DegreesToRadians(90f), Z = 0 });
-            //cubes[1].Rotate(new Vector3() { X = MathHelper.DegreesToRadians(45f), Y = 0, Z = MathHelper.DegreesToRadians(90f) });
-            //cubes[3].Rotate(new Vector3() { X = 0, Y = MathHelper.DegreesToRadians(45f), Z = MathHelper.DegreesToRadians(90f) });
-
-            //line = new Line(new Vector3(4, 0, 0), new Vector3(0, 4, 20));
             mesh = new Mesh();
 
             shader = new Shader(ShaderPath.lightVert, ShaderPath.frag);
@@ -254,13 +213,6 @@ namespace SceneEditor.editor
             view = cameras[activeCam].cam.GetViewMatrix();
             shader.SetMatrix4("view", view);
             shader.SetMatrix4("projection", cameras[activeCam].cam.GetProjectionMatrix());
-
-
-            //test
-
-            //LineFunction testLine = new LineFunction(new float[] { 2, 1, -5, 3, 4, 2 }, true);
-            //testLine.Intersect(7, -5, 2, 19);
-        
         }
 
         private Vector2i SizeToVector2i(Size size)
@@ -344,9 +296,7 @@ namespace SceneEditor.editor
             elapsedTime = elapsed;
 
             //background cleaning
-            var c = Color4.FromHsv(new Vector4(hue, 0.75f, 0.75f, 1));
-            //GL.ClearColor(c);
-            //GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            //var c = Color4.FromHsv(new Vector4(hue, 0.75f, 0.75f, 1));
             GL.ClearColor(0.4f, 0.4f, 0.4f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -381,8 +331,6 @@ namespace SceneEditor.editor
             RenderObject(section);
             //RenderObject(test);
             //RenderObject(cubes);
-
-            
 
             GL.Finish();
         }
@@ -483,7 +431,7 @@ namespace SceneEditor.editor
                 {
                     // test intersection
                     section.IntersectTiled(bottom.Xmesh, bottom.Ymesh, bottom.DataBuffer);
-
+                    section.CountPolarFunction();
                 }
                 if (key == Key.P)
                 {
@@ -492,6 +440,14 @@ namespace SceneEditor.editor
                 if (key == Key.O)
                 {
                     bottom.SwitchDrawStyle();
+                }
+                if (key == Key.L)
+                {
+                    section.SwitchPlaneDisplaying();
+                }
+                if (key == Key.T)
+                {
+                    //section.SwitchPlaneDisplaying();
                 }
             }
         }

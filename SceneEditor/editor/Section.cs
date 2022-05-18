@@ -37,7 +37,8 @@ namespace SceneEditor.editor
         }
     }
 
-    public class LineFunction {
+    public class LineFunction
+    {
         public float x1, m1, y1, p1, z1, l1;
 
         public Vector3 start;
@@ -64,12 +65,34 @@ namespace SceneEditor.editor
             end = new Vector3(m1 + x1, p1 + y1, l1 + z1);
         }
 
+        public LineFunction(Vector3 a, Vector3 b)
+        {
+            start = a;
+            end = b;
+
+            x1 = a.X;
+            y1 = a.Y;
+            z1 = a.Z;
+
+            m1 = b.X - x1;
+            p1 = b.Y - y1;
+            l1 = b.Z - z1;
+        }
+ 
+
         public Vector3? Intersect(float A, float B, float C, float D)
         {
-            
+            Vector3 n1 = new Vector3(A, B, C); 
+            Vector3 n2 = new Vector3(m1, p1, l1);
+
+            if((A*m1 + B*p1 + C*l1) / (n1.Length * n2.Length) == 0)
+            {
+                return new Vector3(x1, y1, z1);
+            }
+
             float[][] arr = new float[3][];
             float[] right = new float[3];
-            for(int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 arr[i] = new float[3];
             }
@@ -90,11 +113,71 @@ namespace SceneEditor.editor
             right[2] = -D;
 
             float[]? X = Functions.MatrixSolution(arr, right);
-            if(X != null)
+            if (X != null)
             {
                 return new Vector3(X[0], X[1], X[2]);
             }
             return null;
+        }
+
+        public bool DotOnLine(Vector3 dot)
+        {
+            float eps = MathF.Pow(10, -4);
+            float x = (dot.X - x1);
+            float y = (dot.Y - y1);
+            float z = (dot.Z - z1);
+
+            float dz = MathF.Abs(start.Z - end.Z);
+            float dz1 = MathF.Abs(dot.Z - MathF.Min(start.Z, end.Z));
+            if(dz1 > dz || dot.Z < MathF.Min(start.Z, end.Z))
+            {
+                return false;
+            }
+
+            List<float> c = new List<float>();
+            if(m1 != 0)
+            {
+                c.Add(x/m1);
+            }
+            if(p1 != 0)
+            {
+                c.Add(y / p1);
+            }
+            if(l1 != 0)
+            {
+                c.Add(z / l1);
+            }
+            float[] arr = c.ToArray();
+            switch (arr.Length)
+            {
+                case 1: return true;
+                case 2: {
+                        return Math.Abs(arr[0] - arr[1]) < eps;
+                    };
+                default: return Math.Abs(arr[0] - arr[1]) < eps && Math.Abs(arr[1] - arr[2]) < eps;
+            }
+        }
+
+        private Vector3 _RotateDot(Vector3 dot, float angle)
+        {
+            float x = dot.X;
+            float y = dot.Y;
+            dot.X = -MathF.Sin(angle) * y + MathF.Cos(angle) * x;
+            dot.Y = MathF.Cos(angle) * y + MathF.Sin(angle) * x;
+            return dot;
+        }
+
+        public LineFunction Rotate(float angle)
+        {
+            return new LineFunction(_RotateDot(start, angle), _RotateDot(end, angle));
+        }
+
+        public float AngleBetweenLines(Vector3 n)
+        {
+            Vector3 v = new Vector3(m1, p1, l1);
+
+            float cos = Vector3.Dot(v, n) / v.Length / n.Length;
+            return MathF.Acos(cos);
         }
     }
 
@@ -119,7 +202,7 @@ namespace SceneEditor.editor
             B = -(arr[0] * arr[5] - arr[2] * arr[3]);
             C = arr[0] * arr[4] - arr[1] * arr[3];
             D = A * (-1f) * a.X + B * (-1f) * a.Y + C * (-1f) * a.Z;
-                   
+
         }
 
         public PlaneFunction(float A, float B, float C, float D)
@@ -143,6 +226,7 @@ namespace SceneEditor.editor
         public int[]? textureHandlers = null;
 
         Square sqr;
+        bool display = false;
 
         Vector3[] chars = new Vector3[2];
 
@@ -150,7 +234,15 @@ namespace SceneEditor.editor
 
         Dot[] dots;
 
-        Line[] lines;
+        Line[] areaMesh;
+        Line[] funcLine;
+        Line[] funcPolar;
+        bool hasPolar = false;
+        float[][] funcPolarArgs;
+        Line[] funcSphere;
+        bool hasSphere = false;
+        float[][] funcSphereArgs;
+
         bool intersected = false;
 
         // TODO: fix the rotation bug
@@ -161,7 +253,7 @@ namespace SceneEditor.editor
 
             plane = new PlaneFunction(start, end);
             //plane.ShowFunction();
-            
+
 
             Vector2 v1 = new Vector2(start.X, start.Y);
             Vector2 v2 = new Vector2(end.X, end.Y);
@@ -182,13 +274,13 @@ namespace SceneEditor.editor
 
         public Vector3[]? IntersectTiled(float[] X, float[] Y, float[][] Data)
         {
-            
+
 
             int cols = X.Length - 1;
             int rows = Y.Length - 1;
 
-            float dx = X[1] - X[0];
-            float dy = Y[1] - Y[0];
+            //float dx = X[1] - X[0];
+            //float dy = Y[1] - Y[0];
 
             // hard stuff appears
             float xmax = MathF.Max(chars[0].X, chars[1].X);
@@ -203,7 +295,7 @@ namespace SceneEditor.editor
             float ymin = MathF.Min(chars[0].Y, chars[1].Y);
             ymin = Y[0] > ymin ? Y[0] : ymin;
 
-            if(xmax < xmin)
+            if (xmax < xmin)
             {
                 float temp = xmin;
                 xmin = xmax;
@@ -229,7 +321,8 @@ namespace SceneEditor.editor
             float[] x = new float[iie - iis + 1];
             float[] y = new float[jje - jjs + 1];
             float[][] data = new float[x.Length][];
-            for (int i = 0; i < x.Length; i++) {
+            for (int i = 0; i < x.Length; i++)
+            {
                 data[i] = new float[y.Length];
             }
 
@@ -260,7 +353,7 @@ namespace SceneEditor.editor
             {
                 for (int j = 0; j < y.Length; j++)
                 {
-                    lines[i * y.Length + j] = new LineFunction(new float[] {x[i], x[i+1], y[j], y[j], data[i][j], data[i+1][j]});
+                    lines[i * y.Length + j] = new LineFunction(new float[] { x[i], x[i + 1], y[j], y[j], data[i][j], data[i + 1][j] });
                 }
             }
 
@@ -272,21 +365,22 @@ namespace SceneEditor.editor
                 }
             }
 
-            this.lines = new Line[amount];
-
-            for (int i = 0; i < amount; i++) 
+            // create working area mesh
+            this.areaMesh = new Line[amount];
+            for (int i = 0; i < amount; i++)
             {
-
-                this.lines[i] = new Line(lines[i].start, lines[i].end, ((Vector4)Color4.Orange).Xyz);
+                this.areaMesh[i] = new Line(lines[i].start, lines[i].end, ((Vector4)Color4.Cyan).Xyz, width: 4);
             }
 
 
             // convert result
             List<Vector3> res = new List<Vector3>();
-            for(int i = 0; i < amount; i++)
+            for (int i = 0; i < amount; i++)
             {
-                Vector3? pos = lines[i].Intersect(plane.A, plane.B, plane.C, plane.D);
-                if(pos != null)
+                LineFunction line = lines[i];
+                Vector3? pos = line.Intersect(plane.A, plane.B, plane.C, plane.D);
+
+                if (pos != null && line.DotOnLine(pos.Value)) 
                 {
                     res.Add(new Vector3(pos.Value));
                 }
@@ -298,40 +392,156 @@ namespace SceneEditor.editor
             {
                 intersected = true;
                 dots = new Dot[amount];
+                funcLine = new Line[amount - 1];
                 Vector3[] intersects = res.ToArray();
+
                 for (int i = 0; i < amount; i++)
                 {
-                    dots[i] = new Dot(intersects[i], color: ((Vector4)Color4.Red).Xyz ,size: 5);
+                    dots[i] = new Dot(intersects[i], color: ((Vector4)Color4.Red).Xyz, size: 5);
+
+                    if(i != 0)
+                    {
+                        funcLine[i - 1] = new Line(dots[i - 1].position, dots[i].position, color: ((Vector4)Color4.Yellow).Xyz, width: 5);
+                    }
                 }
+
                 return intersects;
             }
             return null;
         }
 
+        private float _countAngleToRotateYZ(Vector3 a, Vector3 b)
+        {
+            LineFunction line = new LineFunction(a, b);
+            LineFunction line1 = new LineFunction(new Vector3(0, 1, a.Z), new Vector3(0, 0, b.Z));
+            return (line1.AngleBetweenLines(new Vector3(line.m1, line.p1, line.l1)) - MathF.PI / 2) / 2;
+        }
+
+        public void ShowPolarFuncs()
+        {
+            if (intersected)
+            {
+                Console.WriteLine("Polar functions:");
+                for(int i = 0; i < funcPolarArgs.Length; i++)
+                {
+                    float r = funcPolarArgs[i][0];
+                    float p = funcPolarArgs[i][1];
+                    Console.WriteLine("[" + i + "]:\n\tx=" + r + "*cos(" + p + ");\n\ty=" + r + "*sin(" + p + ");\n");
+                }
+            }
+            else
+            {
+                Console.WriteLine("\n!Do an intersection!\n");
+            }
+        }
+
+        public void CountPolarFunction(int accuracyStrength = 1)
+        {
+            if (intersected)
+            {
+                if (dots.Length > 1)
+                {
+                    Vector3 a = dots[0].position;
+                    Vector3 b = dots[1].position;
+
+                    float angle = _countAngleToRotateYZ(a, b);
+
+                    LineFunction[] rotated = new LineFunction[funcLine.Length];
+
+                    funcPolar = new Line[rotated.Length];
+                    for(int i = 0; i < rotated.Length; i++)
+                    {
+                        
+                        rotated[i] = new LineFunction(dots[i].position, dots[i+1].position);
+                        
+                        rotated[i] = rotated[i].Rotate(angle);
+
+                        //for (int j = 1; j < accuracyStrength; j++)
+                        //{
+                        //    angle = _countAngleToRotateYZ(rotated[i].start, rotated[i].end);
+                        //    rotated[i] = rotated[i].Rotate(angle);
+                        //}
+                        funcPolar[i] = new Line(
+                            new Vector3(0, rotated[i].start.Y, rotated[i].start.Z),
+                            new Vector3(0, rotated[i].end.Y, rotated[i].end.Z),
+                            color: ((Vector4)Color4.Purple).Xyz, 
+                            width: 3
+                            );
+                    }
+
+                    funcPolarArgs = new float[dots.Length][];
+                    for(int i = 0; i < funcPolarArgs.Length; i++)
+                    {
+                        funcPolarArgs[i] = new float[2];
+
+                        float x, y;
+                        if (i < funcPolar.Length)
+                        {
+                            x = funcPolar[i].position.Y;
+                            y = funcPolar[i].position.Z;
+                        }
+                        else
+                        {
+                            x = rotated[i - 1].end.Y;
+                            y = rotated[i - 1].end.Z;
+                        }
+                        funcPolarArgs[i][0] = MathF.Sqrt(x * x + y * y);
+                        funcPolarArgs[i][1] = MathF.Atan(y / x);
+                    }
+                    ShowPolarFuncs();
+                    hasPolar = true;
+                }
+            }
+        }
+
+        public void CountSphericalFunction()
+        {
+
+        }
+
+        public void SwitchPlaneDisplaying()
+        {
+            display = !display;
+        }
 
         public void Render(int shaderHandle, PrimitiveType primitiveType = 0)
         {
             if (intersected)
             {
-                for(int i = 0; i < dots.Length; i++)
+                for (int i = 0; i < dots.Length; i++)
                 {
                     dots[i].Render(shaderHandle);
                 }
-                for (int i = 0; i < lines.Length; i++)
+                for (int i = 0; i < funcLine.Length; i++)
                 {
-                    lines[i].Render(shaderHandle);
+                    funcLine[i].Render(shaderHandle);
+                }
+                for (int i = 0; i < areaMesh.Length; i++)
+                {
+                    areaMesh[i].Render(shaderHandle);
+                }
+                if (hasPolar)
+                {
+                    for(int i = 0; i < funcPolar.Length; i++)
+                    {
+                        funcPolar[i].Render(shaderHandle);
+                    }
                 }
             }
 
-            if (textureHandlers != null && textureHandlers.Length > 0)
+            if (display)
             {
-                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
+                if (textureHandlers != null && textureHandlers.Length > 0)
                 {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
+                    for (int i = 0; i < textureHandlers.Length && i < 32; i++)
+                    {
+                        TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
+                    }
                 }
+
+                sqr.Render(shaderHandle);
             }
 
-            sqr.Render(shaderHandle);
         }
     }
 }

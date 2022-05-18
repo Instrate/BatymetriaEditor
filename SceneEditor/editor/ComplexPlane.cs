@@ -338,7 +338,7 @@ namespace SceneEditor.editor
 
         public void Interp(float scale = 1, float shift = 0)
         {
-            alglib.spline2dinterpolant interp = Functions.Interpolate(Xmesh, Ymesh, DataStock);
+            alglib.spline2dinterpolant interp = Functions.Interpolate(Xmesh, Ymesh, DataBuffer);
 
 
             float dx = (Xmesh[1] - Xmesh[0]) * scale;
@@ -350,7 +350,7 @@ namespace SceneEditor.editor
             Xmesh = X;
             Ymesh = Y;
 
-            DataBuffer = Functions.recalculateBySpline(interp, Xmesh, Ymesh);
+            DataBuffer = Functions.recalculateBySpline(interp, X, Y);
 
             RebuildRelief();
         }
@@ -472,6 +472,8 @@ namespace SceneEditor.editor
                     dots[i * (rows + 1) + j] = new Dot(pos: new Vector3(Xmesh[j], Ymesh[i], DataBuffer[j][i]));
                 }
             }
+            ResetMeshVisibility();
+            MeshCompatibleRange();
         }
         
         public void SwitchDotsVisibility()
