@@ -37,8 +37,6 @@ namespace SceneEditor
         private List<Editor> editors = new List<Editor>();
         private int currentEditor;
 
-        //private Editor scene;
-
         float ticker = 0;
 
         
@@ -49,7 +47,6 @@ namespace SceneEditor
             this.initItems();
 
             panelRoot.Focus();
-            //glMain.Focus();
         }
 
         public static void EventInform(ListView console, String text)
@@ -70,7 +67,6 @@ namespace SceneEditor
         {
             try
             {
-                
 
                 listViewProcess.Items.Clear();
 
@@ -86,10 +82,8 @@ namespace SceneEditor
 
                 glMain.SizeChanged += onResize;
 
-
-                EventInform(listViewProcess, "render size: " + glMain.RenderSize.ToString());
-
                 var windowSettings = new GLWpfControlSettings { MajorVersion = 4, MinorVersion = 5, GraphicsProfile = ContextProfile.Compatability, GraphicsContextFlags = ContextFlags.Debug };
+                
                 glMain.Start(windowSettings);
 
                 EventInform(listViewProcess, "Editor has been started successfuly");
@@ -106,11 +100,7 @@ namespace SceneEditor
 
         private void OnMouseButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            //if(e.LeftButton == MouseButtonState.Pressed)
-            //{
-            //    glMain.CaptureMouse();
-            //}
-            
+
         }
 
         private void OnPreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
@@ -131,7 +121,6 @@ namespace SceneEditor
             glMain.Focus();
             editors[currentEditor].OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
             textKey.Text = "Pressed: no key is pressed yet";
-            //glMain.InvalidateVisual();
             
         }
 
@@ -167,7 +156,6 @@ namespace SceneEditor
 
 
             editors[currentEditor].OnMouseMove(mouse, pos, glMain.PointToScreen(pos));
-            //glMain.InvalidateVisual();
         }
 
 
@@ -184,26 +172,7 @@ namespace SceneEditor
             editors.Add(new Editor(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight }));
             currentEditor = 0;
 
-            //scene = new Editor(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
-
             Trender = new MultiThreader(8, editors[currentEditor].Render);
-            //for (int i = 0; i < scene.test.Count; i++)
-            //{
-            //    EventInform(listViewProcess, "[" + (i + 1).ToString() + "]: " + scene.test[i].ToString()); 
-            //}
-
-            //ObservableCollection<object> oList;
-            //oList = new ObservableCollection<object>(SettingsApp);
-            //SettingsApp.DataContext = oList;
-
-            //Binding binding = new Binding();
-            //SettingsApp.SetBinding(ListBox.ItemsSourceProperty, binding);
-
-            //foreach (var cam in scene.cameras)
-            //{
-            //    (SettingsApp.ItemsSource as ObservableCollection<object>).Add("Lol");
-            //}
-
         }
 
         private float tickerFrames = 0;
@@ -211,19 +180,18 @@ namespace SceneEditor
         [MTAThread]
         private void OnRender(TimeSpan delta)
         {
-            // textFps.Text = "FPS: " + 1.0f / delta.TotalSeconds;/*+ 1.0f / delta.TotalSeconds * 1000;*/
             ticker += (float)delta.TotalSeconds;
             if(ticker >= 0.5)
             {
                 textFps.Text = "FPS: " + (Math.Truncate(1.0f / delta.TotalSeconds)).ToString();
                 ticker = 0;
-                editors[currentEditor].Render();
+                //editors[currentEditor].Render();
             }
 
             //Trender.activateFreeThread();
 
             tickerFrames += (float)delta.TotalSeconds;
-            if(tickerFrames < 1f / 30)
+            if (tickerFrames < 1f / 30)
             {
                 //
                 editors[currentEditor].Render();
@@ -236,12 +204,9 @@ namespace SceneEditor
 
         private void onResize(object sender, SizeChangedEventArgs e)
         {
-            //MessageBox.Show("resized");
             if (sender is GLWpfControl)
             {
                 editors[currentEditor].OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
-                //glMain.Width = glMain.Height;
-                //GL.Viewport(0, 0, (int)glMain.Width, (int)glMain.Height);
             }
         }
 

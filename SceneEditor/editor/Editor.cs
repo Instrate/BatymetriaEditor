@@ -137,74 +137,86 @@ namespace SceneEditor.editor
 
     public class Editor
     {
+        // renderable objects
+        ComplexPlaneTile[]? bottoms;
+        Section[]? sections;
+        Array objects;
+
+
+        // rendrabe visual additions
+        Mesh mesh;
+        Axis axis;
+
+        ComplexPlaneTile bottom;
+        Section section;
+        
+        
+        Vector3 lightPos;
+        Cube lightBubble;
+        
+
+        // for control
+        public CameraControl[] cameras;
+        public int activeCam;
+
+        // for the settings
         private static readonly Stopwatch _stopwatch = Stopwatch.StartNew();
         private float elapsedTime = 0;
         private float timeDelta = 0;
-
-        public Shader shader;
-
-        int[] textureHandlers;
-
-        Square sqr;
-        ComplexPlaneTile bottom;
-        Section section;
-        Cube[] cubes;
-
-        Line line;
-
-        Mesh mesh;
-
-        public CameraControl[] cameras;
-
-        public int activeCam;
-
-        Vector3 lightPos;
-        Cube lightBubble;
-        Axis axis;
-
-        //public List<TextureUnit> test = TextureLoader.units_all;
-
         Size selfSize;
 
+        // for the render
+        public Shader shader;
         Matrix4 model;
         Matrix4 modelCramble;
         Matrix4 view;
+        int[] textureHandlers;
 
         // add switchable uniform bool useGradient
         public Editor(Size windowSize)
         {
             selfSize = windowSize;
 
-            textureHandlers = new int[3];
-            textureHandlers[0] = TextureLoader.LoadFromFile(TexturePath.wall);
-            textureHandlers[1] = TextureLoader.LoadFromFile(TexturePath.oriental_tiles);
-            textureHandlers[2] = TextureLoader.LoadFromFile(TexturePath.criss_cross);
-
-            //sqr = new Square(textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile }, pos: new Vector3() { X = 1f, Z = 1f });
 
             bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
             section = new Section(new Vector3(0,0,3), new Vector3(3, 8, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
 
+            _setupCam();
+            _setupObjects();
+            _setupTextures();
+            _setupShader();
+        }
+
+        private void _setupObjects()
+        {
             axis = new Axis();
+            mesh = new Mesh(size: 10, step:15, width: 1);
 
-            lightBubble = new Cube(pos: new Vector3() { Z = 7f , X = 0, Y = 0});
+            lightBubble = new Cube(pos: new Vector3() { Z = 7f, X = 0, Y = 0 });
             lightBubble.Scale(new Vector3(0.1f));
+        }
 
-            mesh = new Mesh();
+        private void _setupTextures()
+        {
+            textureHandlers = new int[3];
+            textureHandlers[0] = TextureLoader.LoadFromFile(TexturePath.wall);
+            textureHandlers[1] = TextureLoader.LoadFromFile(TexturePath.oriental_tiles);
+            textureHandlers[2] = TextureLoader.LoadFromFile(TexturePath.criss_cross);
+        }
 
-            shader = new Shader(ShaderPath.lightVert, ShaderPath.frag);
-            shader.Use();
-
-            activeCam = 0;
-
+        private void _setupCam()
+        {
             cameras = new CameraControl[1];
             cameras[activeCam] = new CameraControl(new Vector2i() { X = 800, Y = 600 }, false);
             cameras[activeCam].cam.Fov = 90f;
+            activeCam = 0;
+        }
 
-            //axis.MoveAlongWithCamera(cameras[activeCam]);
-
-            //var ortho = Matrix4.CreateOrthographic((float)selfSize.Width, (float)selfSize.Height, 0.1f, 100f);
+        private void _setupShader()
+        {
+            shader = new Shader(ShaderPath.lightVert, ShaderPath.frag);
+            shader.Use();
 
             model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(0f));
             modelCramble = Matrix4.Transpose(model.Inverted());

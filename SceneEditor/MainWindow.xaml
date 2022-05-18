@@ -68,9 +68,13 @@
             <Grid Grid.Row="0">
                 <TabControl Margin="5">
                     <TabItem Header="Structure">
-                        <TreeView>
-                            
-                        </TreeView>
+                        <TabControl x:Name="editorStructure">
+                            <TabItem Header="Main">
+                                <TreeView>
+                                    
+                                </TreeView>
+                            </TabItem>
+                        </TabControl>
                     </TabItem>
                 </TabControl>
             </Grid>
