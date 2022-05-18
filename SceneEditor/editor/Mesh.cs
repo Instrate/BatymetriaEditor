@@ -16,18 +16,20 @@ namespace SceneEditor.editor
 
         private Line[] lines;
 
-        public Mesh(int size = 18, float step = 2.0f)
+        float width;
+
+        public Mesh(int size = 20, float step = 10.0f, float height = 0, float width = 0.5f)
         {
-            this.size = size;
             length = size * 2;
             int amount = 2 * length + 2;
 
+            this.width = width;
 
             lines = new Line[amount];
 
             float x = -size * step;
             float y = x;
-            float z = 0f;
+            float z = height;
 
             float yy = size * step;
             for(int i = 0; i < length + 1; i++)
@@ -42,21 +44,6 @@ namespace SceneEditor.editor
                 lines[length + 1 + i] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: xx, y: y, z: z));
                 y += step;
             }
-
-
-            //for (int i = 0; i < length; i++)
-            //{
-            //    for (int j = 0; j < length; j++)
-            //    {
-            //        lines[i * length * 2 + j * 2] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: x, y: y + step, z: z));
-            //        lines[i * length * 2 + j * 2 + 1] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: x + step, y: y, z: z));
-            //        y += step;
-            //    }
-            //    x += step;
-            //    y -= length * step;
-            //}
-            //lines[amount * 2] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: x, y: y + length * step, z: z));
-            //lines[amount * 2 + 1] = new Line(new Vector3(x: -size * step, y: y + length * step, z: z), new Vector3(x: x, y: y + length * step, z: z));\
 
         }
 
@@ -85,8 +72,11 @@ namespace SceneEditor.editor
 
         }
 
-        void IRenderable.Render(int shaderHandle)
+        void IRenderable.Render(int shaderHandle, PrimitiveType primitiveType = 0)
         {
+
+            GL.LineWidth(width);
+
             int amount = lines.Length;
             for (int i = 0; i < amount; i++)
             {

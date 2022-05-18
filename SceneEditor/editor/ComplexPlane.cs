@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -119,6 +120,147 @@ namespace SceneEditor.editor
             }
             return data;
         }
+    
+        public static float[][] MatrixFindMinor(float[][] arr, int ii, int jj)
+        {
+            float[][] matrix = new float[arr.Length - 1][];
+            for(int i = 0; i < matrix.Length; i++)
+            {
+                matrix[i] = new float[arr[0].Length-1];
+            }
+            int a;
+            int b;
+            a = b = 0;
+            for(int i = 0; i < arr.Length; i++)
+            {
+                for(int j = 0; j < arr.Length; j++)
+                {
+                    if(i != ii && j != jj)
+                    {
+                        matrix[a][b] = arr[i][j];
+                        b++;
+                        if(b == arr.Length - 1)
+                        {
+                            b = 0;
+                            a++;
+                        }
+                    }
+                }
+            }
+            return matrix;
+        }
+
+        public static float[][] MatrixFindMinors(float[][] arr)
+        {
+            float[][] minor_matrix = new float[arr.Length][];
+            for(int i = 0; i < arr.Length; i++)
+            {
+                minor_matrix[i] = new float[arr[0].Length];
+                for(int j = 0; j < arr[0].Length; j++)
+                {
+                    float[][] Am = MatrixFindMinor(arr, i, j);
+                    float det = MatrixDeterminant(Am);
+                    minor_matrix[i][j] = det;
+                }
+            }
+            return minor_matrix;
+        }
+
+        private static float Matrix3x3Determinant(float[][] arr)
+        {
+            float[] n = new float[6];
+            n[0] = arr[0][0] * arr[1][1] * arr[2][2];
+            n[1] = arr[0][1] * arr[1][2] * arr[2][0];
+            n[2] = arr[0][2] * arr[1][0] * arr[2][1];
+            n[3] = arr[0][2] * arr[1][1] * arr[2][0];
+            n[4] = arr[0][0] * arr[1][2] * arr[2][1];
+            n[5] = arr[0][1] * arr[1][0] * arr[2][2];
+            float left = n[0] + n[1] + n[2];
+            float right = n[3] + n[4] + n[5];
+            return left - right;
+        }
+
+        public static float MatrixDeterminant(float[][] arr, float[][]? minors = null)
+        {
+            if (arr.Length > 3)
+            {
+                if(minors == null)
+                {
+                    minors = MatrixFindMinors(arr);
+                }
+                float det = 0;
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    int j = arr[0].Length - 1;
+                    det += minors[i][j] * MathF.Pow((-1), (i + j)) * arr[i][j];
+                }
+                return det;
+            }
+            else
+            {
+                if(arr.Length == 2)
+                {
+                    return arr[0][0] * arr[1][1] - arr[0][1] * arr[1][0];
+                }
+                return Matrix3x3Determinant(arr);
+            }
+        }
+    
+        public static float[][] MatrixInversed(float[][] arr, float det)
+        {
+            float[][] matrix = new float[arr.Length][];
+            for(int i = 0; i < arr.Length; i++)
+            {
+                matrix[i] = new float[arr.Length];
+                for(int j = 0; j < arr.Length; j++)
+                {
+                    matrix[i][j] = arr[i][j] / det;
+                }
+            }
+            return matrix;
+        }
+    
+        public static float[]? MatrixSolution(float[][] A, float[] B)
+        {
+            float[] X = new float[B.Length];
+            float det = MatrixDeterminant(A);
+            if(det == 0)
+            {
+                return null;
+            }
+            try
+            {
+                for (int j = 0; j < B.Length; j++)
+                {
+                    float[][] A_t = MatrixCopy(A);
+                    for (int i = 0; i < A.Length; i++)
+                    {
+                        A_t[i][j] = B[i];
+                    }
+                    float te = MatrixDeterminant(A_t, MatrixFindMinors(A_t));
+                    X[j] = te / det;
+                }
+                return X;
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public static float[][] MatrixCopy(float[][] arr)
+        {
+            float[][] res = new float[arr.Length][];
+            for(int i = 0; i < arr.Length; i++)
+            {
+                res[i] = new float[arr[i].Length];
+                for(int j = 0; j < arr[i].Length; j++)
+                {
+                    res[i][j] = arr[i][j];
+                }
+            }
+            return res;
+        }
     }
 
     internal class ComplexPlaneTile : IRenderable
@@ -142,15 +284,23 @@ namespace SceneEditor.editor
 
         public int[] Range = new int[4];
 
-        public ComplexPlaneTile(Vector3[] inputData = default, float[]? X = null, float[]? Y = null, float[][]? Z = null, string[]? textureSet = null)
+        Dot[] dots;
+        bool showDots = false;
+
+        public PrimitiveType drawStyle = PrimitiveType.Triangles;
+        float lineWidth;
+
+
+        public ComplexPlaneTile(Vector3[] inputData = default,
+                                float[]? X = null,
+                                float[]? Y = null,
+                                float[][]? Z = null,
+                                string[]? textureSet = null,
+                                float lineWidth = 2f)
         {
             if (inputData == default)
             {
-                if (X != null && Y != null && Z != null)
-                {
-
-                }
-                else
+                if (X == null && Y == null && Z == null)
                 {
                     float start = -20f;
                     float end = 20f;
@@ -159,16 +309,8 @@ namespace SceneEditor.editor
                     Y = Functions.Arrange(start, end, step);
                     Z = Functions.FigureTest(X, Y);
                 }
-
-
-                Xmesh = X;
-                Ymesh = Y;
-                DataStock = Z;
-                DataBuffer = (float[][]?) DataStock.Clone();
-
-                ResetMeshVisibility();
-                MeshCompatibleRange();
-                RebuildRelief();
+                LoadData(X, Y, Z);
+                this.lineWidth = lineWidth;
             }
             if (textureSet != null)
             {
@@ -180,6 +322,18 @@ namespace SceneEditor.editor
             }
 
             isLoaded = true;
+        }
+
+        public void LoadData(float[] X, float[] Y, float[][] Data)
+        {
+            Xmesh = X;
+            Ymesh = Y;
+            DataStock = Data;
+            DataBuffer = Functions.MatrixCopy(DataStock);
+
+            ResetMeshVisibility();
+            MeshCompatibleRange();
+            RebuildRelief();
         }
 
         public void Interp(float scale = 1, float shift = 0)
@@ -196,13 +350,14 @@ namespace SceneEditor.editor
             Xmesh = X;
             Ymesh = Y;
 
-            DataStock = Functions.recalculateBySpline(interp, Xmesh, Ymesh);
+            DataBuffer = Functions.recalculateBySpline(interp, Xmesh, Ymesh);
 
             RebuildRelief();
         }
 
         public void MeshCompatibleRange()
         {
+            // appropriate limit for 2Gb of VRAM
             int limit = 60;
             int xfactor = 0;
             int yfactor = 0;
@@ -297,6 +452,7 @@ namespace SceneEditor.editor
             var rows = Xmesh.Length - 1;
             var cols = Ymesh.Length - 1;
             tiles = new Square[rows * cols];
+
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < cols; j++)
@@ -304,12 +460,31 @@ namespace SceneEditor.editor
                     Vector2 top_left = new Vector2(Xmesh[i], Ymesh[j]);
                     Vector2 bottom_right = new Vector2(Xmesh[i + 1], Ymesh[j + 1]);
                     Vector4 heights = new Vector4(DataBuffer[i + 1][j + 1], DataBuffer[i][j + 1], DataBuffer[i][j], DataBuffer[i + 1][j]);
-                    tiles[i * cols + j] = new Square(builder: new Vector2[] { top_left, bottom_right }, heights: heights);
+                    tiles[i * cols + j] = new Square(builder: new Vector2[] { top_left, bottom_right }, heights: heights, fixHeight: false);
+                }
+            }
+
+            dots = new Dot[Xmesh.Length * Ymesh.Length];
+            for (int i = 0; i <= rows; i++)
+            {
+                for(int j = 0; j <= cols; j++)
+                {
+                    dots[i * (rows + 1) + j] = new Dot(pos: new Vector3(Xmesh[j], Ymesh[i], DataBuffer[j][i]));
                 }
             }
         }
+        
+        public void SwitchDotsVisibility()
+        {
+            showDots = !showDots;
+        }
 
-        public void Render(int shader)
+        public void SwitchDrawStyle()
+        {
+            drawStyle = drawStyle == PrimitiveType.Triangles ? PrimitiveType.Lines : PrimitiveType.Triangles;
+        }
+
+        public void Render(int shader, PrimitiveType primitiveType = 0)
         {
             if (!isLoaded)
             {
@@ -325,27 +500,30 @@ namespace SceneEditor.editor
                 }
             }
 
-
-            var rows = Xmesh.Length - 1;
-            var cols = Ymesh.Length - 1;
-            var amount = tiles.Length;
-            for (int i = Range[0]; i <= Range[2]; i++)
+            if (showDots)
             {
-                for (int j = Range[1]; j <= Range[3]; j++)
+                for (int i = 0; i < dots.Length; i++)
                 {
-                    tiles[i * cols + j].Render(shader);
-
-                    //if(i * rows + j >= amount)
-                    //{
-                    //    Console.WriteLine("i: [" + i + "]; j: [" + j + "]; amount: " + amount);
-                    //}
+                    dots[i].Render(shader);
                 }
             }
 
-            //for (int i = 0; i < tiles.Length; i++)
-            //{
-            //    tiles[i].Render(shader);
-            //}
+            //var rows = Xmesh.Length - 1;
+            var cols = Ymesh.Length - 1;
+            //var amount = tiles.Length;
+            if(primitiveType != 0)
+            {
+                drawStyle = primitiveType;
+            }
+            GL.LineWidth(lineWidth);
+            for (int i = Range[0]; i <= Range[2]; i++)
+            {
+                int ii = i * cols;
+                for (int j = Range[1]; j <= Range[3]; j++)
+                {
+                    tiles[ii + j].Render(shader, drawStyle);
+                }
+            }
         }
     }
 }

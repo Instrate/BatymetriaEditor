@@ -50,7 +50,7 @@ namespace SceneEditor.editor
             }
 
             float scaling = 0.05f;
-            float sizeScale = 2f;
+            float sizeScale = 200f;
 
             axis[0].Scale(new Vector3(sizeScale, scaling, scaling));
             axis[1].Scale(new Vector3(scaling, sizeScale, scaling));
@@ -75,7 +75,7 @@ namespace SceneEditor.editor
             }
         }
 
-        public void Render(int shaderHandle)
+        public void Render(int shaderHandle, PrimitiveType primitiveType = 0)
         {
             if (textureHandlers != null && textureHandlers.Length > 0)
             {
@@ -147,6 +147,7 @@ namespace SceneEditor.editor
 
         Square sqr;
         ComplexPlaneTile bottom;
+        Section section;
         Cube[] cubes;
 
         Line line;
@@ -186,10 +187,12 @@ namespace SceneEditor.editor
             //    square.Scale(new Vector3(2f));
             //}
 
-            sqr.Scale(new Vector3(10f, 10f, 1));
-            sqr.Rotate(new Vector3(MathHelper.DegreesToRadians(90f), 0, 0));
+            //sqr.Scale(new Vector3(10f, 10f, 1));
+            //sqr.Rotate(new Vector3(MathHelper.DegreesToRadians(90f), 0, 0));
 
             bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
+
+            section = new Section(new Vector3(3,0,4), new Vector3(0, 8f, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
 
             //trg = new Triangle(pos: new Vector3(0, 0, 2.5f));
             //trg.Scale(new Vector3(2));
@@ -228,7 +231,7 @@ namespace SceneEditor.editor
             //cubes[1].Rotate(new Vector3() { X = MathHelper.DegreesToRadians(45f), Y = 0, Z = MathHelper.DegreesToRadians(90f) });
             //cubes[3].Rotate(new Vector3() { X = 0, Y = MathHelper.DegreesToRadians(45f), Z = MathHelper.DegreesToRadians(90f) });
 
-            line = new Line(new Vector3(0, 0, 0), new Vector3(0, 0, 20));
+            //line = new Line(new Vector3(4, 0, 0), new Vector3(0, 4, 20));
             mesh = new Mesh();
 
             shader = new Shader(ShaderPath.lightVert, ShaderPath.frag);
@@ -251,6 +254,13 @@ namespace SceneEditor.editor
             view = cameras[activeCam].cam.GetViewMatrix();
             shader.SetMatrix4("view", view);
             shader.SetMatrix4("projection", cameras[activeCam].cam.GetProjectionMatrix());
+
+
+            //test
+
+            //LineFunction testLine = new LineFunction(new float[] { 2, 1, -5, 3, 4, 2 }, true);
+            //testLine.Intersect(7, -5, 2, 19);
+        
         }
 
         private Vector2i SizeToVector2i(Size size)
@@ -362,13 +372,13 @@ namespace SceneEditor.editor
 
             RenderObject(mesh);
 
-            //RenderObject(axis);
+            RenderObject(axis);
 
             RenderObject(lightBubble);
 
             //RenderObject(sqr);
             RenderObject(bottom);
-            //RenderObject(line);
+            RenderObject(section);
             //RenderObject(test);
             //RenderObject(cubes);
 
@@ -469,8 +479,21 @@ namespace SceneEditor.editor
                 {
                     bottom.MoveVisibleMesh(1, 0, 0, 0, 0, 0);
                 }
+                if (key == Key.J)
+                {
+                    // test intersection
+                    section.IntersectTiled(bottom.Xmesh, bottom.Ymesh, bottom.DataBuffer);
+
+                }
+                if (key == Key.P)
+                {
+                    bottom.SwitchDotsVisibility();
+                }
+                if (key == Key.O)
+                {
+                    bottom.SwitchDrawStyle();
+                }
             }
-            
         }
 
         [MTAThread]

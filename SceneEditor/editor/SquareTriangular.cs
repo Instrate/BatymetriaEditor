@@ -107,7 +107,7 @@ namespace SceneEditor.editor
 
         }
 
-        public void Render(int shaderHandle)
+        public void Render(int shaderHandle, PrimitiveType primitiveType = 0)
         {
 
             //texture loading

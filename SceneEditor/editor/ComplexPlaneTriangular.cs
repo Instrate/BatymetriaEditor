@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,7 +60,7 @@ namespace SceneEditor.editor
             //}
         }
 
-        public void Render(int shader)
+        public void Render(int shader, PrimitiveType primitiveType = 0)
         {
             //texture loading
             if (textureHandlers != null && textureHandlers.Length > 0)

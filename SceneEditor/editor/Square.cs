@@ -116,7 +116,7 @@ namespace SceneEditor.editor
             }
         }
 
-        private float[] _buildVertice(Vector2 v1, Vector2 v2, Vector4 v3)
+        private float[] _buildVertice(Vector2 v1, Vector2 v2, Vector4 v3, bool isSection = false)
         {
             float[] coords = new float[12];
             int off = 3;
@@ -125,20 +125,56 @@ namespace SceneEditor.editor
                 v3 = Vector4.Zero;
             }
 
-            coords[0] = v2.X; // x
-            coords[1] = v2.Y; // y
+            // bootom left
+            if (isSection)
+            {
+                coords[0] = v1.X; // x
+                coords[1] = v1.Y; // y
+            }
+            else
+            {
+                coords[0] = v2.X; // x
+                coords[1] = v2.Y; // y
+            }
             coords[2] = v3[0]; // z
 
-            coords[0 + off] = v1.X; // x
-            coords[1 + off] = v2.Y; // y
+            // top left
+            if (isSection)
+            {
+                coords[0 + off] = v1.X; // x
+                coords[1 + off] = v1.Y; // y
+            }
+            else
+            {
+                coords[0 + off] = v1.X; // x
+                coords[1 + off] = v2.Y; // y
+            }
             coords[2 + off] = v3[1]; // z
 
-            coords[0 + 2 * off] = v1.X; // x
-            coords[1 + 2 * off] = v1.Y; // y
+            // top right
+            if (isSection)
+            {
+                coords[0 + 2 * off] = v2.X; // x
+                coords[1 + 2 * off] = v2.Y; // y
+            }
+            else
+            {
+                coords[0 + 2 * off] = v1.X; // x
+                coords[1 + 2 * off] = v1.Y; // y
+            }
             coords[2 + 2 * off] = v3[2]; // z
 
-            coords[0 + 3 * off] = v2.X; // x
-            coords[1 + 3 * off] = v1.Y; // y
+            // bootom right
+            if (isSection)
+            {
+                coords[0 + 3 * off] = v2.X; // x
+                coords[1 + 3 * off] = v2.Y; // y
+            }
+            else
+            {
+                coords[0 + 3 * off] = v2.X; // x
+                coords[1 + 3 * off] = v1.Y; // y
+            }
             coords[2 + 3 * off] = v3[3]; // z
 
             return coords;
@@ -167,7 +203,7 @@ namespace SceneEditor.editor
             return heigths;
         }
 
-        public Square(string[]? textureSet = null, Vector2[]? builder = default, Vector4? heights = default, Vector3 pos = default, Vector3? color = default)
+        public Square(string[]? textureSet = null, Vector2[]? builder = default, Vector4? heights = default, Vector3 pos = default, Vector3? color = default, bool fixHeight = false, bool isSection = false)
         {
 
             if(builder == default) 
@@ -177,9 +213,29 @@ namespace SceneEditor.editor
             else
             {
                 // change the application not to vertices but to position
-                concatSet(_buildVertice(builder[0], builder[1], heights == default ? Vector4.Zero : GetCorrectPosition(heights.Value)), color);
+                concatSet(_buildVertice(builder[0], builder[1], heights == default ? Vector4.Zero : fixHeight == true ? GetCorrectPosition(heights.Value) : heights.Value, isSection), color);
             }
 
+            BindObject();
+
+            if (pos != default)
+            {
+                position = pos;
+                Move(position);
+            }
+
+            if (textureSet != null)
+            {
+                textureHandlers = new int[textureSet.Length];
+                for(int i = 0; i < textureSet.Length; i++)
+                {
+                    textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
+                } 
+            }
+        }
+
+        private void BindObject()
+        {
             GL.GenBuffers(1, out VBO);
             GL.GenVertexArrays(1, out VAO);
             EBO = GL.GenBuffer();
@@ -203,22 +259,6 @@ namespace SceneEditor.editor
 
             GL.EnableVertexAttribArray(3);
             GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 8 * sizeof(float));
-
-
-            if (pos != default)
-            {
-                position = pos;
-                Move(position);
-            }
-
-            if (textureSet != null)
-            {
-                textureHandlers = new int[textureSet.Length];
-                for(int i = 0; i < textureSet.Length; i++)
-                {
-                    textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
-                } 
-            }
         }
 
         public void Move(Vector3 shifts)
@@ -249,7 +289,7 @@ namespace SceneEditor.editor
             
         }
 
-        public void Render(int shaderHandle)
+        public void Render(int shaderHandle, PrimitiveType primitiveType = PrimitiveType.Triangles)
         {
 
             //texture loading
@@ -268,7 +308,7 @@ namespace SceneEditor.editor
 
             // drawing processed geometry
             GL.BindVertexArray(VAO);
-            GL.DrawElements(BeginMode.Triangles, Tile.indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(primitiveType, Tile.indices.Length, DrawElementsType.UnsignedInt, 0);
 
             // for safe drawing
             //GL.BindVertexArray(0);

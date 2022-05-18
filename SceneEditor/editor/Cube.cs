@@ -436,7 +436,7 @@ namespace SceneEditor.editor
             TransformCombiner();
         }
 
-        public void Render(int shaderHandle)
+        public void Render(int shaderHandle, PrimitiveType primitiveType = PrimitiveType.Triangles)
         {
             //texture loading
             if (textureHandlers != null && textureHandlers.Length > 0)
@@ -455,7 +455,7 @@ namespace SceneEditor.editor
 
             // drawing processed geometry
             GL.BindVertexArray(VAO);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+            GL.DrawArrays(primitiveType, 0, 36);
 
             // for safe drawing
             //GL.BindVertexArray(0);

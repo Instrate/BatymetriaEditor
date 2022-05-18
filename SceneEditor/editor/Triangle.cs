@@ -130,6 +130,8 @@ namespace SceneEditor.editor
             if (pos != default)
             {
                 position = pos;
+
+                //Questionable
                 Move(position);
             }
 
@@ -171,7 +173,7 @@ namespace SceneEditor.editor
 
         }
 
-        public void Render(int shaderHandle)
+        public void Render(int shaderHandle, PrimitiveType primitiveType = PrimitiveType.Triangles)
         {
 
             //texture loading
@@ -190,7 +192,7 @@ namespace SceneEditor.editor
 
             // drawing processed geometry
             GL.BindVertexArray(VAO);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            GL.DrawArrays(primitiveType, 0, 3);
 
             // for safe drawing
             //GL.BindVertexArray(0);

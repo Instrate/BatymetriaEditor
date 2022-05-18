@@ -34,7 +34,10 @@ namespace SceneEditor
 
         MultiThreader Trender;
 
-        private Editor scene;
+        private List<Editor> editors = new List<Editor>();
+        private int currentEditor;
+
+        //private Editor scene;
 
         float ticker = 0;
 
@@ -112,7 +115,7 @@ namespace SceneEditor
 
         private void OnPreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
         {
-            scene.OnMouseWheel(e);
+            editors[currentEditor].OnMouseWheel(e);
         }
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
@@ -126,7 +129,7 @@ namespace SceneEditor
         private void OnMouseEnter(object sender, MouseEventArgs e)
         {
             glMain.Focus();
-            scene.OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
+            editors[currentEditor].OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
             textKey.Text = "Pressed: no key is pressed yet";
             //glMain.InvalidateVisual();
             
@@ -141,10 +144,10 @@ namespace SceneEditor
         {
             var key = e.Key;
             textKey.Text = "Pressed: " + key.ToString();
-            
-            scene.OnKeyDown(e);
 
-            if (scene.cameras[scene.activeCam].grabedMouse)
+            editors[currentEditor].OnKeyDown(e);
+
+            if (editors[currentEditor].cameras[editors[currentEditor].activeCam].grabedMouse)
             {
                 tabWindows.Background = Brushes.Green;
             }
@@ -162,8 +165,8 @@ namespace SceneEditor
 
             textMouse.Text = msg;
 
-            
-            scene.OnMouseMove(mouse, pos, glMain.PointToScreen(pos));
+
+            editors[currentEditor].OnMouseMove(mouse, pos, glMain.PointToScreen(pos));
             //glMain.InvalidateVisual();
         }
 
@@ -173,13 +176,17 @@ namespace SceneEditor
         {
             GL.Enable(EnableCap.Blend);
             GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.LineSmooth);
             //GL.Enable(EnableCap.PolygonSmooth);
             //GL.Enable(EnableCap.ScissorTest);
             //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
-            scene = new Editor(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
+            editors.Add(new Editor(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight }));
+            currentEditor = 0;
 
-            Trender = new MultiThreader(8, scene.Render);
+            //scene = new Editor(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
+
+            Trender = new MultiThreader(8, editors[currentEditor].Render);
             //for (int i = 0; i < scene.test.Count; i++)
             //{
             //    EventInform(listViewProcess, "[" + (i + 1).ToString() + "]: " + scene.test[i].ToString()); 
@@ -210,7 +217,7 @@ namespace SceneEditor
             {
                 textFps.Text = "FPS: " + (Math.Truncate(1.0f / delta.TotalSeconds)).ToString();
                 ticker = 0;
-                scene.Render();
+                editors[currentEditor].Render();
             }
 
             //Trender.activateFreeThread();
@@ -219,7 +226,7 @@ namespace SceneEditor
             if(tickerFrames < 1f / 30)
             {
                 //
-                scene.Render();
+                editors[currentEditor].Render();
             }
             else
             {
@@ -232,13 +239,16 @@ namespace SceneEditor
             //MessageBox.Show("resized");
             if (sender is GLWpfControl)
             {
-                scene.OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
+                editors[currentEditor].OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
                 //glMain.Width = glMain.Height;
                 //GL.Viewport(0, 0, (int)glMain.Width, (int)glMain.Height);
             }
         }
 
-
+        private void addNewEditor()
+        {
+             
+        }
     }
 
 
