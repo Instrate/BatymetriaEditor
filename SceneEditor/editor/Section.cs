@@ -421,7 +421,7 @@ namespace SceneEditor.editor
         {
             if (intersected)
             {
-                Console.WriteLine("Polar functions:");
+                Console.WriteLine("Polar functions:\n\tx(r,phi)=r*cos(phi);\n\ty(r,phi)=r*sin(phi);\n");
                 for(int i = 0; i < funcPolarArgs.Length; i++)
                 {
                     float r = funcPolarArgs[i][0];
