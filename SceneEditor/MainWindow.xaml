@@ -7,7 +7,7 @@
         xmlns:glWpfControl="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
         mc:Ignorable="d"
         Title="BatymetriaEditor (by Bohdan Savchuk)" Width="1600" Height="900" WindowStyle="ThreeDBorderWindow">
-    <Grid x:Name="panelRoot" Background="Silver" Focusable="True">
+    <Grid x:Name="panelRoot" Background="Silver" Focusable="True" PreviewMouseDown="OnPreviewMouseKeyPressed">
         
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"></ColumnDefinition>
@@ -33,7 +33,7 @@
 
                 <glWpfControl:NonReloadingTabControl Grid.Row="0" Margin="5" x:Name="tabWindows" Background="Wheat">
                     <TabItem Header="Main" x:Name="glControl1">
-                        <glWpfControl:GLWpfControl x:Name="glMain" Margin="5" Focusable="True" Render="OnRender" Cursor="Hand" PreviewMouseWheel="OnPreviewMouseWheel"/>
+                        <glWpfControl:GLWpfControl x:Name="glMain" Margin="5" Focusable="True" Render="OnRender" PreviewMouseWheel="OnPreviewMouseWheel"/>
                     </TabItem>
                 </glWpfControl:NonReloadingTabControl>
 
@@ -71,7 +71,6 @@
                         <TabControl x:Name="editorStructure">
                             <TabItem Header="Main">
                                 <TreeView>
-                                    
                                 </TreeView>
                             </TabItem>
                         </TabControl>

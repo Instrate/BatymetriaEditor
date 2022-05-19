@@ -19,7 +19,7 @@ namespace SceneEditor.editor
 
         public int[] textureHandlers;
 
-        public ComplexPlaneTriangular(Vector3[] inputData = default, float[]? X = null, float[]? Y = null, float[][]? Z = null, string[]? textureSet = null)
+        public ComplexPlaneTriangular(Vector3[]? inputData = null, float[]? X = null, float[]? Y = null, float[][]? Z = null, string[]? textureSet = null)
         {
             //if (inputData == default)
             //{

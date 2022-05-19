@@ -263,7 +263,7 @@ namespace SceneEditor.editor
         }
     }
 
-    internal class ComplexPlaneTile : IRenderable
+    public class ComplexPlaneTile : IRenderable
     {
         public bool isLoaded = false;
 
@@ -287,18 +287,26 @@ namespace SceneEditor.editor
         Dot[] dots;
         bool showDots = false;
 
-        public PrimitiveType drawStyle = PrimitiveType.Triangles;
+
+        int primitiveCurrent = 0;
         float lineWidth;
+        PrimitiveType[] stylesSwitcher = new PrimitiveType[]
+            {
+                PrimitiveType.Triangles,
+                PrimitiveType.Lines,
+                PrimitiveType.LineStrip,
+                PrimitiveType.LinesAdjacency
+            };
+        public PrimitiveType drawStyle;
 
-
-        public ComplexPlaneTile(Vector3[] inputData = default,
+        public ComplexPlaneTile(Vector3[]? inputData = null,
                                 float[]? X = null,
                                 float[]? Y = null,
                                 float[][]? Z = null,
                                 string[]? textureSet = null,
                                 float lineWidth = 2f)
         {
-            if (inputData == default)
+            if (inputData == null)
             {
                 if (X == null && Y == null && Z == null)
                 {
@@ -322,6 +330,7 @@ namespace SceneEditor.editor
             }
 
             isLoaded = true;
+            drawStyle = stylesSwitcher[primitiveCurrent];
         }
 
         public void LoadData(float[] X, float[] Y, float[][] Data)
@@ -483,7 +492,12 @@ namespace SceneEditor.editor
 
         public void SwitchDrawStyle()
         {
-            drawStyle = drawStyle == PrimitiveType.Triangles ? PrimitiveType.Lines : PrimitiveType.Triangles;
+            primitiveCurrent++;
+            if(stylesSwitcher.Length == primitiveCurrent)
+            {
+                primitiveCurrent = 0;
+            }
+            drawStyle = stylesSwitcher[primitiveCurrent];
         }
 
         public void Render(int shader, PrimitiveType primitiveType = 0)

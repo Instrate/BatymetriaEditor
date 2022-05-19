@@ -138,10 +138,9 @@ namespace SceneEditor.editor
     public class Editor
     {
         // renderable objects
-        ComplexPlaneTile[]? bottoms;
-        Section[]? sections;
-        Array objects;
-
+        public Lazy<List<ComplexPlaneTile>> tiledBottoms = new Lazy<List<ComplexPlaneTile>>();
+        public Lazy<List<Section>> sections = new Lazy<List<Section>>();
+        public bool doUpdate = false;
 
         // rendrabe visual additions
         Mesh mesh;
@@ -177,15 +176,31 @@ namespace SceneEditor.editor
         {
             selfSize = windowSize;
 
-
+            
             bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
+            addNewBottom(bottom);
+
             section = new Section(new Vector3(0,0,3), new Vector3(3, 8, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
+
+            addNewSection(section);
 
             _setupCam();
             _setupObjects();
             _setupTextures();
             _setupShader();
+        }
+
+        public void addNewBottom(ComplexPlaneTile tiledBottom)
+        {
+            tiledBottoms.Value.Add(tiledBottom);
+            doUpdate = true;
+        }
+
+        public void addNewSection(Section section)
+        {
+            sections.Value.Add(section);
+            doUpdate = true;
         }
 
         private void _setupObjects()
@@ -282,8 +297,23 @@ namespace SceneEditor.editor
             GL.Viewport(0, 0, (int)selfSize.Width, (int)selfSize.Height);
         }
 
+        public void OnMouseButtonPressed(MouseButtonEventArgs mouse)
+        {
+
+            if (mouse.RightButton == MouseButtonState.Pressed)
+            {
+                cameras[activeCam].grabedMouse = !cameras[activeCam].grabedMouse;
+            }
+            if (cameras[activeCam].grabedMouse)
+            {
+                view = cameras[activeCam].cam.GetViewMatrix();
+                shader.SetMatrix4("view", cameras[activeCam].cam.GetViewMatrix());
+            }
+        }
+
         public void OnMouseWheel(MouseWheelEventArgs e)
         {
+            
             //cameras[activeCam].cam.Fov = 90f - e.Delta / 10;
             //shader.SetMatrix4("projection", cameras[activeCam].cam.GetProjectionMatrix());
         }
@@ -298,27 +328,16 @@ namespace SceneEditor.editor
             return layouts;
         }
 
-        // rewrite shader usage for elements
-        [MTAThread]
-        public void Render()
+        private void _applyTextureUnits()
         {
-            var elapsed = (float)_stopwatch.Elapsed.TotalSeconds;
-            var hue = elapsed * 0.15f % 1;
-            timeDelta = elapsed - elapsedTime;
-            elapsedTime = elapsed;
-
-            //background cleaning
-            //var c = Color4.FromHsv(new Vector4(hue, 0.75f, 0.75f, 1));
-            GL.ClearColor(0.4f, 0.4f, 0.4f, 1.0f);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            //texture buffer loading
             for (int i = 0; i < textureHandlers.Length && i < 32; i++)
             {
                 TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
             }
+        }
 
-
+        private void _applyShaderSettings()
+        {
             shader.Use();
             shader.SetMatrix4("model", model);
             //shader.SetVector3("lightColor", new Vector3(c.R, c.G, c.B));
@@ -331,23 +350,38 @@ namespace SceneEditor.editor
             {
                 shader.SetInt("texture" + (i + 1).ToString(), i);
             }
+        }
 
+        private void _applyRenderQueue()
+        {
             RenderObject(mesh);
-
             RenderObject(axis);
-
             RenderObject(lightBubble);
 
-            //RenderObject(sqr);
-            RenderObject(bottom);
-            RenderObject(section);
-            //RenderObject(test);
-            //RenderObject(cubes);
+            tiledBottoms.Value.ForEach(bottom => RenderObject(bottom));
+            sections.Value.ForEach(section => RenderObject(section));
+        }
 
+        // rewrite shader usage for elements
+        [MTAThread]
+        public void Render()
+        {
+            var elapsed = (float)_stopwatch.Elapsed.TotalSeconds;
+            //var hue = elapsed * 0.15f % 1;
+            timeDelta = elapsed - elapsedTime;
+            elapsedTime = elapsed;
+
+            //background cleaning
+            //var c = Color4.FromHsv(new Vector4(hue, 0.75f, 0.75f, 1));
+            GL.ClearColor(0.4f, 0.4f, 0.4f, 1.0f);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            _applyTextureUnits();
+            _applyShaderSettings();
+            _applyRenderQueue();
             GL.Finish();
         }
 
-        [MTAThread]
+        [STAThread]
         private void RenderObject(IRenderable renderable)
         {
             renderable.Render(shader.Handle);
@@ -361,7 +395,7 @@ namespace SceneEditor.editor
             }
         }
 
-        [MTAThread]
+        [STAThread]
         private void RenderObject(IRenderable[] renderable)
         {
             for (int i = 0; i < renderable.Length; i++)
@@ -378,7 +412,7 @@ namespace SceneEditor.editor
             }
         }
 
-        [MTAThread]
+        [STAThread]
         public void OnKeyDown(KeyEventArgs e)
         {
             var key = e.Key;
@@ -467,6 +501,7 @@ namespace SceneEditor.editor
         [MTAThread]
         public void OnMouseMove(MouseEventArgs mouse, Point pointGL, Point pointScreen)
         {
+            
             if (cameras[activeCam].grabedMouse)
             {
                 cameras[activeCam].OnMouseMove(mouse, selfSize, pointGL, pointScreen);

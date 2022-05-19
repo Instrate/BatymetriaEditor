@@ -32,8 +32,9 @@ namespace SceneEditor
     public partial class MainWindow : Window
     {
 
-        MultiThreader Trender;
+        //MultiThreader Trender;
 
+        // TODO: make it a resizable array for performance
         private List<Editor> editors = new List<Editor>();
         private int currentEditor;
 
@@ -82,6 +83,7 @@ namespace SceneEditor
 
                 glMain.SizeChanged += onResize;
 
+                // OpenGL v4.5.0 if your video card doesn't support it -> :(
                 var windowSettings = new GLWpfControlSettings { MajorVersion = 4, MinorVersion = 5, GraphicsProfile = ContextProfile.Compatability, GraphicsContextFlags = ContextFlags.Debug };
                 
                 glMain.Start(windowSettings);
@@ -136,14 +138,7 @@ namespace SceneEditor
 
             editors[currentEditor].OnKeyDown(e);
 
-            if (editors[currentEditor].cameras[editors[currentEditor].activeCam].grabedMouse)
-            {
-                tabWindows.Background = Brushes.Green;
-            }
-            else
-            {
-                tabWindows.Background = Brushes.Red;
-            }
+            switchVisibleGLStatus();
         }
 
         private void OnMouseMove(object sender, MouseEventArgs mouse)
@@ -156,9 +151,37 @@ namespace SceneEditor
 
 
             editors[currentEditor].OnMouseMove(mouse, pos, glMain.PointToScreen(pos));
+
+            switchVisibleGLStatus();
         }
 
+        private void OnPreviewMouseKeyPressed(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            editors[currentEditor].OnMouseButtonPressed(e);
 
+            switchVisibleGLStatus();
+        }
+
+        private void switchVisibleGLStatus()
+        {
+            if (editors[currentEditor].cameras[editors[currentEditor].activeCam].grabedMouse)
+            {
+                tabWindows.Background = Brushes.Black;
+                glMain.Cursor = Cursors.None;
+            }
+            else
+            {
+                tabWindows.Background = Brushes.FloralWhite;
+                if (glMain.IsFocused)
+                {
+                    glMain.Cursor = Cursors.Cross;
+                }
+                else
+                {
+                    glMain.Cursor = Cursors.Arrow;
+                }
+            }
+        }
 
         private void OnReady()
         {
@@ -169,10 +192,13 @@ namespace SceneEditor
             //GL.Enable(EnableCap.ScissorTest);
             //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
-            editors.Add(new Editor(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight }));
-            currentEditor = 0;
+            editorAddNew();
 
-            Trender = new MultiThreader(8, editors[currentEditor].Render);
+            //Trender = new MultiThreader(8, editors[currentEditor].Render);
+
+            editorStructure.Loaded += structureOnReady;
+
+            switchVisibleGLStatus();
         }
 
         private float tickerFrames = 0;
@@ -180,25 +206,105 @@ namespace SceneEditor
         [MTAThread]
         private void OnRender(TimeSpan delta)
         {
+            
+
             ticker += (float)delta.TotalSeconds;
             if(ticker >= 0.5)
             {
                 textFps.Text = "FPS: " + (Math.Truncate(1.0f / delta.TotalSeconds)).ToString();
                 ticker = 0;
                 //editors[currentEditor].Render();
+                if (editors[currentEditor].doUpdate)
+                {
+                    structureUpdate();
+                    editors[currentEditor].doUpdate = false;
+                }
             }
 
             //Trender.activateFreeThread();
 
+
             tickerFrames += (float)delta.TotalSeconds;
             if (tickerFrames < 1f / 30)
             {
-                //
                 editors[currentEditor].Render();
             }
             else
             {
                 tickerFrames = 0;
+            }
+        }
+
+        private void structureOnReady(object sender, RoutedEventArgs e)
+        {
+            editorStructure.SelectionChanged += structureSelectionChanged;
+        }
+
+        private void structureSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            editorChangeCurrent(editorStructure.SelectedIndex);
+            structureUpdate();
+        }
+
+        private TreeViewItem _addNewTreeMember(string Header)
+        {
+            TreeViewItem item = new TreeViewItem() { Header = Header};
+            //item.Header = Header;
+            return item;
+        }
+
+        private void structureCreate()
+        {
+            editorStructure.SelectedIndex = currentEditor;
+            TabItem item = (TabItem)editorStructure.SelectedItem;
+            TreeView treeView = (TreeView)item.Content;      
+        }
+
+        private void structureViewAdd()
+        {
+
+        }
+
+        private void structureUpdate()
+        {
+
+            editorStructure.SelectedIndex = currentEditor;
+            TabItem item = (TabItem)editorStructure.SelectedItem;
+            TreeView treeView = (TreeView)item.Content;
+
+            treeView.Items.Clear();
+            treeView.Items.Add(_addNewTreeMember("Mesh"));
+            treeView.Items.Add(_addNewTreeMember("Axis"));
+            treeView.Items.Add(_addNewTreeMember("Bottoms"));
+            treeView.Items.Add(_addNewTreeMember("Section"));
+
+            TreeViewItem view = (TreeViewItem)treeView.Items.GetItemAt(2);
+            int amount = editors[currentEditor].tiledBottoms.Value.Count;
+            
+            if(amount == 0)
+            {
+                view.Items.Add(_addNewTreeMember("None"));
+            }
+            else
+            {
+                for (int i = 0; i < amount; i++)
+                {
+                    view.Items.Add(_addNewTreeMember("bottom " + (i + 1).ToString()));
+                }
+            }
+
+            view = (TreeViewItem)treeView.Items.GetItemAt(3);
+            amount = editors[currentEditor].sections.Value.Count;
+            if (amount == 0)
+            {
+                view.Items.Add(_addNewTreeMember("None"));
+            }
+            else
+            {
+                for (int i = 0; i < amount; i++)
+                {
+                    view.Items.Add(_addNewTreeMember("section " + (i + 1).ToString()));
+                }
             }
         }
 
@@ -210,10 +316,24 @@ namespace SceneEditor
             }
         }
 
-        private void addNewEditor()
+        private void editorAddNew()
         {
-             
+            editors.Add(new Editor(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight }));
+            currentEditor = editors.Count - 1;
+
+            structureUpdate();
         }
+
+        private void editorChangeCurrent(int editorIndex)
+        {
+            int amount = editors.Count;
+            if(editorIndex < 0 || editorIndex >= amount)
+            {
+                return;
+            }
+            currentEditor = editorIndex;
+        }
+        
     }
 
 

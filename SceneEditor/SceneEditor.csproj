@@ -24,8 +24,8 @@
 
   <ItemGroup>
     <PackageReference Include="alglib.net" Version="3.18.2" />
-    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-    <PackageReference Include="NEST" Version="7.17.0" />
+    <PackageReference Include="freetype" Version="2.8.0.1" />
+    <PackageReference Include="NEST" Version="7.17.2" />
     <PackageReference Include="OpenTK" Version="4.7.1" />
     <PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
   </ItemGroup>
