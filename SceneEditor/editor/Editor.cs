@@ -180,18 +180,24 @@ namespace SceneEditor.editor
 
             
             
-            addNewUnMeshedObject(new ComplexPlaneTriangular(shouldTriangulate:true, textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.oriental_tiles }));
+            addNewUnMeshedObject(
+                new ComplexPlaneTriangular(
+                    shouldTriangulate:true,
+                    textureSet: new string[] { TexturePath.criss_cross,
+                        TexturePath.cork_board,
+                        TexturePath.criss_cross
+                    }));
 
             //bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
-            //bottom = nonTiledBottoms.Value[0].ConvertToTiledByInterpolation();
+            bottom = nonTiledBottoms.Value[0].ConvertToTiledByInterpolation();
 
             section = new Section(new Vector3(0,0,3), new Vector3(3, 8, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
 
             addNewSection(section);
 
-            //addNewBottom(bottom);
-            addNewBottom(new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross }));
+            addNewBottom(bottom);
+            //addNewBottom(new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross }));
 
             _setupCam();
             _setupObjects();
@@ -372,7 +378,7 @@ namespace SceneEditor.editor
             RenderObject(axis);
             RenderObject(lightBubble);
 
-            //tiledBottoms.Value.ForEach(bottom => RenderObject(bottom));
+            tiledBottoms.Value.ForEach(bottom => RenderObject(bottom));
             sections.Value.ForEach(section => RenderObject(section));
             nonTiledBottoms.Value.ForEach(item => RenderObject(item));
         }

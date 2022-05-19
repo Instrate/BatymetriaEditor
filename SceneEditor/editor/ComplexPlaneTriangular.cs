@@ -55,9 +55,9 @@ namespace SceneEditor.editor
                 if(X == null || Y == null || Z == null)
                 {
                     if(shouldTriangulate)
-                        Functions.GenerateRandomPoints(out data, start: -20f, end: 20f, amountLow:200, amountHigh: 500);
+                        Functions.GenerateRandomPoints(out data, start: -10f, end: 10f, amountLow:100, amountHigh: 300);
                     else
-                        Functions.GenerateRandomPoints(out data, start: -20f, end: 20f, amountLow: 1000, amountHigh: 2000);
+                        Functions.GenerateRandomPoints(out data, start: -10f, end: 10f, amountLow: 1000, amountHigh: 3000);
                     data = Functions.FixLowHight(data);
                 }
             }
@@ -69,7 +69,7 @@ namespace SceneEditor.editor
             dots = new Dot[data.Length];
             for (int i = 0; i < dots.Length; i++)
             {
-                dots[i] = new Dot(data[i], ((Vector4)Color4.Red).Xyz, 8);
+                dots[i] = new Dot(data[i], ((Vector4)Color4.Red).Xyz, 5);
             }
 
             interp = Functions.Interpolate(data);
@@ -111,10 +111,14 @@ namespace SceneEditor.editor
                         ));
 
             var Coptions = new ConstraintOptions();
-            Coptions.UseRegions = true;
+            //Coptions.UseRegions = true;
+            Coptions.Convex = true;
+            Coptions.SegmentSplitting = 10;
+            //Coptions.ConformingDelaunay = true;
 
             var Qoptions = new QualityOptions();
             //Qoptions.MinimumAngle = 30;
+            //Qoptions.MaximumAngle = 60;
 
             var mesh = poly.Triangulate(Coptions, Qoptions);
 
@@ -363,7 +367,7 @@ namespace SceneEditor.editor
                 }
             }
 
-            if(connections != null)
+            if (connections != null)
             {
                 GL.LineWidth(lineWidth);
                 for (int i = 0; i < connections.Length; i++)

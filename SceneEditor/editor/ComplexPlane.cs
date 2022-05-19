@@ -12,7 +12,7 @@ namespace SceneEditor.editor
     {
         public bool isLoaded = false;
 
-        public Square[] tiles;
+        public Square[]? tiles;
 
         public Vector3 position = Vector3.Zero;
 
@@ -277,20 +277,23 @@ namespace SceneEditor.editor
                 }
             }
 
-            var rows = Xmesh.Length - 1;
-            var cols = Ymesh.Length - 1;
-            //var amount = tiles.Length;
-            if(primitiveType != 0)
+            if(tiles != null)
             {
-                drawStyle = primitiveType;
-            }
-            GL.LineWidth(lineWidth);
-            for (int i = Range[0]; i <= Range[2]; i++)
-            {
-                int ii = i * rows;
-                for (int j = Range[1]; j <= Range[3]; j++)
+                var rows = Xmesh.Length - 1;
+                var cols = Ymesh.Length - 1;
+                //var amount = tiles.Length;
+                if(primitiveType != 0)
                 {
-                    tiles[ii + j].Render(shader, drawStyle);
+                    drawStyle = primitiveType;
+                }
+                GL.LineWidth(lineWidth);
+                for (int i = Range[0]; i <= Range[2]; i++)
+                {
+                    int ii = i * rows;
+                    for (int j = Range[1]; j <= Range[3]; j++)
+                    {
+                        tiles[ii + j].Render(shader, drawStyle);
+                    }
                 }
             }
         }
