@@ -28,6 +28,7 @@
     <PackageReference Include="NEST" Version="7.17.2" />
     <PackageReference Include="OpenTK" Version="4.7.1" />
     <PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
+    <PackageReference Include="Triangle" Version="0.0.6-Beta3" />
   </ItemGroup>
 
   <ItemGroup>

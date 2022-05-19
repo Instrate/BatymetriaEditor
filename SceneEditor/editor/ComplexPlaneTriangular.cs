@@ -6,58 +6,342 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using TriangleNet;
+using TriangleNet.Geometry;
+using TriangleNet.Meshing;
+using TriangleNet.Meshing.Algorithm;
+using TriangleNet.Smoothing;
+
 namespace SceneEditor.editor
 {
 
     public class ComplexPlaneTriangular : IRenderable
     {
-        SquareTriangular[] tiles;
+        Triangle[]? connections = null;
 
         public Vector3 position = Vector3.Zero;
 
-        public Vector3[] data = new Vector3[0];
+        public Vector3[] data;
 
         public int[] textureHandlers;
 
-        public ComplexPlaneTriangular(Vector3[]? inputData = null, float[]? X = null, float[]? Y = null, float[][]? Z = null, string[]? textureSet = null)
-        {
-            //if (inputData == default)
-            //{
-            //    if (X != null && Y != null && Z != null)
-            //    {
+        Dot[] dots;
+        bool showDots = true;
 
-            //    }
-            //    else
-            //    {
-            //        float start = -1f;
-            //        float end = 1f;
-            //        float step = 1f;
-            //        X = Functions.Arrange(start, end, step);
-            //        Y = Functions.Arrange(start, end, step);
-            //        Z = Functions.FigureTest(X, Y);
-            //    }
-            //    var rows = X.Length - 1;
-            //    var cols = Y.Length - 1;
-            //    tiles = new SquareTriangular[rows * cols];
-            //    for (int i = 0; i < rows; i++)
-            //    {
-            //        for (int j = 0; j < cols; j++)
-            //        {
-            //            Vector2 top_left = new Vector2(X[i], Y[j]);
-            //            Vector2 bottom_right = new Vector2(X[i + 1], Y[j + 1]);
-            //            Vector4 heights = new Vector4(Z[i + 1][j + 1], Z[i][j + 1], Z[i][j], Z[i + 1][j]);
-            //            tiles[i * cols + j] = new SquareTriangular(builder: new Vector2[] { top_left, bottom_right }, heights: heights);
-            //        }
-            //    }
-            //}
-            //if (textureSet != null)
+        private alglib.spline2dinterpolant? interp = null;
+
+
+        int primitiveCurrent = 2;
+        float lineWidth;
+        PrimitiveType[] stylesSwitcher = new PrimitiveType[]
+            {
+                PrimitiveType.Triangles,
+                PrimitiveType.Lines,
+                PrimitiveType.LineStrip,
+                PrimitiveType.LinesAdjacency,
+                PrimitiveType.Points
+            };
+        public PrimitiveType drawStyle;
+
+        public ComplexPlaneTriangular(Vector3[]? inputData = null,
+                                      float[]? X = null,
+                                      float[]? Y = null,
+                                      float[]? Z = null,
+                                      string[]? textureSet = null,
+                                      bool shouldTriangulate = true)
+        {
+            if(inputData == null)
+            {
+                if(X == null || Y == null || Z == null)
+                {
+                    if(shouldTriangulate)
+                        Functions.GenerateRandomPoints(out data, start: -20f, end: 20f, amountLow:200, amountHigh: 500);
+                    else
+                        Functions.GenerateRandomPoints(out data, start: -20f, end: 20f, amountLow: 1000, amountHigh: 2000);
+                    data = Functions.FixLowHight(data);
+                }
+            }
+            else
+            {
+
+            }
+
+            dots = new Dot[data.Length];
+            for (int i = 0; i < dots.Length; i++)
+            {
+                dots[i] = new Dot(data[i], ((Vector4)Color4.Red).Xyz, 8);
+            }
+
+            interp = Functions.Interpolate(data);
+
+            //_generateFastTriangulationFromData();
+            if (shouldTriangulate)
+            {
+                generateDelaunayTriangulationFromData();
+            }
+
+            if (textureSet != null)
+            {
+                textureHandlers = new int[textureSet.Length];
+                for (int i = 0; i < textureSet.Length; i++)
+                {
+                    textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
+                }
+            }
+
+            drawStyle = stylesSwitcher[primitiveCurrent];
+        }
+
+        public void generateDelaunayTriangulationFromData()
+        {
+            Polygon poly = new Polygon();
+
+            for(int i = 0; i < data.Length - 1; i++)
+            {
+                poly.Add(new Vertex(data[i].X, data[i].Y));
+                poly.Add(new Segment(
+                        new Vertex(data[i].X, data[i].Y),
+                        new Vertex(data[i+1].X, data[i + 1].Y)
+                        ));
+            }
+            poly.Add(new Vertex(data[data.Length - 1].X, data[data.Length - 1].Y));
+            poly.Add(new Segment(
+                        new Vertex(data[data.Length - 1].X, data[data.Length - 1].Y),
+                        new Vertex(data[0].X, data[0].Y)
+                        ));
+
+            var Coptions = new ConstraintOptions();
+            Coptions.UseRegions = true;
+
+            var Qoptions = new QualityOptions();
+            //Qoptions.MinimumAngle = 30;
+
+            var mesh = poly.Triangulate(Coptions, Qoptions);
+
+            List<Vector2> trgs = new List<Vector2>();
+            List<int> indices = new List<int>();
+
+            foreach (var t in mesh.Triangles)
+            {
+                for (int j = 2; j >= 0; j--)
+                {
+                    int amount = trgs.Count;
+                    bool found = false;
+                    var vx = t.GetVertex(j);
+                    for (int i = 0; i < amount && !found; i++)
+                    {
+                        if((trgs[i].X == vx.X) && (trgs[i].Y == vx.Y))
+                        {
+                            indices.Add(i);
+                            found = true;
+                        }
+
+                    }
+                    if (!found)
+                    {
+                        trgs.Add(new Vector2((float)vx.X, (float)vx.Y));
+                        indices.Add(amount);
+                    }
+                }
+            }
+
+            int[] iRes = indices.ToArray();
+
+            Vector3[] vector3s = Functions.recalculateBySpline(interp, trgs.ToArray());
+
+            //Use.ShowVectors("res", vector3s);
+
+            //dots = new Dot[vector3s.Length];
+            //for (int i = 0; i < dots.Length; i++)
             //{
-            //    textureHandlers = new int[textureSet.Length];
-            //    for (int i = 0; i < textureSet.Length; i++)
-            //    {
-            //        textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
-            //    }
+            //    dots[i] = new Dot(vector3s[i], ((Vector4)Color4.LimeGreen).Xyz, 8);
             //}
+
+            connections = new Triangle[iRes.Length/3];
+
+            for (int i = 0; i < connections.Length; i++)
+            {
+                Vector3[] points = new Vector3[3];
+                for (int j = 0; j < 3; j++)
+                {
+                    points[j] = new Vector3(vector3s[iRes[i * 3 + j]]);
+                }
+                connections[i] = new Triangle(points);
+            }
+            
+        }
+
+        private void _generateFastTriangulationFromData(int amountOfConnections = 6)
+        {
+            Vector3[][] cons = new Vector3[data.Length][];
+
+            float maxDist = 0;
+            float minDist = (data[0].Xy - data[1].Xy).Length;
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                for (int j = 0; j < data.Length; j++)
+                {
+                    if (i != j)
+                    {
+                        Vector2 test = data[i].Xy - data[j].Xy;
+                        float length = test.Length;
+                        if (length > maxDist)
+                        {
+                            maxDist = length;
+                        }
+                        else
+                        {
+                            if (length < minDist)
+                            {
+                                minDist = length;
+                            }
+                        }
+                    }
+                }
+            }
+
+            List<int> points;
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                points = new List<int>();
+                points.Add(i);
+
+                int count = 0;
+                
+                float dist = minDist;
+
+                while (count < amountOfConnections && dist <= maxDist)
+                {
+                    float minNext = maxDist;
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        if (i != j && !points.Contains(j))
+                        {
+                            Vector2 temp = data[i].Xy - data[j].Xy;
+                            float length = temp.Length;
+                            if(length <= dist)
+                            {
+                                points.Add(j);
+                                count++;
+                            }
+                            else
+                            {
+                                if(length < minNext)
+                                {
+                                    minNext = length;
+                                }
+                            }
+                        }
+                    }
+                    dist = minNext;
+                }
+
+                int[] res = points.ToArray();
+                cons[i] = new Vector3[res.Length];
+                for(int j = 0; j < res.Length; j++)
+                {
+                    cons[i][j] = data[res[j]];
+                }
+            }
+
+            // ?!
+            //_ShowConnections(cons);
+            _generateTrianglesFromPoints(cons);
+        }
+
+        private void _generateTrianglesFromPoints(Vector3[][] cons)
+        {
+            List<Triangle> trgs = new List<Triangle>();
+
+            for(int i = 0; i < cons.Length; i++)
+            {
+                for (int j = 0; j < cons[i].Length - 2; j++)
+                {
+                    trgs.Add(new Triangle(new Vector3[]
+                    {
+                        cons[i][j],
+                        cons[i][j + 1],
+                        cons[i][j + 2]
+                    }));
+                }
+            }
+            connections = trgs.ToArray();
+        }
+
+        private void _ShowConnections(Vector3[][] cons)
+        {
+            Console.WriteLine("\n Connections:");
+            for(int i = 0; i < cons.Length; i++)
+            {
+                Console.WriteLine("[" + i + "]: " + cons[i][0].ToString());
+                Vector2 parent = cons[i][0].Xy;
+                for (int j = 1; j < cons[i].Length; j++)
+                {
+                    Vector2 child = cons[i][j].Xy;
+                    Console.WriteLine("\t[" + j + "]: " + cons[i][j].ToString() + " - " + (parent - child).Length);
+                }
+                Console.WriteLine();
+            }
+        }
+
+        public ComplexPlaneTile ConvertToTiledByInterpolation()
+        {
+            float xmin = data[0].X;
+            float xmax = xmin;
+            float ymin = data[0].Y;
+            float ymax = ymin;
+
+            float mindifx = float.MaxValue;
+            float mindify = float.MaxValue;
+
+            for (int i = 1; i < data.Length; i++)
+            {
+                float vx = data[i].X;
+                float vy = data[i].Y;
+                float lengthx = MathF.Abs(data[i - 1].X - data[i].X);
+                float lengthy = MathF.Abs(data[i - 1].Y - data[i].Y);
+                if (mindifx > lengthx)
+                {
+                    mindifx = lengthx;
+                }
+                if (mindify > lengthy)
+                {
+                    mindify = lengthy;
+                }
+
+                if (xmin > vx)
+                {
+                    xmin = vx;
+                }
+                else
+                {
+                    if(xmax < vx)
+                    {
+                        xmax = vx;
+                    }
+                }
+                if (ymin > vy)
+                {
+                    ymin = vy;
+                }
+                else
+                {
+                    if (ymax < vy)
+                    {
+                        ymax = vy;
+                    }
+                }
+            }
+
+            float dividerx = (xmax - xmin) / 50;
+            float dividery = (ymax - ymin) / 50;
+            float[] X = Functions.Arrange(xmin, xmax, (xmax - xmin) / mindifx > 100 ? dividerx : mindifx);
+            float[] Y = Functions.Arrange(ymin, ymax, (ymax - ymin) / mindify > 100 ? dividery : mindify);
+            float[][] Z = Functions.recalculateBySpline(interp, X, Y);
+
+            return new ComplexPlaneTile(X: X, Y: Y, Z:Z, textureHandlersCopy: textureHandlers);
         }
 
         public void Render(int shader, PrimitiveType primitiveType = 0)
@@ -71,9 +355,21 @@ namespace SceneEditor.editor
                 }
             }
 
-            for (int i = 0; i < tiles.Length; i++)
+            if (showDots)
             {
-                tiles[i].Render(shader);
+                for (int i = 0; i < dots.Length; i++)
+                {
+                    dots[i].Render(shader);
+                }
+            }
+
+            if(connections != null)
+            {
+                GL.LineWidth(lineWidth);
+                for (int i = 0; i < connections.Length; i++)
+                {
+                    connections[i].Render(shader, drawStyle);
+                }
             }
         }
     }

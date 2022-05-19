@@ -81,30 +81,8 @@
             <Grid Grid.Row="1">
                 <TabControl Margin="5">
                     <TabItem Header="Settings">
-                        <ListBox Width="Auto" x:Name="SettingsApp">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Expander Header="{Binding Path = setting}">
-                                        <DockPanel>
-                                            <ListBox>
-                                                <ListBox.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <DockPanel />
-                                                    </ItemsPanelTemplate>
-                                                </ListBox.ItemsPanel>
-                                                <ListBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <DockPanel>
-                                                            <TextBlock DockPanel.Dock="Left" Text="{Binding Path=setting.name}"/>
-                                                            <TextBox DockPanel.Dock="Right" Text="{Binding Path=setting.value}"/>
-                                                        </DockPanel>
-                                                    </DataTemplate>
-                                                </ListBox.ItemTemplate>
-                                            </ListBox>
-                                        </DockPanel>
-                                    </Expander>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
+                        <ListBox Width="Auto" x:Name="editorElementSettings">
+                            
                         </ListBox>
                     </TabItem>
                     <TabItem Header="Scene">

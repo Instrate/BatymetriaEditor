@@ -38,7 +38,7 @@ namespace SceneEditor.editor
     {
         Cube[] axis = new Cube[3];
 
-        public int[] textureHandlers;
+        public int[]? textureHandlers;
 
         public Axis(string[]? textureSet = null)
         {
@@ -140,17 +140,19 @@ namespace SceneEditor.editor
         // renderable objects
         public Lazy<List<ComplexPlaneTile>> tiledBottoms = new Lazy<List<ComplexPlaneTile>>();
         public Lazy<List<Section>> sections = new Lazy<List<Section>>();
+        public Lazy<List<ComplexPlaneTriangular>> nonTiledBottoms = new Lazy<List<ComplexPlaneTriangular>>();
         public bool doUpdate = false;
 
         // rendrabe visual additions
         Mesh mesh;
         Axis axis;
 
+        // to remove
         ComplexPlaneTile bottom;
         Section section;
         
-        
-        Vector3 lightPos;
+        // fix usage
+        //Vector3 lightPos;
         Cube lightBubble;
         
 
@@ -164,7 +166,7 @@ namespace SceneEditor.editor
         private float timeDelta = 0;
         Size selfSize;
 
-        // for the render
+        // for the renderer
         public Shader shader;
         Matrix4 model;
         Matrix4 modelCramble;
@@ -177,13 +179,19 @@ namespace SceneEditor.editor
             selfSize = windowSize;
 
             
-            bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
+            
+            addNewUnMeshedObject(new ComplexPlaneTriangular(shouldTriangulate:true, textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.oriental_tiles }));
 
-            addNewBottom(bottom);
+            //bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
+
+            //bottom = nonTiledBottoms.Value[0].ConvertToTiledByInterpolation();
 
             section = new Section(new Vector3(0,0,3), new Vector3(3, 8, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
 
             addNewSection(section);
+
+            //addNewBottom(bottom);
+            addNewBottom(new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross }));
 
             _setupCam();
             _setupObjects();
@@ -200,6 +208,12 @@ namespace SceneEditor.editor
         public void addNewSection(Section section)
         {
             sections.Value.Add(section);
+            doUpdate = true;
+        }
+
+        public void addNewUnMeshedObject(ComplexPlaneTriangular item)
+        {
+            nonTiledBottoms.Value.Add(item);
             doUpdate = true;
         }
 
@@ -358,8 +372,9 @@ namespace SceneEditor.editor
             RenderObject(axis);
             RenderObject(lightBubble);
 
-            tiledBottoms.Value.ForEach(bottom => RenderObject(bottom));
+            //tiledBottoms.Value.ForEach(bottom => RenderObject(bottom));
             sections.Value.ForEach(section => RenderObject(section));
+            nonTiledBottoms.Value.ForEach(item => RenderObject(item));
         }
 
         // rewrite shader usage for elements
@@ -412,7 +427,7 @@ namespace SceneEditor.editor
             }
         }
 
-        [STAThread]
+        [MTAThread]
         public void OnKeyDown(KeyEventArgs e)
         {
             var key = e.Key;

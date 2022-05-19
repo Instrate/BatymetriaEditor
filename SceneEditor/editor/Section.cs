@@ -17,6 +17,16 @@ namespace SceneEditor.editor
             Console.WriteLine("\n");
         }
 
+        public static void ShowVectors(string name, Vector3[] v)
+        {
+            Console.WriteLine("Vectors " + name + ":\n");
+            for (int i = 0; i < v.Length; i++)
+            {
+                Console.WriteLine("[" + i.ToString() + "]: " + v[i].ToString() + "");
+            }
+            Console.WriteLine("\n");
+        }
+
         public static void ShowArray(string name, float[][] arr)
         {
             Console.WriteLine("Matrix " + name + ":\n");

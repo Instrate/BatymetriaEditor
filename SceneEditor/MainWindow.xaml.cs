@@ -89,15 +89,12 @@ namespace SceneEditor
                 glMain.Start(windowSettings);
 
                 EventInform(listViewProcess, "Editor has been started successfuly");
-
-                
             }
             catch (Exception ex)
             {
                 EventInform(listViewProcess, "An error occured");
                 MessageBox.Show(ex.Message);
             }
-
         }
 
         private void OnMouseButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -149,7 +146,6 @@ namespace SceneEditor
 
             textMouse.Text = msg;
 
-
             editors[currentEditor].OnMouseMove(mouse, pos, glMain.PointToScreen(pos));
 
             switchVisibleGLStatus();
@@ -194,6 +190,7 @@ namespace SceneEditor
 
             editorAddNew();
 
+            //seamless optimization but is it?
             //Trender = new MultiThreader(8, editors[currentEditor].Render);
 
             editorStructure.Loaded += structureOnReady;
@@ -206,23 +203,19 @@ namespace SceneEditor
         [MTAThread]
         private void OnRender(TimeSpan delta)
         {
-            
+
 
             ticker += (float)delta.TotalSeconds;
-            if(ticker >= 0.5)
+            if (ticker >= 0.5)
             {
                 textFps.Text = "FPS: " + (Math.Truncate(1.0f / delta.TotalSeconds)).ToString();
                 ticker = 0;
-                //editors[currentEditor].Render();
                 if (editors[currentEditor].doUpdate)
                 {
                     structureUpdate();
                     editors[currentEditor].doUpdate = false;
                 }
             }
-
-            //Trender.activateFreeThread();
-
 
             tickerFrames += (float)delta.TotalSeconds;
             if (tickerFrames < 1f / 30)
@@ -334,6 +327,12 @@ namespace SceneEditor
             currentEditor = editorIndex;
         }
         
+        // !!!!!
+        private void elementSettingsLoad()
+        {
+
+        }
+
     }
 
 

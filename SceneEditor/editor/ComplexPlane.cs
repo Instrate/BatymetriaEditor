@@ -8,261 +8,6 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
-    public static class Functions
-    {
-        public static float[] Arrange(float min, float max, float step)
-        {
-            int size = (int)((max - min) / step + 1);
-            float[] res = new float[size];
-            for (int i = 0; i < size; i++)
-            {
-                res[i] = min + i * step;
-            }
-            return res;
-        }
-
-        public static Vector3[] CreatePlane(Vector2 size = default)
-        {
-            if (size == default)
-            {
-                size = new Vector2(100, 100);
-            }
-
-
-            return default;
-        }
-
-        public static float[][] RaiseToZero(float[][] income)
-        {
-            float min = income[0][0];
-            for (int i = 0; i < income.Length; i++)
-            {
-                for (int j = 0; j < income[i].Length; j++)
-                {
-                    if (min > income[i][j])
-                    {
-                        min = income[i][j];
-                    }
-                }
-            }
-            for (int i = 0; i < income.Length; i++)
-            {
-                for (int j = 0; j < income[i].Length; j++)
-                {
-                    income[i][j] -= min;
-                }
-            }
-            return income;
-        }
-
-        public static float[][] FigureTest(float[] X, float[] Y)
-        {
-            float[][] res = new float[X.Length][];
-            for (int i = 0; i < X.Length; i++)
-            {
-                res[i] = new float[Y.Length];
-                for (int j = 0; j < Y.Length; j++)
-                {
-                    float x = X[i];
-                    float y = Y[j];
-                    //res[i][j] = MathF.Sin(x);
-                    //res[i][j] = x;
-                    //res[i][j] = 1.3f * MathF.Atan((x + y) / 2) * MathF.Sin(MathF.Cos(x / 2)) * MathF.Cosh(MathF.Sin(y / 2));
-                    res[i][j] = (MathF.Cos(x / 3f) - MathF.Sin(y / 2f)) * (MathF.Cos(y / 3f) - MathF.Sin(x / 2f)) / 1.5f;
-                }
-            }
-            res = RaiseToZero(res);
-            return res;
-        }
-
-        public static alglib.spline2dinterpolant Interpolate(float[] X, float[] Y, float[][] data, int type = 0)
-        {
-            int m = X.Length;
-            int n = Y.Length;
-            int d = m * n;
-
-            double[] x = Array.ConvertAll(X, var => (double)var);
-            double[] y = Array.ConvertAll(Y, var => (double)var);
-
-            double[] f = new double[d];
-
-            for (int i = 0; i < n; i++)
-            {
-                for (int j = 0; j < m; j++)
-                {
-                    f[i * n + j] = data[j][i];
-                }
-            }
-
-            alglib.spline2dinterpolant res;
-
-
-            //alglib.spline2dbuildbilinearv(x, m, y, n, f, 1, out res);
-            alglib.spline2dbuildbicubicv(x, m, y, n, f, 1, out res);
-
-
-            return res;
-        }
-
-        public static float[][] recalculateBySpline(alglib.spline2dinterpolant interp, float[] x, float[] y)
-        {
-            float[][] data = new float[x.Length][];
-
-            for (int i = 0; i < x.Length; i++)
-            {
-                data[i] = new float[y.Length];
-                for (int j = 0; j < y.Length; j++)
-                {
-                    double vx = x[i];
-                    double vy = y[j];
-                    data[i][j] = (float)alglib.spline2dcalc(interp, vx, vy);
-                }
-            }
-            return data;
-        }
-    
-        public static float[][] MatrixFindMinor(float[][] arr, int ii, int jj)
-        {
-            float[][] matrix = new float[arr.Length - 1][];
-            for(int i = 0; i < matrix.Length; i++)
-            {
-                matrix[i] = new float[arr[0].Length-1];
-            }
-            int a;
-            int b;
-            a = b = 0;
-            for(int i = 0; i < arr.Length; i++)
-            {
-                for(int j = 0; j < arr.Length; j++)
-                {
-                    if(i != ii && j != jj)
-                    {
-                        matrix[a][b] = arr[i][j];
-                        b++;
-                        if(b == arr.Length - 1)
-                        {
-                            b = 0;
-                            a++;
-                        }
-                    }
-                }
-            }
-            return matrix;
-        }
-
-        public static float[][] MatrixFindMinors(float[][] arr)
-        {
-            float[][] minor_matrix = new float[arr.Length][];
-            for(int i = 0; i < arr.Length; i++)
-            {
-                minor_matrix[i] = new float[arr[0].Length];
-                for(int j = 0; j < arr[0].Length; j++)
-                {
-                    float[][] Am = MatrixFindMinor(arr, i, j);
-                    float det = MatrixDeterminant(Am);
-                    minor_matrix[i][j] = det;
-                }
-            }
-            return minor_matrix;
-        }
-
-        private static float Matrix3x3Determinant(float[][] arr)
-        {
-            float[] n = new float[6];
-            n[0] = arr[0][0] * arr[1][1] * arr[2][2];
-            n[1] = arr[0][1] * arr[1][2] * arr[2][0];
-            n[2] = arr[0][2] * arr[1][0] * arr[2][1];
-            n[3] = arr[0][2] * arr[1][1] * arr[2][0];
-            n[4] = arr[0][0] * arr[1][2] * arr[2][1];
-            n[5] = arr[0][1] * arr[1][0] * arr[2][2];
-            float left = n[0] + n[1] + n[2];
-            float right = n[3] + n[4] + n[5];
-            return left - right;
-        }
-
-        public static float MatrixDeterminant(float[][] arr, float[][]? minors = null)
-        {
-            if (arr.Length > 3)
-            {
-                if(minors == null)
-                {
-                    minors = MatrixFindMinors(arr);
-                }
-                float det = 0;
-                for (int i = 0; i < arr.Length; i++)
-                {
-                    int j = arr[0].Length - 1;
-                    det += minors[i][j] * MathF.Pow((-1), (i + j)) * arr[i][j];
-                }
-                return det;
-            }
-            else
-            {
-                if(arr.Length == 2)
-                {
-                    return arr[0][0] * arr[1][1] - arr[0][1] * arr[1][0];
-                }
-                return Matrix3x3Determinant(arr);
-            }
-        }
-    
-        public static float[][] MatrixInversed(float[][] arr, float det)
-        {
-            float[][] matrix = new float[arr.Length][];
-            for(int i = 0; i < arr.Length; i++)
-            {
-                matrix[i] = new float[arr.Length];
-                for(int j = 0; j < arr.Length; j++)
-                {
-                    matrix[i][j] = arr[i][j] / det;
-                }
-            }
-            return matrix;
-        }
-    
-        public static float[]? MatrixSolution(float[][] A, float[] B)
-        {
-            float[] X = new float[B.Length];
-            float det = MatrixDeterminant(A);
-            if(det == 0)
-            {
-                return null;
-            }
-            try
-            {
-                for (int j = 0; j < B.Length; j++)
-                {
-                    float[][] A_t = MatrixCopy(A);
-                    for (int i = 0; i < A.Length; i++)
-                    {
-                        A_t[i][j] = B[i];
-                    }
-                    float te = MatrixDeterminant(A_t, MatrixFindMinors(A_t));
-                    X[j] = te / det;
-                }
-                return X;
-            }
-            catch(Exception ex)
-            {
-                return null;
-            }
-        }
-
-        public static float[][] MatrixCopy(float[][] arr)
-        {
-            float[][] res = new float[arr.Length][];
-            for(int i = 0; i < arr.Length; i++)
-            {
-                res[i] = new float[arr[i].Length];
-                for(int j = 0; j < arr[i].Length; j++)
-                {
-                    res[i][j] = arr[i][j];
-                }
-            }
-            return res;
-        }
-    }
-
     public class ComplexPlaneTile : IRenderable
     {
         public bool isLoaded = false;
@@ -295,27 +40,26 @@ namespace SceneEditor.editor
                 PrimitiveType.Triangles,
                 PrimitiveType.Lines,
                 PrimitiveType.LineStrip,
-                PrimitiveType.LinesAdjacency
+                PrimitiveType.LinesAdjacency,
+                PrimitiveType.Points
             };
         public PrimitiveType drawStyle;
+
+
 
         public ComplexPlaneTile(Vector3[]? inputData = null,
                                 float[]? X = null,
                                 float[]? Y = null,
                                 float[][]? Z = null,
                                 string[]? textureSet = null,
+                                int[]? textureHandlersCopy = null, 
                                 float lineWidth = 2f)
         {
             if (inputData == null)
             {
-                if (X == null && Y == null && Z == null)
+                if (X == null || Y == null || Z == null)
                 {
-                    float start = -20f;
-                    float end = 20f;
-                    float step = (end - start) / 60;
-                    X = Functions.Arrange(start, end, step);
-                    Y = Functions.Arrange(start, end, step);
-                    Z = Functions.FigureTest(X, Y);
+                    Functions.GenerateMesh(out X, out Y, out Z, start: -20, end: 20);
                 }
                 LoadData(X, Y, Z);
                 this.lineWidth = lineWidth;
@@ -328,6 +72,15 @@ namespace SceneEditor.editor
                     textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
                 }
             }
+            else
+            {
+                if (textureHandlersCopy != null)
+                {
+                    textureHandlers = textureHandlersCopy;
+                }
+            }
+            
+
 
             isLoaded = true;
             drawStyle = stylesSwitcher[primitiveCurrent];
@@ -394,7 +147,7 @@ namespace SceneEditor.editor
                 {
                     Range[1] += shrinkx;
                 }
-                if (Range[3] - shrinkx < cols)
+                if (Range[3] - shrinkx < rows)
                 {
                     Range[3] -= shrinkx;
                 }
@@ -406,7 +159,7 @@ namespace SceneEditor.editor
                 {
                     Range[0] += shrinky;
                 }
-                if (Range[2] - shrinky < rows)
+                if (Range[2] - shrinky < cols)
                 {
                     Range[2] -= shrinky;
                 }
@@ -418,14 +171,14 @@ namespace SceneEditor.editor
             Range[1] = temp >= 0 && temp < Range[3] ? temp : Range[1];
 
             temp = Range[3] + x;
-            Range[3] = temp > Range[1] && temp < cols ? temp : Range[3];
+            Range[3] = temp > Range[1] && temp < rows ? temp : Range[3];
 
             // y
             temp = Range[0] + y;
             Range[0] = temp >= 0 && temp < Range[2] ? temp : Range[0];
 
             temp = Range[2] + y;
-            Range[2] = temp > Range[0] && temp < rows ? temp : Range[2];
+            Range[2] = temp > Range[0] && temp < cols ? temp : Range[2];
 
             //scale
 
@@ -442,8 +195,8 @@ namespace SceneEditor.editor
 
             Range[0] = Range[0] < 0 ? 0 : Range[0];
             Range[1] = Range[1] < 0 ? 0 : Range[1];
-            Range[2] = Range[2] >= rows ? rows - 1 : Range[2];
-            Range[3] = Range[3] >= cols ? cols - 1 : Range[3];
+            Range[2] = Range[2] >= cols ? cols - 1 : Range[2];
+            Range[3] = Range[3] >= rows ? rows - 1 : Range[3];
             //Console.WriteLine(Range);
         }
 
@@ -478,7 +231,7 @@ namespace SceneEditor.editor
             {
                 for(int j = 0; j <= cols; j++)
                 {
-                    dots[i * (rows + 1) + j] = new Dot(pos: new Vector3(Xmesh[j], Ymesh[i], DataBuffer[j][i]));
+                    dots[i * (cols + 1) + j] = new Dot(pos: new Vector3(Xmesh[j], Ymesh[i], DataBuffer[j][i]));
                 }
             }
             ResetMeshVisibility();
@@ -524,7 +277,7 @@ namespace SceneEditor.editor
                 }
             }
 
-            //var rows = Xmesh.Length - 1;
+            var rows = Xmesh.Length - 1;
             var cols = Ymesh.Length - 1;
             //var amount = tiles.Length;
             if(primitiveType != 0)
@@ -534,7 +287,7 @@ namespace SceneEditor.editor
             GL.LineWidth(lineWidth);
             for (int i = Range[0]; i <= Range[2]; i++)
             {
-                int ii = i * cols;
+                int ii = i * rows;
                 for (int j = Range[1]; j <= Range[3]; j++)
                 {
                     tiles[ii + j].Render(shader, drawStyle);

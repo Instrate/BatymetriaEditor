@@ -10,32 +10,18 @@ namespace SceneEditor.editor
 {
     public static class TriangleCoords
     {
-        public static float[] coords1 =
+        public static float[] coords =
         {
             -0.5f, -0.5f, 0.0f,
              -0.5f, 0.5f, 0.0f,
              0.5f,  -0.5f, 0.0f
         };
 
-        public static float[] coords2 =
-        {
-            -0.5f, 0.5f, 0.0f,
-             0.5f, 0.5f, 0.0f,
-             0.5f,  -0.5f, 0.0f
-        };
-
-        public static float[] texture1 =
+        public static float[] texture =
         {
             0, 0,
             0, 1,
             1, 0
-        };
-
-        public static float[] texture2 =
-        {
-            1, 1,
-            1, 0,
-            0, 1
         };
 
         public static float[] color =
@@ -52,19 +38,17 @@ namespace SceneEditor.editor
             0f, 0f, 1f
         };
 
-        public static float[] vertices1 = Vertices();
+        public static float[] vertices = Vertices();
 
-        public static float[] vertices2 = Vertices(true);
 
         public static int offset = 11;
 
-        private static float[] Vertices(bool use_texture1 = false)
+        public static float[] Vertices(float[]? customCoords = null)
         {
-            int size = coords1.Length + color.Length + texture1.Length + normal.Length;
-            float[] v = new float[size];
+            float[] coords = customCoords == null ? TriangleCoords.coords : customCoords;
 
-            float[] texture = use_texture1 ? texture1 : texture2;
-            float[] coords = use_texture1 ? coords1 : coords2;
+            int size = coords.Length + color.Length + texture.Length + normal.Length;
+            float[] v = new float[size];
 
             int offset = size / 3;
 
@@ -90,13 +74,48 @@ namespace SceneEditor.editor
         private Matrix4 scale = Matrix4.Identity;
         private Matrix4 originShift = Matrix4.Identity;
 
+        float[] vertices;
 
         private int VBO = -1;
         private int VAO = -1;
 
-        public int[] textureHandlers = null;
+        public int[]? textureHandlers = null;
 
-        public Triangle(string[]? textureSet = null, bool secondTriangle = false, Vector2[]? builder = default, Vector4? heights = default, Vector3 pos = default, Vector3? color = default)
+        //implement color usage
+        public Triangle(Vector3[] pointsV, Vector3? color = default, string[]? textureSet = null, bool keepHeight = true)
+        {
+            float min1 = pointsV[0].Z;
+            float min2 = MathF.Min(pointsV[1].Z, pointsV[2].Z);
+            min1 = MathF.Min(min1, pointsV[1].Z);
+
+            if (keepHeight)
+            {
+                Move(new Vector3(0, 0, min1));
+            }
+
+            float[] points = new float[9];
+            for(int i = 0; i < 3; i++)
+            {
+                points[3 * i] = pointsV[i].X;
+                points[3 * i + 1] = pointsV[i].Y;
+                points[3 * i + 2] = pointsV[i].Z - min1;
+            }
+
+            vertices = TriangleCoords.Vertices(points);
+
+            BindObject();
+
+            if (textureSet != null)
+            {
+                textureHandlers = new int[textureSet.Length];
+                for (int i = 0; i < textureSet.Length; i++)
+                {
+                    textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
+                }
+            }
+        }
+
+        private void BindObject()
         {
             GL.GenBuffers(1, out VBO);
             GL.GenVertexArrays(1, out VAO);
@@ -104,15 +123,8 @@ namespace SceneEditor.editor
             GL.BindVertexArray(VAO);
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
-            if (!secondTriangle)
-            {
-                GL.BufferData(BufferTarget.ArrayBuffer, TriangleCoords.vertices1.Length * sizeof(float), TriangleCoords.vertices1, BufferUsageHint.StaticDraw);
-            }
-            else
-            {
-                GL.BufferData(BufferTarget.ArrayBuffer, TriangleCoords.vertices2.Length * sizeof(float), TriangleCoords.vertices2, BufferUsageHint.StaticDraw);
-            }
-            
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+
 
             GL.EnableVertexAttribArray(0);
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, TriangleCoords.offset * sizeof(float), IntPtr.Zero);
@@ -126,23 +138,6 @@ namespace SceneEditor.editor
             GL.EnableVertexAttribArray(3);
             GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, TriangleCoords.offset * sizeof(float), 8 * sizeof(float));
 
-
-            if (pos != default)
-            {
-                position = pos;
-
-                //Questionable
-                Move(position);
-            }
-
-            if (textureSet != null)
-            {
-                textureHandlers = new int[textureSet.Length];
-                for (int i = 0; i < textureSet.Length; i++)
-                {
-                    textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
-                }
-            }
         }
 
         public void Move(Vector3 shifts)
@@ -193,10 +188,6 @@ namespace SceneEditor.editor
             // drawing processed geometry
             GL.BindVertexArray(VAO);
             GL.DrawArrays(primitiveType, 0, 3);
-
-            // for safe drawing
-            //GL.BindVertexArray(0);
-
         }
 
         public void TransformClean()
