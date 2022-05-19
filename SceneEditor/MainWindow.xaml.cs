@@ -268,35 +268,53 @@ namespace SceneEditor
             treeView.Items.Clear();
             treeView.Items.Add(_addNewTreeMember("Mesh"));
             treeView.Items.Add(_addNewTreeMember("Axis"));
-            treeView.Items.Add(_addNewTreeMember("Bottoms"));
-            treeView.Items.Add(_addNewTreeMember("Section"));
+            //treeView.Items.Add(_addNewTreeMember("Bottoms"));
+            //treeView.Items.Add(_addNewTreeMember("Section"));
 
-            TreeViewItem view = (TreeViewItem)treeView.Items.GetItemAt(2);
+            
             int amount = editors[currentEditor].tiledBottoms.Value.Count;
             
             if(amount == 0)
             {
-                view.Items.Add(_addNewTreeMember("None"));
+                //view.Items.Add(_addNewTreeMember("None"));
             }
             else
             {
+                treeView.Items.Add(_addNewTreeMember("Bottoms"));
+                TreeViewItem view = (TreeViewItem)treeView.Items.GetItemAt(treeView.Items.Count - 1);
                 for (int i = 0; i < amount; i++)
                 {
                     view.Items.Add(_addNewTreeMember("bottom " + (i + 1).ToString()));
                 }
             }
 
-            view = (TreeViewItem)treeView.Items.GetItemAt(3);
             amount = editors[currentEditor].sections.Value.Count;
             if (amount == 0)
             {
-                view.Items.Add(_addNewTreeMember("None"));
+                //view.Items.Add(_addNewTreeMember("None"));
             }
             else
             {
+                treeView.Items.Add(_addNewTreeMember("Section"));
+                TreeViewItem view = (TreeViewItem)treeView.Items.GetItemAt(treeView.Items.Count-1);
                 for (int i = 0; i < amount; i++)
                 {
                     view.Items.Add(_addNewTreeMember("section " + (i + 1).ToString()));
+                }
+            }
+
+            amount = editors[currentEditor].nonTiledBottoms.Value.Count;
+            if (amount == 0)
+            {
+                //view.Items.Add(_addNewTreeMember("None"));
+            }
+            else
+            {
+                treeView.Items.Add(_addNewTreeMember("Triangulated plane"));
+                TreeViewItem view = (TreeViewItem)treeView.Items.GetItemAt(treeView.Items.Count - 1);
+                for (int i = 0; i < amount; i++)
+                {
+                    view.Items.Add(_addNewTreeMember("mesh " + (i + 1).ToString()));
                 }
             }
         }

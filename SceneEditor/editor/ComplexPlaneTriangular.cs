@@ -345,7 +345,9 @@ namespace SceneEditor.editor
             float[] Y = Functions.Arrange(ymin, ymax, (ymax - ymin) / mindify > 100 ? dividery : mindify);
             float[][] Z = Functions.recalculateBySpline(interp, X, Y);
 
-            return new ComplexPlaneTile(X: X, Y: Y, Z:Z, textureHandlersCopy: textureHandlers);
+            return new ComplexPlaneTile(X: X, Y: Y, Z:Z,
+                textureHandlersCopy: null
+                );
         }
 
         public void Render(int shader, PrimitiveType primitiveType = 0)
