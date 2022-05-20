@@ -272,7 +272,7 @@ namespace SceneEditor
             //treeView.Items.Add(_addNewTreeMember("Section"));
 
             
-            int amount = editors[currentEditor].tiledBottoms.Value.Count;
+            int amount = editors[currentEditor].meshTiled.Value.Count;
             
             if(amount == 0)
             {
@@ -303,7 +303,7 @@ namespace SceneEditor
                 }
             }
 
-            amount = editors[currentEditor].nonTiledBottoms.Value.Count;
+            amount = editors[currentEditor].meshUneven.Value.Count;
             if (amount == 0)
             {
                 //view.Items.Add(_addNewTreeMember("None"));

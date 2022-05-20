@@ -40,7 +40,6 @@ namespace SceneEditor.editor
 
         public static float[] vertices = Vertices();
 
-
         public static int offset = 11;
 
         public static float[] Vertices(float[]? customCoords = null)
@@ -65,15 +64,8 @@ namespace SceneEditor.editor
     }
 
 
-    public class Triangle : IDrawable
+    public class Triangle : Transformable, IDrawable
     {
-        public Vector3 position = Vector3.Zero;
-
-        private Matrix4 transform = Matrix4.Identity;
-        private Matrix4 rotation = Matrix4.Identity;
-        private Matrix4 scale = Matrix4.Identity;
-        private Matrix4 originShift = Matrix4.Identity;
-
         float[] vertices;
 
         private int VBO = -1;
@@ -140,34 +132,6 @@ namespace SceneEditor.editor
 
         }
 
-        public void Move(Vector3 shifts)
-        {
-            originShift = originShift * Matrix4.CreateTranslation(shifts);
-
-            TransformCombiner();
-        }
-
-        public void Rotate(Vector3 angles)
-        {
-            Matrix4 X = Matrix4.CreateRotationX(angles.X);
-            Matrix4 Y = Matrix4.CreateRotationY(angles.Y);
-            Matrix4 Z = Matrix4.CreateRotationZ(angles.Z);
-            rotation = rotation * X * Y * Z;
-            TransformCombiner();
-        }
-
-        public void Scale(Vector3 scalar)
-        {
-            scale = scale * Matrix4.CreateScale(scalar);
-            TransformCombiner();
-        }
-
-        public void TransformCombiner()
-        {
-            transform = scale * originShift * rotation;
-
-        }
-
         public void Render(int shaderHandle, PrimitiveType primitiveType = PrimitiveType.Triangles)
         {
 
@@ -188,11 +152,6 @@ namespace SceneEditor.editor
             // drawing processed geometry
             GL.BindVertexArray(VAO);
             GL.DrawArrays(primitiveType, 0, 3);
-        }
-
-        public void TransformClean()
-        {
-            scale = originShift = rotation = Matrix4.Identity;
         }
     }
 }

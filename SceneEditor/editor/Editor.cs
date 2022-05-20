@@ -13,140 +13,24 @@ using System.Windows.Input;
 
 namespace SceneEditor.editor
 {
-    public static class ShaderPath
+    public class EditorSettings
     {
-        private static string shaderPath = "../../../shaders/";
-        public static string vert { get => shaderPath + "shader.vert"; }
-        public static string lightVert { get => shaderPath + "lightShader.vert"; }
-        public static string frag { get => shaderPath + "shader.frag"; }
-    }
-
-    public static class TexturePath
-    {
-        private static string resourcesPath = "../../../resources/images/";
-        public static string wall { get => resourcesPath + "wall.jpg"; }
-        public static string oriental_tiles { get => resourcesPath + "oriental-tiles.png"; }
-        public static string morocco { get => resourcesPath + "morocco.png"; }
-        public static string morocco_blue { get => resourcesPath + "morocco-blue.png"; }
-        public static string pxtile { get => resourcesPath + "px_by_Gre3g.png"; }
-        public static string criss_cross { get => resourcesPath + "criss-cross.png"; }
-        public static string cork_board { get => resourcesPath + "cork-board.png"; }
-        public static string dark_paths { get => resourcesPath + "dark-paths.png"; }
-    }
-
-    public class Axis : IRenderable
-    {
-        Cube[] axis = new Cube[3];
-
-        public int[]? textureHandlers;
-
-        public Axis(string[]? textureSet = null)
-        {
-            for(int i = 0; i < 3; i++)
-            {
-                Vector3 color = Vector3.Zero;
-                color[i] = 1;
-                axis[i] = new Cube(color: color);
-            }
-
-            float scaling = 0.05f;
-            float sizeScale = 200f;
-
-            axis[0].Scale(new Vector3(sizeScale, scaling, scaling));
-            axis[1].Scale(new Vector3(scaling, sizeScale, scaling));
-            axis[2].Scale(new Vector3(scaling, scaling, sizeScale));
-
-            axis[0].Move(new Vector3() { X = 0.5f * sizeScale - scaling / 2 });
-            axis[1].Move(new Vector3() { Y = 0.5f * sizeScale - scaling / 2 });
-            axis[2].Move(new Vector3() { Z = 0.5f * sizeScale - scaling / 2 });
-
-            //foreach (var ax in axis)
-            //{
-            //    ax.Move(new Vector3(0, 0, 3f));
-            //}
-
-            if (textureSet != null)
-            {
-                textureHandlers = new int[textureSet.Length];
-                for (int i = 0; i < textureSet.Length; i++)
-                {
-                    textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
-                }
-            }
-        }
-
-        public void Render(int shaderHandle, PrimitiveType primitiveType = 0)
-        {
-            if (textureHandlers != null && textureHandlers.Length > 0)
-            {
-
-                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-                {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                }
-            }
-
-            foreach (var c in axis)
-            {
-                c.Render(shaderHandle);
-            }
-        }
-
-        public void MoveAlongWithCamera(CameraControl camera)
-        {
-            
-            //Vector3 fix = new Vector3(-0.2f, -0.2f, 0);
-            //Vector3 shifts = camera.cam.Position - axis[0].position;
-
-            //foreach (var ax in axis)
-            //{
-            //    ax.Move(shifts);
-            //}
-
-            
-        }
-
-        public void RotateAlongWithCamera(CameraControl camera)
-        {
-            //float pitch = camera.cam.Pitch;
-            //float yaw = camera.cam.Yaw;
-
-            //Vector3 shifts = camera.cam.Position - axis[0].position;
-
-            //Vector3 YAW = new Vector3(-1, 0, 0);
-
-            //float Yaw = MathHelper.RadiansToDegrees(Vector3.CalculateAngle(shifts, YAW));
-
-            //var x = shifts.X;
-            //var y = shifts.Y;
-            //var Yawdif = yaw - Yaw;
-
-            //Vector3 posH = new Vector3(MathF.Cos(Yawdif) * x - MathF.Sin(Yawdif) * y, MathF.Sin(Yawdif) * x + MathF.Cos(Yawdif) * y, 0);
-
-            //Console.WriteLine("Yawdif: " + Yawdif);
-            //Console.WriteLine("A: " + shifts);
-            //Console.WriteLine("pos: " + axis[0].position);
-            //Console.WriteLine("Shift: " + posH + "\n");
-
-            //foreach (var ax in axis)
-            //{
-            //    ax.Move(shifts - posH);
-            //}
-        }
-    }
-
-    public class Editor
-    {
-        // renderable objects
-        public Lazy<List<ComplexPlaneTile>> tiledBottoms = new Lazy<List<ComplexPlaneTile>>();
-        public Lazy<List<Section>> sections = new Lazy<List<Section>>();
-        public Lazy<List<ComplexPlaneTriangular>> nonTiledBottoms = new Lazy<List<ComplexPlaneTriangular>>();
+        protected bool isEnabled = false;
         public bool doUpdate = false;
 
-        // rendrabe visual additions
-        Mesh mesh;
-        Axis axis;
+        public Lazy<List<ComplexPlaneTile>> meshTiled;
+        public Lazy<List<ComplexPlaneTriangular>> meshUneven;
+        public Lazy<List<Section>> sections;
 
+        public Mesh mesh;
+        public Axis axis;
+
+        public CameraControl[] cameras;
+        public int activeCam;
+    }
+
+    public class Editor : EditorSettings
+    {
         // to remove
         ComplexPlaneTile bottom;
         Section section;
@@ -154,11 +38,6 @@ namespace SceneEditor.editor
         // fix usage
         //Vector3 lightPos;
         Cube lightBubble;
-        
-
-        // for control
-        public CameraControl[] cameras;
-        public int activeCam;
 
         // for the settings
         private static readonly Stopwatch _stopwatch = Stopwatch.StartNew();
@@ -178,9 +57,10 @@ namespace SceneEditor.editor
         {
             selfSize = windowSize;
 
+            Initialize();
             
             
-            addNewUnMeshedObject(
+            addNewPointsDataset(
                 new ComplexPlaneTriangular(
                     shouldTriangulate:true,
                     textureSet: new string[] { TexturePath.criss_cross,
@@ -190,7 +70,7 @@ namespace SceneEditor.editor
 
             //bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
-            bottom = nonTiledBottoms.Value[0].ConvertToTiledByInterpolation();
+            bottom = meshUneven.Value[0].ConvertToTiledByInterpolation();
 
             section = new Section(new Vector3(0,0,3), new Vector3(3, 8, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
 
@@ -205,9 +85,18 @@ namespace SceneEditor.editor
             _setupShader();
         }
 
+        public void Initialize()
+        {
+            meshTiled = new Lazy<List<ComplexPlaneTile>>();
+            meshUneven = new Lazy<List<ComplexPlaneTriangular>>();
+            sections = new Lazy<List<Section>>();
+
+            isEnabled = true;
+        }
+
         public void addNewBottom(ComplexPlaneTile tiledBottom)
         {
-            tiledBottoms.Value.Add(tiledBottom);
+            meshTiled.Value.Add(tiledBottom);
             doUpdate = true;
         }
 
@@ -217,16 +106,16 @@ namespace SceneEditor.editor
             doUpdate = true;
         }
 
-        public void addNewUnMeshedObject(ComplexPlaneTriangular item)
+        public void addNewPointsDataset(ComplexPlaneTriangular item)
         {
-            nonTiledBottoms.Value.Add(item);
+            meshUneven.Value.Add(item);
             doUpdate = true;
         }
 
         private void _setupObjects()
         {
             axis = new Axis();
-            mesh = new Mesh(size: 10, step:15, width: 1);
+            mesh = new Mesh(size: 15, step:10, width: 0.5f);
 
             lightBubble = new Cube(pos: new Vector3() { Z = 7f, X = 0, Y = 0 });
             lightBubble.Scale(new Vector3(0.1f));
@@ -378,13 +267,13 @@ namespace SceneEditor.editor
             RenderObject(axis);
             RenderObject(lightBubble);
 
-            tiledBottoms.Value.ForEach(bottom => RenderObject(bottom));
+            //meshTiled.Value.ForEach(bottom => RenderObject(bottom));
             sections.Value.ForEach(section => RenderObject(section));
-            nonTiledBottoms.Value.ForEach(item => RenderObject(item));
+            meshUneven.Value.ForEach(item => RenderObject(item));
         }
 
         // rewrite shader usage for elements
-        [MTAThread]
+        [STAThread]
         public void Render()
         {
             var elapsed = (float)_stopwatch.Elapsed.TotalSeconds;
@@ -392,14 +281,17 @@ namespace SceneEditor.editor
             timeDelta = elapsed - elapsedTime;
             elapsedTime = elapsed;
 
-            //background cleaning
-            //var c = Color4.FromHsv(new Vector4(hue, 0.75f, 0.75f, 1));
-            GL.ClearColor(0.4f, 0.4f, 0.4f, 1.0f);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            _applyTextureUnits();
-            _applyShaderSettings();
-            _applyRenderQueue();
-            GL.Finish();
+            if (isEnabled)
+            {
+                //background cleaning
+                //var c = Color4.FromHsv(new Vector4(hue, 0.75f, 0.75f, 1));
+                GL.ClearColor(0.4f, 0.4f, 0.4f, 1.0f);
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                _applyTextureUnits();
+                _applyShaderSettings();
+                _applyRenderQueue();
+                GL.Finish();
+            }
         }
 
         [STAThread]

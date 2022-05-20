@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
-    internal class EditorSettings
-    {
-        public SceneSetting[] settings;
+    //internal class EditorSettings
+    //{
+    //    public SceneSetting[] settings;
 
-    }
+    //}
 }

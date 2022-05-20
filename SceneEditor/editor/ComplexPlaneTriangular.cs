@@ -65,7 +65,7 @@ namespace SceneEditor.editor
             {
 
             }
-
+            lineWidth = 1;
             dots = new Dot[data.Length];
             for (int i = 0; i < dots.Length; i++)
             {
@@ -113,7 +113,7 @@ namespace SceneEditor.editor
             var Coptions = new ConstraintOptions();
             //Coptions.UseRegions = true;
             Coptions.Convex = true;
-            Coptions.SegmentSplitting = 10;
+            //Coptions.SegmentSplitting = 10;
             //Coptions.ConformingDelaunay = true;
 
             var Qoptions = new QualityOptions();
@@ -290,7 +290,7 @@ namespace SceneEditor.editor
             }
         }
 
-        public ComplexPlaneTile ConvertToTiledByInterpolation()
+        public ComplexPlaneTile ConvertToTiledByInterpolation(int limitSide = 100, bool copyCurrentTexturePack = false)
         {
             float xmin = data[0].X;
             float xmax = xmin;
@@ -339,14 +339,14 @@ namespace SceneEditor.editor
                 }
             }
 
-            float dividerx = (xmax - xmin) / 50;
-            float dividery = (ymax - ymin) / 50;
-            float[] X = Functions.Arrange(xmin, xmax, (xmax - xmin) / mindifx > 100 ? dividerx : mindifx);
-            float[] Y = Functions.Arrange(ymin, ymax, (ymax - ymin) / mindify > 100 ? dividery : mindify);
+            float dividerx = (xmax - xmin) / limitSide / 2;
+            float dividery = (ymax - ymin) / limitSide / 2;
+            float[] X = Functions.Arrange(xmin, xmax, (xmax - xmin) / mindifx > limitSide ? dividerx : mindifx);
+            float[] Y = Functions.Arrange(ymin, ymax, (ymax - ymin) / mindify > limitSide ? dividery : mindify);
             float[][] Z = Functions.recalculateBySpline(interp, X, Y);
 
             return new ComplexPlaneTile(X: X, Y: Y, Z:Z,
-                textureHandlersCopy: null
+                textureHandlersCopy: copyCurrentTexturePack ? (textureHandlers != null ? textureHandlers : null) : null
                 );
         }
 

@@ -56,9 +56,9 @@ namespace SceneEditor.editor
             )
         {
             float step = (end - start) / divider;
-            X = Functions.Arrange(start, end, step);
-            Y = Functions.Arrange(start, end, step);
-            Z = Functions.FigureTest(X, Y);
+            X = Arrange(start, end, step);
+            Y = Arrange(start, end, step);
+            Z = FigureTest(X, Y);
         }
 
         public static void GenerateRandomPoints(
@@ -69,7 +69,7 @@ namespace SceneEditor.editor
             int amountHigh = 60
             )
         {
-            int amount = (int)Functions.Random(amountLow, amountHigh);
+            int amount = (int)Random(amountLow, amountHigh);
             float[] X = new float[amount];
             float[] Y = new float[amount];
             float[] Z = new float[amount];
@@ -78,9 +78,9 @@ namespace SceneEditor.editor
 
             for (int i = 0; i < amount; i++)
             {
-                X[i] = Functions.Random((int)start, (int)end, 3);
-                Y[i] = Functions.Random((int)start, (int)end, 3);
-                Z[i] = Functions.FuncTestValue(X[i], Y[i]);
+                X[i] = Random((int)start, (int)end, 3);
+                Y[i] = Random((int)start, (int)end, 3);
+                Z[i] = FuncTestValue(X[i], Y[i]);
                 data[i] = new Vector3(X[i], Y[i], Z[i]);
             }
         }
@@ -94,18 +94,6 @@ namespace SceneEditor.editor
                 res[i] = min + i * step;
             }
             return res;
-        }
-
-        // what was it for?
-        public static Vector3[] CreatePlane(Vector2 size = default)
-        {
-            if (size == default)
-            {
-                size = new Vector2(100, 100);
-            }
-
-
-            return default;
         }
 
         public static float[][] RaiseToZero(float[][] income)

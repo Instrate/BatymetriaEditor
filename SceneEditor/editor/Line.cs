@@ -12,23 +12,14 @@ namespace SceneEditor.editor
     public static class LineDefaultBuilder
     {
         public static float[] color = { 0f, 0f, 0f };
-
-
     }
 
-    public class Line : IRenderable, IDrawable
+    public class Line : Transformable, IRenderable
     {
         private float[] vertices;
 
         private int VBO = -1;
         private int VAO = -1;
-
-        public Vector3 position = Vector3.Zero;
-
-        private Matrix4 transform = Matrix4.Identity;
-        private Matrix4 rotation = Matrix4.Identity;
-        private Matrix4 scale = Matrix4.Identity;
-        private Matrix4 originShift = Matrix4.Identity;
 
         public float width;
 
@@ -52,8 +43,11 @@ namespace SceneEditor.editor
                 a.X, a.Y, a.Z, c[0], c[1], c[2]
             };
 
-            
+            BindObject();
+        }
 
+        private void BindObject()
+        {
             VAO = GL.GenVertexArray();
             VBO = GL.GenBuffer();
 
@@ -67,10 +61,9 @@ namespace SceneEditor.editor
 
             GL.EnableVertexAttribArray(1);
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
-
         }
 
-        public void Move(Vector3 shifts)
+        public override void Move(Vector3 shifts)
         {
             position += shifts;
             originShift = originShift * Matrix4.CreateTranslation(shifts);
@@ -87,31 +80,6 @@ namespace SceneEditor.editor
 
             GL.BindVertexArray(VAO);
             GL.DrawArrays(primitiveType, 0, 2);
-        }
-
-        public void Rotate(Vector3 angles)
-        {
-            Matrix4 X = Matrix4.CreateRotationX(angles.X);
-            Matrix4 Y = Matrix4.CreateRotationY(angles.Y);
-            Matrix4 Z = Matrix4.CreateRotationZ(angles.Z);
-            rotation = rotation * X * Y * Z;
-            TransformCombiner();
-        }
-
-        public void Scale(Vector3 scalar)
-        {
-            scale = scale * Matrix4.CreateScale(scalar);
-            TransformCombiner();
-        }
-
-        public void TransformClean()
-        {
-            scale = originShift = rotation = Matrix4.Identity;
-        }
-
-        public void TransformCombiner()
-        {
-            transform = scale * rotation * originShift;
         }
     }
 }

@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace SceneEditor.editor
 {
-    public class Mesh : IRenderable, IDrawable
+    public class Mesh : Moveable, IRenderable
     {
         public int size;
         public int length;
@@ -44,31 +44,6 @@ namespace SceneEditor.editor
                 lines[length + 1 + i] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: xx, y: y, z: z));
                 y += step;
             }
-
-        }
-
-        public void Move(Vector3 shifts)
-        {
-
-        }
-
-        public void Rotate(Vector3 angles)
-        {
-
-        }
-
-        public void Scale(Vector3 scalar)
-        {
-
-        }
-
-        public void TransformClean()
-        {
-
-        }
-
-        public void TransformCombiner()
-        {
 
         }
 

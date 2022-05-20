@@ -11,14 +11,14 @@ namespace SceneEditor.editor
     public interface IDrawable : IRenderable
     {
 
-        public void Move(Vector3 shifts);
+        //public void Move(Vector3 shifts);
 
-        public void Rotate(Vector3 angles);
+        //public void Rotate(Vector3 angles);
 
-        public void Scale(Vector3 scalar);
+        //public void Scale(Vector3 scalar);
 
-        public void TransformCombiner();
+        //public void TransformCombiner();
 
-        public void TransformClean();
+        //public void TransformClean();
     }
 }

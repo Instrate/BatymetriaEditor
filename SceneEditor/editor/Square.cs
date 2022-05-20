@@ -69,16 +69,9 @@ namespace SceneEditor.editor
         }
     }
 
-    public class Square : IDrawable
+    public class Square : Transformable, IRenderable
     {
         private float[] vertices;
-
-        public Vector3 position = Vector3.Zero;
-
-        private Matrix4 transform = Matrix4.Identity;
-        private Matrix4 rotation = Matrix4.Identity;
-        private Matrix4 scale = Matrix4.Identity;
-        private Matrix4 originShift = Matrix4.Identity;
 
         private int offset;
 
@@ -261,34 +254,6 @@ namespace SceneEditor.editor
             GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 8 * sizeof(float));
         }
 
-        public void Move(Vector3 shifts)
-        {
-            originShift = originShift * Matrix4.CreateTranslation(shifts);
-
-            TransformCombiner();
-        }
-
-        public void Rotate(Vector3 angles)
-        {
-            Matrix4 X = Matrix4.CreateRotationX(angles.X);
-            Matrix4 Y = Matrix4.CreateRotationY(angles.Y);
-            Matrix4 Z = Matrix4.CreateRotationZ(angles.Z);
-            rotation = rotation * X * Y * Z;
-            TransformCombiner();
-        }
-
-        public void Scale(Vector3 scalar)
-        {
-            scale = scale * Matrix4.CreateScale(scalar);
-            TransformCombiner();
-        }
-
-        public void TransformCombiner()
-        {
-            transform = scale * rotation * originShift;
-            
-        }
-
         public void Render(int shaderHandle, PrimitiveType primitiveType = PrimitiveType.Triangles)
         {
 
@@ -313,11 +278,6 @@ namespace SceneEditor.editor
             // for safe drawing
             //GL.BindVertexArray(0);
 
-        }
-
-        public void TransformClean()
-        {
-            scale = originShift = rotation = Matrix4.Identity;
         }
 
         ~Square()
