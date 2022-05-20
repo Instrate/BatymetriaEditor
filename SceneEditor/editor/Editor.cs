@@ -13,22 +13,6 @@ using System.Windows.Input;
 
 namespace SceneEditor.editor
 {
-    public class EditorSettings
-    {
-        protected bool isEnabled = false;
-        public bool doUpdate = false;
-
-        public Lazy<List<ComplexPlaneTile>> meshTiled;
-        public Lazy<List<ComplexPlaneTriangular>> meshUneven;
-        public Lazy<List<Section>> sections;
-
-        public Mesh mesh;
-        public Axis axis;
-
-        public CameraControl[] cameras;
-        public int activeCam;
-    }
-
     public class Editor : EditorSettings
     {
         // to remove
@@ -52,6 +36,8 @@ namespace SceneEditor.editor
         Matrix4 view;
         int[] textureHandlers;
 
+        public bool isLoaded = false;
+
         // add switchable uniform bool useGradient
         public Editor(Size windowSize)
         {
@@ -63,16 +49,16 @@ namespace SceneEditor.editor
             addNewPointsDataset(
                 new ComplexPlaneTriangular(
                     shouldTriangulate:true,
-                    textureSet: new string[] { TexturePath.criss_cross,
-                        TexturePath.cork_board,
-                        TexturePath.criss_cross
+                    textureSet: new string[] { TexturePath.dark_paths,
+                        TexturePath.dark_paths,
+                        TexturePath.dark_paths
                     }));
 
             bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
             //bottom = meshUneven.Value[0].ConvertToTiledByInterpolation();
 
-            section = new Section(new Vector3(0,0,3), new Vector3(3, 8, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
+            section = new Section(new Vector3(-4,-7,4), new Vector3(3, 6, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
 
             addNewSection(section);
 
@@ -82,6 +68,8 @@ namespace SceneEditor.editor
             _setupObjects();
             _setupTextures();
             _setupShader();
+
+            isLoaded = true;
         }
 
         public void Initialize()
@@ -264,11 +252,11 @@ namespace SceneEditor.editor
         {
             RenderObject(mesh);
             RenderObject(axis);
-            RenderObject(lightBubble);
+            //RenderObject(lightBubble);
 
             meshTiled.Value.ForEach(bottom => RenderObject(bottom));
             sections.Value.ForEach(section => RenderObject(section));
-            //meshUneven.Value.ForEach(item => RenderObject(item));
+            meshUneven.Value.ForEach(item => RenderObject(item));
         }
 
         // rewrite shader usage for elements
@@ -359,7 +347,11 @@ namespace SceneEditor.editor
                 }
                 if (key == Key.I)
                 {
-                    bottom.Interp(0.9f, 0);
+                    bottom.Interp(0.9f, 1);
+                }
+                if (key == Key.K)
+                {
+                    bottom.Interp(1.1f, 1);
                 }
                 if (key == Key.PageUp)
                 {
@@ -405,7 +397,7 @@ namespace SceneEditor.editor
                 }
                 if (key == Key.T)
                 {
-                    //section.SwitchPlaneDisplaying();
+                    meshUneven.Value[0].isEnabled = !meshUneven.Value[0].isEnabled;
                 }
             }
         }

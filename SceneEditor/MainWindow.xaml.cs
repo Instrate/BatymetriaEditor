@@ -231,19 +231,14 @@ namespace SceneEditor
         private void structureOnReady(object sender, RoutedEventArgs e)
         {
             editorStructure.SelectionChanged += structureSelectionChanged;
+            editorStructure.SelectedIndex = currentEditor;
+            structureUpdate();
         }
 
         private void structureSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             editorChangeCurrent(editorStructure.SelectedIndex);
             structureUpdate();
-        }
-
-        private TreeViewItem _addNewTreeMember(string Header)
-        {
-            TreeViewItem item = new TreeViewItem() { Header = Header};
-            //item.Header = Header;
-            return item;
         }
 
         private void structureCreate()
@@ -260,63 +255,13 @@ namespace SceneEditor
 
         private void structureUpdate()
         {
-
-            editorStructure.SelectedIndex = currentEditor;
-            TabItem item = (TabItem)editorStructure.SelectedItem;
-            TreeView treeView = (TreeView)item.Content;
-
-            treeView.Items.Clear();
-            treeView.Items.Add(_addNewTreeMember("Mesh"));
-            treeView.Items.Add(_addNewTreeMember("Axis"));
-            //treeView.Items.Add(_addNewTreeMember("Bottoms"));
-            //treeView.Items.Add(_addNewTreeMember("Section"));
-
-            
-            int amount = editors[currentEditor].meshTiled.Value.Count;
-            
-            if(amount == 0)
+            if (editors[currentEditor].isLoaded && editorStructure.IsLoaded)
             {
-                //view.Items.Add(_addNewTreeMember("None"));
-            }
-            else
-            {
-                treeView.Items.Add(_addNewTreeMember("Bottoms"));
-                TreeViewItem view = (TreeViewItem)treeView.Items.GetItemAt(treeView.Items.Count - 1);
-                for (int i = 0; i < amount; i++)
-                {
-                    view.Items.Add(_addNewTreeMember("bottom " + (i + 1).ToString()));
-                }
-            }
-
-            amount = editors[currentEditor].sections.Value.Count;
-            if (amount == 0)
-            {
-                //view.Items.Add(_addNewTreeMember("None"));
-            }
-            else
-            {
-                treeView.Items.Add(_addNewTreeMember("Section"));
-                TreeViewItem view = (TreeViewItem)treeView.Items.GetItemAt(treeView.Items.Count-1);
-                for (int i = 0; i < amount; i++)
-                {
-                    view.Items.Add(_addNewTreeMember("section " + (i + 1).ToString()));
-                }
-            }
-
-            amount = editors[currentEditor].meshUneven.Value.Count;
-            if (amount == 0)
-            {
-                //view.Items.Add(_addNewTreeMember("None"));
-            }
-            else
-            {
-                treeView.Items.Add(_addNewTreeMember("Triangulated plane"));
-                TreeViewItem view = (TreeViewItem)treeView.Items.GetItemAt(treeView.Items.Count - 1);
-                for (int i = 0; i < amount; i++)
-                {
-                    view.Items.Add(_addNewTreeMember("mesh " + (i + 1).ToString()));
-                }
-            }
+                EditorSettings editor = editors[currentEditor];
+                TabItem tab = (TabItem)editorStructure.SelectedItem;
+                TreeView treeView = (TreeView)tab.Content;
+                editor.UpdateTreeView(treeView);
+            }     
         }
 
         private void onResize(object sender, SizeChangedEventArgs e)

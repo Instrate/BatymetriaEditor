@@ -22,7 +22,7 @@ namespace SceneEditor.editor
             }
 
             float scaling = 0.05f;
-            float sizeScale = 200f;
+            float sizeScale = 100f;
 
             axis[0].Scale(new Vector3(sizeScale, scaling, scaling));
             axis[1].Scale(new Vector3(scaling, sizeScale, scaling));
@@ -32,11 +32,6 @@ namespace SceneEditor.editor
             axis[1].Move(new Vector3() { Y = 0.5f * sizeScale - scaling / 2 });
             axis[2].Move(new Vector3() { Z = 0.5f * sizeScale - scaling / 2 });
 
-            //foreach (var ax in axis)
-            //{
-            //    ax.Move(new Vector3(0, 0, 3f));
-            //}
-
             if (textureSet != null)
             {
                 textureHandlers = new int[textureSet.Length];
@@ -45,6 +40,8 @@ namespace SceneEditor.editor
                     textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
                 }
             }
+
+            isEnabled = true;
         }
 
         private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
