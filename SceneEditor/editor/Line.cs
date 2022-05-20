@@ -14,7 +14,7 @@ namespace SceneEditor.editor
         public static float[] color = { 0f, 0f, 0f };
     }
 
-    public class Line : Transformable, IRenderable
+    public class Line : Transformable
     {
         private float[] vertices;
 
@@ -44,6 +44,7 @@ namespace SceneEditor.editor
             };
 
             BindObject();
+            isEnabled = true;
         }
 
         private void BindObject()
@@ -63,21 +64,17 @@ namespace SceneEditor.editor
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
         }
 
-        public override void Move(Vector3 shifts)
+        //public override void Move(Vector3 shifts)
+        //{
+        //    position += shifts;
+        //    originShift = originShift * Matrix4.CreateTranslation(shifts);
+
+        //    TransformCombiner();
+        //}
+
+        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
-            position += shifts;
-            originShift = originShift * Matrix4.CreateTranslation(shifts);
-
-            TransformCombiner();
-        }
-
-        public void Render(int shaderHandle)
-        {            
             GL.LineWidth(width);
-
-            var id = GL.GetUniformLocation(shaderHandle, "transform");
-            GL.UniformMatrix4(id, false, ref transform);
-
             GL.BindVertexArray(VAO);
             GL.DrawArrays(PrimitiveType.Lines, 0, 2);
         }

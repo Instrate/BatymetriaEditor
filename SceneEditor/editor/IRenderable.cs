@@ -9,6 +9,6 @@ namespace SceneEditor.editor
 {
     public interface IRenderable
     {
-        void Render(int shaderHandle);
+        void Render(int shaderHandle, PrimitiveType? primitive = null);
     }
 }

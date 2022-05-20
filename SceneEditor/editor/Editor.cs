@@ -68,16 +68,15 @@ namespace SceneEditor.editor
                         TexturePath.criss_cross
                     }));
 
-            //bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
+            bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
-            bottom = meshUneven.Value[0].ConvertToTiledByInterpolation();
+            //bottom = meshUneven.Value[0].ConvertToTiledByInterpolation();
 
             section = new Section(new Vector3(0,0,3), new Vector3(3, 8, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
 
             addNewSection(section);
 
             addNewBottom(bottom);
-            //addNewBottom(new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross }));
 
             _setupCam();
             _setupObjects();
@@ -267,9 +266,9 @@ namespace SceneEditor.editor
             RenderObject(axis);
             RenderObject(lightBubble);
 
-            //meshTiled.Value.ForEach(bottom => RenderObject(bottom));
+            meshTiled.Value.ForEach(bottom => RenderObject(bottom));
             sections.Value.ForEach(section => RenderObject(section));
-            meshUneven.Value.ForEach(item => RenderObject(item));
+            //meshUneven.Value.ForEach(item => RenderObject(item));
         }
 
         // rewrite shader usage for elements

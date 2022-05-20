@@ -15,15 +15,11 @@ using TriangleNet.Smoothing;
 namespace SceneEditor.editor
 {
 
-    public class ComplexPlaneTriangular : IRenderable
+    public class ComplexPlaneTriangular : Transformable
     {
         Triangle[]? connections = null;
 
-        public Vector3 position = Vector3.Zero;
-
         public Vector3[] data;
-
-        public int[] textureHandlers;
 
         Dot[] dots;
         bool showDots = true;
@@ -55,7 +51,7 @@ namespace SceneEditor.editor
                 if(X == null || Y == null || Z == null)
                 {
                     if(shouldTriangulate)
-                        Functions.GenerateRandomPoints(out data, start: -10f, end: 10f, amountLow:100, amountHigh: 300);
+                        Functions.GenerateRandomPoints(out data, start: -10f, end: 10f, amountLow:100, amountHigh: 200);
                     else
                         Functions.GenerateRandomPoints(out data, start: -10f, end: 10f, amountLow: 1000, amountHigh: 3000);
                     data = Functions.FixLowHight(data);
@@ -89,6 +85,7 @@ namespace SceneEditor.editor
                 }
             }
 
+            isEnabled = true;
             drawStyle = stylesSwitcher[primitiveCurrent];
         }
 
@@ -350,22 +347,13 @@ namespace SceneEditor.editor
                 );
         }
 
-        public void Render(int shader)
+        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
-            //texture loading
-            if (textureHandlers != null && textureHandlers.Length > 0)
-            {
-                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-                {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                }
-            }
-
             if (showDots)
             {
                 for (int i = 0; i < dots.Length; i++)
                 {
-                    dots[i].Render(shader);
+                    dots[i].Render(shaderHandle);
                 }
             }
 
@@ -374,7 +362,7 @@ namespace SceneEditor.editor
                 GL.LineWidth(lineWidth);
                 for (int i = 0; i < connections.Length; i++)
                 {
-                    connections[i].Render(shader, drawStyle);
+                    connections[i].Render(shaderHandle, drawStyle);
                 }
             }
         }

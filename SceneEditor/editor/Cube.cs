@@ -152,7 +152,7 @@ namespace SceneEditor.editor
         };
     }
 
-    internal class Cube : Transformable, IDrawable
+    public class Cube : Transformable
     {
         private float[] vertices;
 
@@ -242,6 +242,7 @@ namespace SceneEditor.editor
             concatSet(Color: color);
 
             BindObject();
+            isEnabled = true;
 
             if (pos != default)
             {
@@ -286,29 +287,13 @@ namespace SceneEditor.editor
             GL.EnableVertexAttribArray(3);
         }
 
-        public override void Move(Vector3 shifts)
+        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
-            position += shifts;
-            originShift = originShift * Matrix4.CreateTranslation(shifts);
-
-            TransformCombiner();
-        }
-
-        public void Render(int shaderHandle)
-        {
-            //texture loading
-            _applyTextures();
-
-            //geometry and color changes
-            var id = GL.GetUniformLocation(shaderHandle, "transform");
-            GL.UniformMatrix4(id, false, ref transform);
-
-            // drawing processed geometry
             GL.BindVertexArray(VAO);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
-
-            // for safe drawing
-            //GL.BindVertexArray(0);
+            GL.DrawArrays(
+                primitive.HasValue ?
+                primitive.Value : PrimitiveType.Triangles,
+                0, 36);
         }
     }
 }

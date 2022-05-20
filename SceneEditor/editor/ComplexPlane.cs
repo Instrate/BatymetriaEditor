@@ -8,17 +8,11 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
-    public class ComplexPlaneTile : IRenderable
+    public class ComplexPlaneTile : Transformable
     {
-        public bool isLoaded = false;
-
         public Square[]? tiles;
 
-        public Vector3 position = Vector3.Zero;
-
         public Vector3[] data = new Vector3[0];
-
-        public int[] textureHandlers;
 
         public float[] Xmesh;
         public float[] Ymesh;
@@ -80,9 +74,7 @@ namespace SceneEditor.editor
                 }
             }
             
-
-
-            isLoaded = true;
+            isEnabled = true;
             drawStyle = stylesSwitcher[primitiveCurrent];
         }
 
@@ -221,8 +213,16 @@ namespace SceneEditor.editor
                 {
                     Vector2 top_left = new Vector2(Xmesh[i], Ymesh[j]);
                     Vector2 bottom_right = new Vector2(Xmesh[i + 1], Ymesh[j + 1]);
-                    Vector4 heights = new Vector4(DataBuffer[i + 1][j + 1], DataBuffer[i][j + 1], DataBuffer[i][j], DataBuffer[i + 1][j]);
-                    tiles[i * cols + j] = new Square(builder: new Vector2[] { top_left, bottom_right }, heights: heights, fixHeight: false);
+                    Vector4 heights = new Vector4(
+                        DataBuffer[i + 1][j + 1],
+                        DataBuffer[i][j + 1],
+                        DataBuffer[i][j],
+                        DataBuffer[i + 1][j]);
+                    tiles[i * cols + j] = new Square(
+                        builder: new Vector2[] { top_left, bottom_right },
+                        heights: heights,
+                        fixHeight: false
+                        );
                 }
             }
 
@@ -253,31 +253,17 @@ namespace SceneEditor.editor
             drawStyle = stylesSwitcher[primitiveCurrent];
         }
 
-        public void Render(int shader)
+        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
-            if (!isLoaded)
-            {
-                return;
-            }
-
-            //texture loading
-            if (textureHandlers != null && textureHandlers.Length > 0)
-            {
-                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-                {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                }
-            }
-
             if (showDots)
             {
                 for (int i = 0; i < dots.Length; i++)
                 {
-                    dots[i].Render(shader);
+                    dots[i].Render(shaderHandle);
                 }
             }
 
-            if(tiles != null)
+            if (tiles != null)
             {
                 var rows = Xmesh.Length - 1;
                 var cols = Ymesh.Length - 1;
@@ -288,7 +274,7 @@ namespace SceneEditor.editor
                     int ii = i * rows;
                     for (int j = Range[1]; j <= Range[3]; j++)
                     {
-                        tiles[ii + j].Render(shader, drawStyle);
+                        tiles[ii + j].Render(shaderHandle, drawStyle);
                     }
                 }
             }

@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace SceneEditor.editor
 {
-    public class Mesh : Moveable, IDrawable
+    public class Mesh : Moveable
     {
         public int size;
         public int length;
@@ -45,16 +45,17 @@ namespace SceneEditor.editor
                 y += step;
             }
 
+            isEnabled = true;
         }
 
-        public void Render(int shaderHandle)
+        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
             GL.LineWidth(width);
 
             int amount = lines.Length;
             for (int i = 0; i < amount; i++)
             {
-                lines[i].Render(shaderHandle);
+                lines[i].Render(shaderHandle, primitive);
             }
         }
     }

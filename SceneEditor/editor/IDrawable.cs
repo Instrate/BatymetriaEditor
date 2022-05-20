@@ -3,22 +3,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace SceneEditor.editor
 {
-    public interface IDrawable : IRenderable
+    public interface IDrawable
     {
+        
+        
+        //protected private virtual void _renderObjects(int shaderHandle)
+        //{
+        //    return;
+        //}
 
-        //public void Move(Vector3 shifts);
+        //protected private virtual void _renderObjects(int shaderHandle, PrimitiveType primitive)
+        //{
+        //    return;
+        //}
 
-        //public void Rotate(Vector3 angles);
+        //public virtual void _prepareRendering(int shaderHandle);
 
-        //public void Scale(Vector3 scalar);
+        //public virtual void Render(int shaderHandle)
+        //{
+        //    _prepareRendering(shaderHandle);
+        //    _renderObjects(shaderHandle);
+        //}
 
-        //public void TransformCombiner();
+        //public virtual void Render(int shaderHandle, PrimitiveType primitive)
+        //{
+        //    _prepareRendering(shaderHandle);
+        //    _renderObjects(shaderHandle, primitive);
+        //}
 
-        //public void TransformClean();
+
     }
 }

@@ -257,7 +257,6 @@ namespace SceneEditor.editor
 
         bool intersected = false;
 
-        // TODO: fix the rotation bug
         public Section(Vector3 start, Vector3 end, string[]? textureSet = null, Vector3? color = default)
         {
             chars[0] = start;
@@ -284,6 +283,7 @@ namespace SceneEditor.editor
             }
         }
 
+        // recheck formulae
         public Vector3[]? IntersectTiled(float[] X, float[] Y, float[][] Data)
         {
 
@@ -381,7 +381,7 @@ namespace SceneEditor.editor
             this.areaMesh = new Line[amount];
             for (int i = 0; i < amount; i++)
             {
-                this.areaMesh[i] = new Line(lines[i].start, lines[i].end, ((Vector4)Color4.Cyan).Xyz, width: 4);
+                this.areaMesh[i] = new Line(lines[i].start, lines[i].end, ((Vector4)Color4.Cyan).Xyz, width: 2);
             }
 
 
@@ -409,7 +409,7 @@ namespace SceneEditor.editor
 
                 for (int i = 0; i < amount; i++)
                 {
-                    dots[i] = new Dot(intersects[i], color: ((Vector4)Color4.Red).Xyz, size: 5);
+                    dots[i] = new Dot(intersects[i], color: ((Vector4)Color4.Red).Xyz, size: 6);
 
                     if(i != 0)
                     {
@@ -517,27 +517,27 @@ namespace SceneEditor.editor
             display = !display;
         }
 
-        public void Render(int shaderHandle)
+        public void Render(int shaderHandle, PrimitiveType? primitive = null)
         {
             if (intersected)
             {
                 for (int i = 0; i < dots.Length; i++)
                 {
-                    dots[i].Render(shaderHandle);
+                    dots[i].Render(shaderHandle, primitive);
                 }
                 for (int i = 0; i < funcLine.Length; i++)
                 {
-                    funcLine[i].Render(shaderHandle);
+                    funcLine[i].Render(shaderHandle, primitive);
                 }
                 for (int i = 0; i < areaMesh.Length; i++)
                 {
-                    areaMesh[i].Render(shaderHandle);
+                    areaMesh[i].Render(shaderHandle, primitive);
                 }
                 if (hasPolar)
                 {
                     for(int i = 0; i < funcPolar.Length; i++)
                     {
-                        funcPolar[i].Render(shaderHandle);
+                        funcPolar[i].Render(shaderHandle, primitive);
                     }
                 }
             }

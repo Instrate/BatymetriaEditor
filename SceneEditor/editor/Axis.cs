@@ -8,11 +8,9 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
-    public class Axis : IRenderable
+    public class Axis : Transformable
     {
         Cube[] axis = new Cube[3];
-
-        public int[]? textureHandlers;
 
         public Axis(string[]? textureSet = null)
         {
@@ -49,20 +47,11 @@ namespace SceneEditor.editor
             }
         }
 
-        public void Render(int shaderHandle, PrimitiveType primitiveType = 0)
+        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
-            if (textureHandlers != null && textureHandlers.Length > 0)
-            {
-
-                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-                {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                }
-            }
-
             foreach (var c in axis)
             {
-                c.Render(shaderHandle);
+                c.Render(shaderHandle, primitive);
             }
         }
 

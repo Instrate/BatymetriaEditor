@@ -64,7 +64,7 @@ namespace SceneEditor.editor
     }
 
 
-    public class Triangle : Transformable, IDrawable
+    public class Triangle : Transformable
     {
         float[] vertices;
 
@@ -94,7 +94,7 @@ namespace SceneEditor.editor
             vertices = TriangleCoords.Vertices(points);
 
             BindObject();
-
+            isEnabled = true;
             if (textureSet != null)
             {
                 textureHandlers = new int[textureSet.Length];
@@ -130,18 +130,16 @@ namespace SceneEditor.editor
 
         }
 
-        public void Render(int shaderHandle)
+
+        // Is there a better solution
+
+        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
-
-            //texture loading
-            _applyTextures();
-
-            //geometry
-            var id = GL.GetUniformLocation(shaderHandle, "transform");
-            GL.UniformMatrix4(id, false, ref transform);
-
-            // drawing processed geometry
-            _renderObjects(shaderHandle);
+            GL.BindVertexArray(VAO);
+            GL.DrawArrays(
+                primitive.HasValue ?
+                primitive.Value : PrimitiveType.Triangles,
+                0, 3);
         }
     }
 }

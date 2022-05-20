@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
-    public class Dot : Moveable, IDrawable
+    public class Dot : Moveable
     {
         private float[]? vertices = null;
 
@@ -29,6 +29,7 @@ namespace SceneEditor.editor
             this.size = size;
 
             BindObject();
+            isEnabled = true;
         }
 
         private void BindObject()
@@ -48,12 +49,9 @@ namespace SceneEditor.editor
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 3 * sizeof(float));
         }
 
-        public void Render(int shaderHandle)
+        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
             GL.PointSize(size);
-
-            var id = GL.GetUniformLocation(shaderHandle, "transform");
-            GL.UniformMatrix4(id, false, ref transform);
 
             GL.BindVertexArray(VAO);
             GL.DrawArrays(PrimitiveType.Points, 0, 1);

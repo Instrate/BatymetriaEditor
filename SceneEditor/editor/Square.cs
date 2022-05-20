@@ -183,10 +183,11 @@ namespace SceneEditor.editor
                       Vector3? pos = null,
                       Vector3? color = default,
                       bool fixHeight = false,
-                      bool isSection = false)
+                      bool isSection = false
+                      )
         {
 
-            if(builder != null) 
+            if(builder == null) 
             {
                 concatSet();
             }
@@ -197,6 +198,7 @@ namespace SceneEditor.editor
             }
 
             BindObject();
+            isEnabled = true;
 
             if (pos != null)
             {
@@ -241,22 +243,10 @@ namespace SceneEditor.editor
             GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 8 * sizeof(float));
         }
 
-        public void Render(int shaderHandle)
+        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
-
-            //texture loading
-            _applyTextures();
-
-            //geometry
-            var id = GL.GetUniformLocation(shaderHandle, "transform");
-            GL.UniformMatrix4(id, false, ref transform);
-
-            // drawing processed geometry
             GL.BindVertexArray(VAO);
             GL.DrawElements(PrimitiveType.Triangles, Tile.indices.Length, DrawElementsType.UnsignedInt, 0);
-
-            // for safe drawing
-            //GL.BindVertexArray(0);
         }
     }
 }

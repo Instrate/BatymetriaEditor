@@ -13,13 +13,16 @@ namespace SceneEditor.editor
         
         protected int[] textureHandlers;
 
+        public new Vector3 position = Vector3.Zero;
+
+        private protected new Matrix4 transform = Matrix4.Identity;
+        private protected new Matrix4 originShift = Matrix4.Identity;
         private protected Matrix4 rotation = Matrix4.Identity;
         private protected Matrix4 scale = Matrix4.Identity;
 
         public virtual new void Move(Vector3 shifts)
         {
             originShift = originShift * Matrix4.CreateTranslation(shifts);
-
             TransformCombiner();
         }
 
@@ -48,7 +51,7 @@ namespace SceneEditor.editor
             transform = scale = originShift = rotation = Matrix4.Identity;
         }
 
-        private protected virtual void _applyTextures()
+        private protected void _applyTextures()
         {
             if (textureHandlers != null && textureHandlers.Length > 0)
             {
@@ -59,13 +62,20 @@ namespace SceneEditor.editor
             }
         }
 
-        public virtual void Render(int shaderHandle, PrimitiveType primitive)
+        private protected override void _prepareRendering(int shaderHandle)
         {
-            _applyTextures();
             var id = GL.GetUniformLocation(shaderHandle, "transform");
             GL.UniformMatrix4(id, false, ref transform);
-            _renderObjects(shaderHandle);
         }
 
+        public override void Render(int shaderHandle, PrimitiveType? primitive = null)
+        {
+            if (isEnabled)
+            {
+                _applyTextures();
+                _prepareRendering(shaderHandle);
+                _renderObjects(shaderHandle, primitive);
+            }
+        }
     }
 }
