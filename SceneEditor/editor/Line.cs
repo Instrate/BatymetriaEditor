@@ -71,7 +71,7 @@ namespace SceneEditor.editor
             TransformCombiner();
         }
 
-        public void Render(int shaderHandle, PrimitiveType primitiveType = PrimitiveType.Lines)
+        public void Render(int shaderHandle)
         {            
             GL.LineWidth(width);
 
@@ -79,7 +79,7 @@ namespace SceneEditor.editor
             GL.UniformMatrix4(id, false, ref transform);
 
             GL.BindVertexArray(VAO);
-            GL.DrawArrays(primitiveType, 0, 2);
+            GL.DrawArrays(PrimitiveType.Lines, 0, 2);
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
-    public class Dot : IRenderable, IDrawable
+    public class Dot : Moveable, IDrawable
     {
         private float[]? vertices = null;
 
@@ -16,13 +16,6 @@ namespace SceneEditor.editor
         private int VAO = -1;
 
         public float size;
-
-        public Vector3 position = Vector3.Zero;
-
-        private Matrix4 transform = Matrix4.Identity;
-        private Matrix4 rotation = Matrix4.Identity;
-        private Matrix4 scale = Matrix4.Identity;
-        private Matrix4 originShift = Matrix4.Identity;
 
         public Dot(Vector3 pos, Vector3 color = default, float size = 3f)
         {
@@ -35,6 +28,11 @@ namespace SceneEditor.editor
 
             this.size = size;
 
+            BindObject();
+        }
+
+        private void BindObject()
+        {
             VAO = GL.GenVertexArray();
             VBO = GL.GenBuffer();
 
@@ -50,7 +48,7 @@ namespace SceneEditor.editor
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 3 * sizeof(float));
         }
 
-        public void Render(int shaderHandle, PrimitiveType primitiveType = PrimitiveType.Points)
+        public void Render(int shaderHandle)
         {
             GL.PointSize(size);
 
@@ -58,35 +56,15 @@ namespace SceneEditor.editor
             GL.UniformMatrix4(id, false, ref transform);
 
             GL.BindVertexArray(VAO);
-            GL.DrawArrays(primitiveType, 0, 1);
+            GL.DrawArrays(PrimitiveType.Points, 0, 1);
         }
 
-        public void Move(Vector3 shifts)
+        public override void Move(Vector3 shifts)
         {
             position += shifts;
             originShift = originShift * Matrix4.CreateTranslation(shifts);
 
             TransformCombiner();
-        }
-
-        public void Rotate(Vector3 angles)
-        {
-
-        }
-
-        public void Scale(Vector3 scalar)
-        {
-
-        }
-
-        public void TransformCombiner()
-        {
-            transform = originShift;
-        }
-
-        public void TransformClean()
-        {
-            originShift = Matrix4.Identity;
         }
     }
 }

@@ -30,5 +30,10 @@ namespace SceneEditor.editor
         {
             transform = originShift = Matrix4.Identity;
         }
+
+        private protected virtual void _renderObjects(int shaderHandle)
+        {
+            return;
+        }
     }
 }

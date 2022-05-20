@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace SceneEditor.editor
 {
     public class Transformable : Moveable
     {
+        
+        protected int[] textureHandlers;
 
         private protected Matrix4 rotation = Matrix4.Identity;
         private protected Matrix4 scale = Matrix4.Identity;
@@ -44,5 +47,25 @@ namespace SceneEditor.editor
         {
             transform = scale = originShift = rotation = Matrix4.Identity;
         }
+
+        private protected virtual void _applyTextures()
+        {
+            if (textureHandlers != null && textureHandlers.Length > 0)
+            {
+                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
+                {
+                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
+                }
+            }
+        }
+
+        public virtual void Render(int shaderHandle, PrimitiveType primitive)
+        {
+            _applyTextures();
+            var id = GL.GetUniformLocation(shaderHandle, "transform");
+            GL.UniformMatrix4(id, false, ref transform);
+            _renderObjects(shaderHandle);
+        }
+
     }
 }

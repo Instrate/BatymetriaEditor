@@ -10,143 +10,6 @@ namespace SceneEditor.editor
 {
     static class WallsCubic
     {
-        //public static float[] coords = {
-        //    // bottom
-        //    0.5f, -0.5f, -0.5f,
-        //    -0.5f, -0.5f, -0.5f,
-        //    -0.5f, 0.5f, -0.5f,
-        //    0.5f, 0.5f, -0.5f,
-
-        //    // top
-        //    0.5f, -0.5f, 0.5f,
-        //    -0.5f, -0.5f, 0.5f,
-        //    -0.5f, 0.5f, 0.5f,
-        //    0.5f, 0.5f, 0.5f,
-
-        //    // back
-        //    -0.5f, 0.5f, -0.5f,
-        //    -0.5f, 0.5f, 0.5f,
-        //    -0.5f, -0.5f, 0.5f,
-        //    -0.5f, -0.5f, -0.5f,
-
-        //    // front
-        //    0.5f, -0.5f, -0.5f,
-        //    0.5f, -0.5f, 0.5f,
-        //    0.5f, 0.5f, 0.5f,
-        //    0.5f, 0.5f, -0.5f,
-
-        //    // left
-        //    -0.5f, -0.5f, -0.5f,
-        //    -0.5f, -0.5f, 0.5f,
-        //    0.5f, -0.5f, 0.5f,
-        //    0.5f, -0.5f, -0.5f,
-
-        //    // right
-        //    0.5f, 0.5f, -0.5f,
-        //    0.5f, 0.5f, 0.5f,
-        //    -0.5f, 0.5f, 0.5f,
-        //    -0.5f, 0.5f, -0.5f 
-        //};
-
-        //public static float[] color =
-        //{
-        //    1.0f, 1.0f, 1.0f,
-        //    1.0f, 1.0f, 1.0f,
-        //    1.0f, 1.0f, 1.0f,
-        //    1.0f, 1.0f, 1.0f
-        //};
-
-        //public static float[] normal =
-        //{
-        //    0.0f,  0.0f, -1.0f,
-        //    0.0f,  0.0f, -1.0f,
-        //    0.0f,  0.0f, -1.0f,
-        //    0.0f,  0.0f, -1.0f,
-
-
-        //    0.0f,  0.0f,  1.0f,
-        //    0.0f,  0.0f,  1.0f,
-        //    0.0f,  0.0f,  1.0f,
-        //    0.0f,  0.0f,  1.0f,
-
-        //    -1.0f,  0.0f,  0.0f,
-        //    -1.0f,  0.0f,  0.0f,
-        //    -1.0f,  0.0f,  0.0f,
-        //    -1.0f,  0.0f,  0.0f,
-
-        //    1.0f,  0.0f,  0.0f,
-        //    1.0f,  0.0f,  0.0f,
-        //    1.0f,  0.0f,  0.0f,
-        //    1.0f,  0.0f,  0.0f,
-
-        //    0.0f, -1.0f,  0.0f,
-        //    0.0f, -1.0f,  0.0f,
-        //    0.0f, -1.0f,  0.0f,
-        //    0.0f, -1.0f,  0.0f,
-
-        //    0.0f,  1.0f,  0.0f,
-        //    0.0f,  1.0f,  0.0f,
-        //    0.0f,  1.0f,  0.0f,
-        //    0.0f,  1.0f,  0.0f
-        //};
-
-        //public static float[] texture =
-        //{
-        //    // bottom
-        //    1.0f, 1.0f,
-        //    1.0f, 0.0f,
-        //    0.0f, 0.0f,
-        //    0.0f, 1.0f,
-
-        //    // top
-        //    1.0f, 1.0f,
-        //    1.0f, 0.0f,
-        //    0.0f, 0.0f,
-        //    0.0f, 1.0f,
-
-        //    // back
-        //    1.0f, 1.0f,
-        //    1.0f, 0.0f,
-        //    0.0f, 0.0f,
-        //    0.0f, 1.0f,
-
-        //    // front
-        //    1.0f, 1.0f,
-        //    1.0f, 0.0f,
-        //    0.0f, 0.0f,
-        //    0.0f, 1.0f,
-
-        //    1.0f, 1.0f,
-        //    1.0f, 0.0f,
-        //    0.0f, 0.0f,
-        //    0.0f, 1.0f,
-
-        //    1.0f, 1.0f,
-        //    1.0f, 0.0f,
-        //    0.0f, 0.0f,
-        //    0.0f, 1.0f
-        //};
-
-        //public static uint[] indices = {
-        //    0, 1, 3,
-        //    1, 2, 3,
-
-        //    4, 5, 7,
-        //    5, 6, 7,
-
-        //    1, 2, 6,
-        //    1, 5, 6,
-
-        //    0, 3, 4,
-        //    3, 4, 7,
-
-        //    0, 1, 5,
-        //    0, 4, 5,
-
-        //    2, 3, 7,
-        //    2, 6, 7
-        //};
-
         public static float[] coords = {
             -0.5f, -0.5f, -0.5f,
              0.5f, -0.5f, -0.5f,
@@ -289,23 +152,15 @@ namespace SceneEditor.editor
         };
     }
 
-    internal class Cube : IDrawable
+    internal class Cube : Transformable, IDrawable
     {
         private float[] vertices;
-
-        public Vector3 position = Vector3.Zero;
-
-        private Matrix4 transform = Matrix4.Identity;
-        private Matrix4 rotation = Matrix4.Identity;
-        private Matrix4 scale = Matrix4.Identity;
-        private Matrix4 originShift = Matrix4.Identity;
 
         private int offset;
 
         private int VBO = -1;
         private int VAO = -1;
 
-        public int[] textureHandlers = null;
 
         private void concatSet(float[]? builder = default, Vector3? Color = default)
         {
@@ -385,7 +240,27 @@ namespace SceneEditor.editor
         public Cube(string[]? textureSet = null, Vector3 pos = default, Vector3? color = default)
         {
             concatSet(Color: color);
-            
+
+            BindObject();
+
+            if (pos != default)
+            {
+                position = pos;
+                Move(position);
+            }
+
+            if (textureSet != null)
+            {
+                textureHandlers = new int[textureSet.Length];
+                for (int i = 0; i < textureSet.Length; i++)
+                {
+                    textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
+                }
+            }
+        }
+
+        private void BindObject()
+        {
             GL.GenBuffers(1, out VBO);
             GL.GenVertexArrays(1, out VAO);
 
@@ -409,86 +284,31 @@ namespace SceneEditor.editor
             // normal
             GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 8 * sizeof(float));
             GL.EnableVertexAttribArray(3);
-
-            if (pos != default)
-            {
-                position = pos;
-                Move(position);
-            }
-
-            if (textureSet != null)
-            {
-                textureHandlers = new int[textureSet.Length];
-                for (int i = 0; i < textureSet.Length; i++)
-                {
-                    textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
-                }
-            }
         }
 
-        public void Move(Vector3 shifts)
+        public override void Move(Vector3 shifts)
         {
+            position += shifts;
             originShift = originShift * Matrix4.CreateTranslation(shifts);
-            //Console.WriteLine(originShift);
-            position = new Vector3(originShift[3, 0], originShift[3, 1], originShift[3, 2]);
-            //Console.WriteLine(position);
 
             TransformCombiner();
         }
 
-        public void Render(int shaderHandle, PrimitiveType primitiveType = PrimitiveType.Triangles)
+        public void Render(int shaderHandle)
         {
             //texture loading
-            if (textureHandlers != null && textureHandlers.Length > 0)
-            {
-                int i;
-                for (i = 0; i < textureHandlers.Length && i < 32; i++)
-                {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                }
-            }
+            _applyTextures();
 
             //geometry and color changes
             var id = GL.GetUniformLocation(shaderHandle, "transform");
             GL.UniformMatrix4(id, false, ref transform);
 
-
             // drawing processed geometry
             GL.BindVertexArray(VAO);
-            GL.DrawArrays(primitiveType, 0, 36);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
 
             // for safe drawing
             //GL.BindVertexArray(0);
-        }
-
-        public void Rotate(Vector3 angles)
-        {
-            Matrix4 X;
-            Matrix4 Y;
-            Matrix4 Z;
-            Matrix4.CreateRotationX(angles.X, out X);
-            Matrix4.CreateRotationY(angles.Y, out Y);
-            Matrix4.CreateRotationZ(angles.Z, out Z);
-
-            rotation = rotation * X * Y * Z;
-
-            TransformCombiner();
-        }
-
-        public void Scale(Vector3 scalar)
-        {
-            scale = scale * Matrix4.CreateScale(scalar);
-            TransformCombiner();
-        }
-
-        public void TransformClean()
-        {
-            transform = Matrix4.Identity;
-        }
-
-        public void TransformCombiner()
-        {
-            transform = scale * rotation * originShift;
         }
     }
 }

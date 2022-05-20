@@ -49,24 +49,7 @@ namespace SceneEditor.editor
             1, 2, 3
         };
 
-        public static float[] vertices = _buildVertices();
-
         public static int offset = 11;
-
-        private static float[] _buildVertices()
-        {
-            int size = Tile.coords.Length + Tile.color.Length + Tile.texture.Length;
-
-            float[] vertices = new float[size];
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < offset; j++)
-                {
-                    vertices[i * offset + j] = j < 3 ? coords[i * 3 + j] : j < 6 ? Tile.color[i * 3 + j - 3] : j < 8 ? Tile.texture[i * 2 + j - 6] : Tile.normal[i * 3 + j - 8];
-                }
-            }
-            return default;
-        }
     }
 
     public class Square : Transformable, IRenderable
@@ -78,8 +61,6 @@ namespace SceneEditor.editor
         private int VBO = -1;
         private int VAO = -1;
         private int EBO = -1;
-
-        public int[] textureHandlers = null;
 
         private void concatSet(float[]? builder = default, Vector3? Color = default)
         {
@@ -196,24 +177,30 @@ namespace SceneEditor.editor
             return heigths;
         }
 
-        public Square(string[]? textureSet = null, Vector2[]? builder = default, Vector4? heights = default, Vector3 pos = default, Vector3? color = default, bool fixHeight = false, bool isSection = false)
+        public Square(string[]? textureSet = null,
+                      Vector2[]? builder = null,
+                      Vector4? heights = default,
+                      Vector3? pos = null,
+                      Vector3? color = default,
+                      bool fixHeight = false,
+                      bool isSection = false)
         {
 
-            if(builder == default) 
+            if(builder != null) 
             {
                 concatSet();
             }
             else
             {
-                // change the application not to vertices but to position
+                // change the application not to vertices but to position if possible
                 concatSet(_buildVertice(builder[0], builder[1], heights == default ? Vector4.Zero : fixHeight == true ? GetCorrectPosition(heights.Value) : heights.Value, isSection), color);
             }
 
             BindObject();
 
-            if (pos != default)
+            if (pos != null)
             {
-                position = pos;
+                position = pos.Value;
                 Move(position);
             }
 
@@ -254,18 +241,11 @@ namespace SceneEditor.editor
             GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 8 * sizeof(float));
         }
 
-        public void Render(int shaderHandle, PrimitiveType primitiveType = PrimitiveType.Triangles)
+        public void Render(int shaderHandle)
         {
 
             //texture loading
-            if (textureHandlers != null && textureHandlers.Length > 0)
-            {
-                
-                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-                {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                }
-            }
+            _applyTextures();
 
             //geometry
             var id = GL.GetUniformLocation(shaderHandle, "transform");
@@ -273,21 +253,10 @@ namespace SceneEditor.editor
 
             // drawing processed geometry
             GL.BindVertexArray(VAO);
-            GL.DrawElements(primitiveType, Tile.indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(PrimitiveType.Triangles, Tile.indices.Length, DrawElementsType.UnsignedInt, 0);
 
             // for safe drawing
             //GL.BindVertexArray(0);
-
-        }
-
-        ~Square()
-        {
-            //if(VAO != -1)
-            //    GL.DeleteVertexArray(VAO);
-            //if (VBO != -1)
-            //    GL.DeleteBuffer(VBO);
-            //if (EBO != -1)
-            //    GL.DeleteBuffer(EBO);
         }
     }
 }

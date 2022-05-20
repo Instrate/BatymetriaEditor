@@ -71,8 +71,6 @@ namespace SceneEditor.editor
         private int VBO = -1;
         private int VAO = -1;
 
-        public int[]? textureHandlers = null;
-
         //implement color usage
         public Triangle(Vector3[] pointsV, Vector3? color = default, string[]? textureSet = null, bool keepHeight = true)
         {
@@ -132,26 +130,18 @@ namespace SceneEditor.editor
 
         }
 
-        public void Render(int shaderHandle, PrimitiveType primitiveType = PrimitiveType.Triangles)
+        public void Render(int shaderHandle)
         {
 
             //texture loading
-            if (textureHandlers != null && textureHandlers.Length > 0)
-            {
-
-                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-                {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                }
-            }
+            _applyTextures();
 
             //geometry
             var id = GL.GetUniformLocation(shaderHandle, "transform");
             GL.UniformMatrix4(id, false, ref transform);
 
             // drawing processed geometry
-            GL.BindVertexArray(VAO);
-            GL.DrawArrays(primitiveType, 0, 3);
+            _renderObjects(shaderHandle);
         }
     }
 }

@@ -7,15 +7,9 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
-    public class Drawable
+    public abstract class Drawable
     {
-        protected int[] textureHandlers;
+        private protected abstract void _renderObjects(int shaderHandle);
 
-
-
-        public virtual void Render(int shaderHandle, PrimitiveType? primitive)
-        {
-
-        }
     }
 }

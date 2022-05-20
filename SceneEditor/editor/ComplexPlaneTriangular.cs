@@ -350,7 +350,7 @@ namespace SceneEditor.editor
                 );
         }
 
-        public void Render(int shader, PrimitiveType primitiveType = 0)
+        public void Render(int shader)
         {
             //texture loading
             if (textureHandlers != null && textureHandlers.Length > 0)

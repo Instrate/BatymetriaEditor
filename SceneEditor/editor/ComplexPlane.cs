@@ -253,7 +253,7 @@ namespace SceneEditor.editor
             drawStyle = stylesSwitcher[primitiveCurrent];
         }
 
-        public void Render(int shader, PrimitiveType primitiveType = 0)
+        public void Render(int shader)
         {
             if (!isLoaded)
             {
@@ -282,10 +282,6 @@ namespace SceneEditor.editor
                 var rows = Xmesh.Length - 1;
                 var cols = Ymesh.Length - 1;
                 //var amount = tiles.Length;
-                if(primitiveType != 0)
-                {
-                    drawStyle = primitiveType;
-                }
                 GL.LineWidth(lineWidth);
                 for (int i = Range[0]; i <= Range[2]; i++)
                 {

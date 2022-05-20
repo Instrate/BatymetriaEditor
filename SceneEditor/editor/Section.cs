@@ -49,6 +49,9 @@ namespace SceneEditor.editor
 
     public class LineFunction
     {
+        // x - x1   y - y1   z - z1
+        // ------ = ------ = ------
+        //   m1       p1       l1
         public float x1, m1, y1, p1, z1, l1;
 
         public Vector3 start;
@@ -89,7 +92,6 @@ namespace SceneEditor.editor
             l1 = b.Z - z1;
         }
  
-
         public Vector3? Intersect(float A, float B, float C, float D)
         {
             Vector3 n1 = new Vector3(A, B, C); 
@@ -249,9 +251,9 @@ namespace SceneEditor.editor
         Line[] funcPolar;
         bool hasPolar = false;
         float[][] funcPolarArgs;
-        Line[] funcSphere;
-        bool hasSphere = false;
-        float[][] funcSphereArgs;
+        //Line[] funcSphere;
+        //bool hasSphere = false;
+        //float[][] funcSphereArgs;
 
         bool intersected = false;
 
@@ -504,7 +506,8 @@ namespace SceneEditor.editor
             }
         }
 
-        public void CountSphericalFunction()
+        // maybe later
+        private void CountSphericalFunction()
         {
 
         }
@@ -514,7 +517,7 @@ namespace SceneEditor.editor
             display = !display;
         }
 
-        public void Render(int shaderHandle, PrimitiveType primitiveType = 0)
+        public void Render(int shaderHandle)
         {
             if (intersected)
             {
