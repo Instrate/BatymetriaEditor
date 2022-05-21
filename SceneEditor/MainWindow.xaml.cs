@@ -90,6 +90,9 @@ namespace SceneEditor
                 glMain.Start(windowSettings);
 
                 EventInform(listViewProcess, "Editor has been started successfuly");
+                EventInform(listViewProcess, "Press \"F\" or RMB over GL window to switch mouse being grabbed");
+                EventInform(listViewProcess, "Keep pressing LMB to move camera while mouse grabbed");
+                EventInform(listViewProcess, "Use WASD, Ctrl, Shift to move");
             }
             catch (Exception ex)
             {

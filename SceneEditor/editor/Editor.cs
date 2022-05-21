@@ -78,23 +78,6 @@ namespace SceneEditor.editor
             isEnabled = true;
         }
 
-        public void addNewBottom(ComplexPlaneTile tiledBottom)
-        {
-            meshTiled.Value.Add(tiledBottom);
-            doUpdate = true;
-        }
-
-        public void addNewSection(Section section)
-        {
-            sections.Value.Add(section);
-            doUpdate = true;
-        }
-
-        public void addNewPointsDataset(ComplexPlaneTriangular item)
-        {
-            meshUneven.Value.Add(item);
-            doUpdate = true;
-        }
 
         private void _setupObjects()
         {
@@ -136,10 +119,7 @@ namespace SceneEditor.editor
             shader.SetMatrix4("projection", cameras[activeCam].cam.GetProjectionMatrix());
         }
 
-        public void ExportData()
-        {
-
-        }
+        
 
         
         [MTAThread]

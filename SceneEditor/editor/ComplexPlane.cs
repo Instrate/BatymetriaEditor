@@ -8,6 +8,20 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
+    public class TileDataSet
+    {
+        public float[] X { get; set; }
+        public float[] Y { get; set; }
+        public float[][] Z { get; set; }
+
+        public TileDataSet(float[] X, float[] Y, float[][] Z)
+        {
+            this.X = X;
+            this.Y = Y;
+            this.Z = Z;
+        }
+    }
+
     public class ComplexPlaneTile : Transformable
     {
         public Square[]? tiles;

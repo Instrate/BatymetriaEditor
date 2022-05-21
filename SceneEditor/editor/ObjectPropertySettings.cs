@@ -6,6 +6,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Text.Json;
+using Microsoft.Win32;
+using System.IO;
 
 namespace SceneEditor.editor
 {
@@ -39,7 +42,7 @@ namespace SceneEditor.editor
 
         public ListBox elementProperties;
         public ListBox editorProperties;
-        private object currentProperty;
+        private object? currentProperty;
 
         protected bool isEnabled = false;
         public bool doUpdate = false;
@@ -190,6 +193,23 @@ namespace SceneEditor.editor
                             );
                         list.Items.Add(buttonStyle);
 
+                        Button buttonShowLess = Generate.Button(
+                            "Show less cells",
+                            ShowLessCells
+                            );
+                        list.Items.Add(buttonShowLess);
+
+                        Button buttonShowMore = Generate.Button(
+                            "Show more cells",
+                            ShowMoreCells
+                            );
+                        list.Items.Add(buttonShowMore);
+
+                        Button buttonExport = Generate.Button(
+                            "Export data",
+                            ExportData
+                            );
+                        list.Items.Add(buttonExport);
 
                     }; break;
                 case 1:
@@ -283,7 +303,18 @@ namespace SceneEditor.editor
                             SwitchObjectDrawingEnabled
                             );
             list.Items.Add(enabled);
+
+            Button buttonRemove = Generate.Button(
+                            "Remove me",
+                            ButtonDelete
+                            );
+            list.Items.Add(buttonRemove);
             return null;
+        }
+
+        private void ButtonDelete(object sender, RoutedEventArgs e)
+        {
+            removeCurrentItem();
         }
 
         private void SectionVertChanged(object sender, TextChangedEventArgs e)
@@ -360,6 +391,16 @@ namespace SceneEditor.editor
             }
         }
 
+        private void ShowLessCells(object sender, RoutedEventArgs e)
+        {
+            ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(0, 0, 0, 0, 1, 1);
+        }
+
+        private void ShowMoreCells(object sender, RoutedEventArgs e)
+        {
+            ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(0, 0, 0, 0, -1, -1);
+        }
+
         private void SwitchVerticesDisplayingForTiles(object sender, RoutedEventArgs e)
         {
             bool state = (bool)(sender as CheckBox).IsChecked;
@@ -430,6 +471,11 @@ namespace SceneEditor.editor
             exp = Generate.Expander("Mesh");
             exp.Content = CreateMeshSettings();
             editorProperties.Items.Add(exp);
+
+            Button buttonImportTileset = Generate.Button(
+                "Import mesh",
+                ImportData);
+            editorProperties.Items.Add(buttonImportTileset);
 
             editorProperties.HorizontalContentAlignment = HorizontalAlignment.Stretch;
         }
@@ -963,6 +1009,92 @@ namespace SceneEditor.editor
         // EVENTS FOR MESH SETTINGS END
         // ----------------------------
 
+        // DATA IMPORT-EXPORT START
+        // ------------------------
+        public void ExportData(object sender, RoutedEventArgs e)
+        {
+            string jsonString = "";
+            
+            if (currentProperty is ComplexPlaneTile)
+            {
+                ComplexPlaneTile export = (ComplexPlaneTile) currentProperty;
+                TileDataSet data = new TileDataSet(export.Xmesh, export.Ymesh, export.DataBuffer);
+
+                jsonString = JsonSerializer.Serialize(data, typeof(TileDataSet));
+
+            }
+
+            SaveFileDialog dialog = new SaveFileDialog();
+            //dialog.InitialDirectory = "../../../";
+            dialog.Filter = "JSON file (*.json)|*.json";
+            if(dialog.ShowDialog() == true)
+            {
+                File.WriteAllText(dialog.FileName, jsonString);
+            }
+        }
+
+        public void ImportData(object sender, RoutedEventArgs e)
+        {
+            string jsonString = "";
+            OpenFileDialog dialog = new OpenFileDialog();
+            //dialog.InitialDirectory = "../../../";
+            if (dialog.ShowDialog() == true)
+            {
+                jsonString = File.ReadAllText(dialog.FileName);
+
+                TileDataSet? income = JsonSerializer.Deserialize<TileDataSet>(jsonString);
+
+                if (income != null)
+                {
+                    TileDataSet data = (TileDataSet)income;
+
+                    addNewBottom(new ComplexPlaneTile(
+                        textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross },
+                        X: data.X, Y: data.Y, Z: data.Z
+                        ));
+                }
+            }
+        }
+
+        // DATA IMPORT-EXPORT END
+        // ----------------------
+
+        public void removeCurrentItem()
+        {
+            if(currentProperty is ComplexPlaneTile)
+            {
+                meshTiled.Value.Remove((ComplexPlaneTile)currentProperty);
+            }
+            else if (currentProperty is ComplexPlaneTriangular)
+            {
+                meshUneven.Value.Remove((ComplexPlaneTriangular)currentProperty);
+            }
+            else if (currentProperty is Section)
+            {
+                sections.Value.Remove((Section)currentProperty);
+            }
+            currentProperty = null;
+            doUpdate = true;
+        }
+
+        public void addNewBottom(ComplexPlaneTile tiledBottom)
+        {
+            meshTiled.Value.Add(tiledBottom);
+            doUpdate = true;
+        }
+
+        public void addNewSection(Section section)
+        {
+            sections.Value.Add(section);
+            doUpdate = true;
+        }
+
+        public void addNewPointsDataset(ComplexPlaneTriangular item)
+        {
+            meshUneven.Value.Add(item);
+            doUpdate = true;
+        }
+
         public void OnKeyDown(KeyEventArgs e)
         {
             var key = e.Key;
@@ -991,14 +1123,6 @@ namespace SceneEditor.editor
             {
                 meshTiled.Value[0].Interp(1.1f, 1);
             }
-            if (key == Key.PageUp)
-            {
-                meshTiled.Value[0].MoveVisibleMesh(0, 0, 0, 0, 1, 1);
-            }
-            if (key == Key.PageDown)
-            {
-                meshTiled.Value[0].MoveVisibleMesh(0, 0, 0, 0, -1, -1);
-            }
             if (key == Key.Up)
             {
                 meshTiled.Value[0].MoveVisibleMesh(0, 1, 0, 0, 0, 0);
@@ -1014,19 +1138,6 @@ namespace SceneEditor.editor
             if (key == Key.Right)
             {
                 meshTiled.Value[0].MoveVisibleMesh(1, 0, 0, 0, 0, 0);
-            }
-            if (key == Key.J)
-            {
-                // test intersection
-                sections.Value[0].IntersectTiled(
-                    meshTiled.Value[0].Xmesh,
-                    meshTiled.Value[0].Ymesh,
-                    meshTiled.Value[0].DataBuffer);
-                sections.Value[0].CountPolarFunction();
-            }
-            if (key == Key.O)
-            {
-                meshTiled.Value[0].SwitchDrawStyle();
             }
         }
     }
