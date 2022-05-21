@@ -11,6 +11,7 @@ namespace SceneEditor.editor
     public class ComplexPlaneTile : Transformable
     {
         public Square[]? tiles;
+        public bool showGeometry = false;
 
         public Vector3[] data = new Vector3[0];
 
@@ -24,7 +25,7 @@ namespace SceneEditor.editor
         public int[] Range = new int[4];
 
         Dot[] dots;
-        bool showDots = false;
+        public bool showDots = false;
 
 
         int primitiveCurrent = 0;
@@ -34,7 +35,6 @@ namespace SceneEditor.editor
                 PrimitiveType.Triangles,
                 PrimitiveType.Lines,
                 PrimitiveType.LineStrip,
-                PrimitiveType.LinesAdjacency,
                 PrimitiveType.Points
             };
         public PrimitiveType drawStyle;
@@ -75,6 +75,7 @@ namespace SceneEditor.editor
             }
             
             isEnabled = true;
+            showGeometry = true;
             drawStyle = stylesSwitcher[primitiveCurrent];
         }
 
@@ -231,16 +232,11 @@ namespace SceneEditor.editor
             {
                 for(int j = 0; j <= cols; j++)
                 {
-                    dots[i * (cols + 1) + j] = new Dot(pos: new Vector3(Xmesh[j], Ymesh[i], DataBuffer[j][i]));
+                    dots[i * (cols + 1) + j] = new Dot(pos: new Vector3(Xmesh[j], Ymesh[i], DataBuffer[j][i]), size: 3);
                 }
             }
             ResetMeshVisibility();
             MeshCompatibleRange();
-        }
-        
-        public void SwitchDotsVisibility()
-        {
-            showDots = !showDots;
         }
 
         public void SwitchDrawStyle()
@@ -263,12 +259,13 @@ namespace SceneEditor.editor
                 }
             }
 
-            if (tiles != null)
+            if (tiles != null && showGeometry)
             {
                 var rows = Xmesh.Length - 1;
                 var cols = Ymesh.Length - 1;
                 //var amount = tiles.Length;
                 GL.LineWidth(lineWidth);
+                GL.PointSize(lineWidth * 5);
                 for (int i = Range[0]; i <= Range[2]; i++)
                 {
                     int ii = i * rows;

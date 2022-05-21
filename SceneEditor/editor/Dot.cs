@@ -56,13 +56,5 @@ namespace SceneEditor.editor
             GL.BindVertexArray(VAO);
             GL.DrawArrays(PrimitiveType.Points, 0, 1);
         }
-
-        public override void Move(Vector3 shifts)
-        {
-            position += shifts;
-            originShift = originShift * Matrix4.CreateTranslation(shifts);
-
-            TransformCombiner();
-        }
     }
 }

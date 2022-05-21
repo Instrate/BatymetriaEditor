@@ -18,23 +18,23 @@ namespace SceneEditor.editor
     public class ComplexPlaneTriangular : Transformable
     {
         Triangle[]? connections = null;
+        public bool showGeometry = false;
 
         public Vector3[] data;
 
         Dot[] dots;
-        bool showDots = true;
+        public bool showDots = true;
 
         private alglib.spline2dinterpolant? interp = null;
 
+        //public new bool isEnabled;
 
-        int primitiveCurrent = 2;
+        int primitiveCurrent = 1;
         float lineWidth;
         PrimitiveType[] stylesSwitcher = new PrimitiveType[]
             {
                 PrimitiveType.Triangles,
-                PrimitiveType.Lines,
                 PrimitiveType.LineStrip,
-                PrimitiveType.LinesAdjacency,
                 PrimitiveType.Points
             };
         public PrimitiveType drawStyle;
@@ -65,7 +65,7 @@ namespace SceneEditor.editor
             dots = new Dot[data.Length];
             for (int i = 0; i < dots.Length; i++)
             {
-                dots[i] = new Dot(data[i], ((Vector4)Color4.Red).Xyz, 5);
+                dots[i] = new Dot(data[i], ((Vector4)Color4.Red).Xyz, 6);
             }
 
             interp = Functions.Interpolate(data);
@@ -169,7 +169,8 @@ namespace SceneEditor.editor
                 }
                 connections[i] = new Triangle(points);
             }
-            
+
+            showGeometry = true;
         }
 
         private void _generateFastTriangulationFromData(int amountOfConnections = 6)
@@ -347,6 +348,16 @@ namespace SceneEditor.editor
                 );
         }
 
+        public void SwitchDrawStyle()
+        {
+            primitiveCurrent++;
+            if (stylesSwitcher.Length == primitiveCurrent)
+            {
+                primitiveCurrent = 0;
+            }
+            drawStyle = stylesSwitcher[primitiveCurrent];
+        }
+
         private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
             if (showDots)
@@ -357,9 +368,10 @@ namespace SceneEditor.editor
                 }
             }
 
-            if (connections != null)
+            if (connections != null && showGeometry)
             {
                 GL.LineWidth(lineWidth);
+                GL.PointSize(lineWidth * 5);
                 for (int i = 0; i < connections.Length; i++)
                 {
                     connections[i].Render(shaderHandle, drawStyle);

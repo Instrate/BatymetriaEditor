@@ -22,6 +22,7 @@ namespace SceneEditor.editor
 
         public virtual new void Move(Vector3 shifts)
         {
+            position += shifts;
             originShift = originShift * Matrix4.CreateTranslation(shifts);
             TransformCombiner();
         }

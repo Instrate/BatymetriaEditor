@@ -238,40 +238,34 @@ namespace SceneEditor.editor
         public int[]? textureHandlers = null;
 
         Square sqr;
-        bool display = false;
+        public bool isEnabled = false;
 
-        Vector3[] chars = new Vector3[2];
+
+        public Vector3[] chars = new Vector3[2];
 
         PlaneFunction plane;
 
         Dot[] dots;
 
         Line[] areaMesh;
+        public bool showAreaMesh = false;
+
         Line[] funcLine;
+
         Line[] funcPolar;
         bool hasPolar = false;
+        public bool showPolar = false;
+
         float[][] funcPolarArgs;
         //Line[] funcSphere;
         //bool hasSphere = false;
         //float[][] funcSphereArgs;
 
-        bool intersected = false;
+        public bool intersected = false;
 
         public Section(Vector3 start, Vector3 end, string[]? textureSet = null, Vector3? color = default)
         {
-            chars[0] = start;
-            chars[1] = end;
-
-            plane = new PlaneFunction(start, end);
-            //plane.ShowFunction();
-
-
-            Vector2 v1 = new Vector2(start.X, start.Y);
-            Vector2 v2 = new Vector2(end.X, end.Y);
-
-            Vector4 heights = new Vector4(end.Z, start.Z, start.Z, end.Z);
-
-            sqr = new Square(builder: new Vector2[] { v1, v2 }, heights: heights, isSection: true);
+            Replace(start, end);
 
             if (textureSet != null)
             {
@@ -281,6 +275,25 @@ namespace SceneEditor.editor
                     textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
                 }
             }
+        }
+
+        public void Replace(Vector3 start, Vector3 end)
+        {
+            chars[0] = start;
+            chars[1] = end;
+
+            plane = new PlaneFunction(start, end);
+
+            Vector2 v1 = new Vector2(start.X, start.Y);
+            Vector2 v2 = new Vector2(end.X, end.Y);
+
+            Vector4 heights = new Vector4(end.Z, start.Z, start.Z, end.Z);
+
+            sqr = new Square(builder: new Vector2[] { v1, v2 }, heights: heights, isSection: true);
+
+            showAreaMesh = false;
+            intersected = false;
+            showPolar = false;
         }
 
         // recheck formulae
@@ -378,11 +391,7 @@ namespace SceneEditor.editor
             }
 
             // create working area mesh
-            this.areaMesh = new Line[amount];
-            for (int i = 0; i < amount; i++)
-            {
-                this.areaMesh[i] = new Line(lines[i].start, lines[i].end, ((Vector4)Color4.Cyan).Xyz, width: 2);
-            }
+            _assignAreaMesh(lines);
 
 
             // convert result
@@ -417,9 +426,20 @@ namespace SceneEditor.editor
                     }
                 }
 
+                CountPolarFunction();
                 return intersects;
             }
             return null;
+        }
+
+        private void _assignAreaMesh(LineFunction[] lines)
+        {
+            areaMesh = new Line[lines.Length];
+            for (int i = 0; i < lines.Length; i++)
+            {
+                areaMesh[i] = new Line(lines[i].start, lines[i].end, ((Vector4)Color4.Cyan).Xyz, width: 2);
+            }
+            showAreaMesh = true;
         }
 
         private float _countAngleToRotateYZ(Vector3 a, Vector3 b)
@@ -502,6 +522,7 @@ namespace SceneEditor.editor
                     }
                     ShowPolarFuncs();
                     hasPolar = true;
+                    showPolar = true;
                 }
             }
         }
@@ -514,26 +535,26 @@ namespace SceneEditor.editor
 
         public void SwitchPlaneDisplaying()
         {
-            display = !display;
+            isEnabled = !isEnabled;
         }
 
         public void Render(int shaderHandle, PrimitiveType? primitive = null)
         {
             if (intersected)
             {
-                for (int i = 0; i < dots.Length; i++)
+                for (int i = 0; i < dots.Length && showAreaMesh; i++)
                 {
                     dots[i].Render(shaderHandle, primitive);
                 }
-                for (int i = 0; i < funcLine.Length; i++)
+                for (int i = 0; i < funcLine.Length && showAreaMesh; i++)
                 {
                     funcLine[i].Render(shaderHandle, primitive);
                 }
-                for (int i = 0; i < areaMesh.Length; i++)
+                for (int i = 0; i < areaMesh.Length && showAreaMesh; i++)
                 {
                     areaMesh[i].Render(shaderHandle, primitive);
                 }
-                if (hasPolar)
+                if (hasPolar && showPolar)
                 {
                     for(int i = 0; i < funcPolar.Length; i++)
                     {
@@ -542,7 +563,7 @@ namespace SceneEditor.editor
                 }
             }
 
-            if (display)
+            if (isEnabled)
             {
                 if (textureHandlers != null && textureHandlers.Length > 0)
                 {

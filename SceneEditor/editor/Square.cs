@@ -246,7 +246,10 @@ namespace SceneEditor.editor
         private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
         {
             GL.BindVertexArray(VAO);
-            GL.DrawElements(PrimitiveType.Triangles, Tile.indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(
+                primitive.HasValue ? primitive.Value : PrimitiveType.Triangles,
+                Tile.indices.Length,
+                DrawElementsType.UnsignedInt, 0);
         }
     }
 }

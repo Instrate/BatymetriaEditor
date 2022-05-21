@@ -29,51 +29,8 @@ namespace SceneEditor.editor
             "Mesh uneven"
         };
 
-        private static Type[] supportedTypes = new Type[]
-        {
-            typeof(ComplexPlaneTile),
-            typeof(Section),
-            typeof(ComplexPlaneTriangular)
-        };
-
-
         // change to the right type
-        public static object? LookUpProperties(object itemWithProperties, ListBox list)
-        {
-            int index = -1;
-            list.Items.Clear();
-
-            if (itemWithProperties is ComplexPlaneTile)
-                index = 0;
-            else if (itemWithProperties is Section)
-                index = 1;
-            else if (itemWithProperties is ComplexPlaneTriangular)
-                index = 2;
-
-            Expander exp = new Expander();
-            exp.Header = "me";
-
-            list.Items.Add(exp);
-
-            switch (index)
-            {
-                case 0:
-                    {
-                        
-                    }; break;
-                case 1:
-                    {
-
-                    }; break;
-                case 2:
-                    {
-
-                    }; break;
-            }
-
-
-            return null;
-        }
+        
     }
 
     public static class Generate
@@ -142,6 +99,22 @@ namespace SceneEditor.editor
             checkBox.Content = content;
             return checkBox;
         }
+    
+        public static Button Button(string name, RoutedEventHandler Event)
+        {
+            Button button = new Button();
+            button.Content = TextBlock(name);
+            button.Click += Event;
+            return button;
+        }
+    
+        public static ComboBoxItem ComboBoxItem(string content)
+        {
+            ComboBoxItem item = new ComboBoxItem();
+            item.Content = TextBlock(content);
+            //item.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+            return item;
+        }
     }
 
     public class EditorSettings
@@ -153,6 +126,7 @@ namespace SceneEditor.editor
 
         public ListBox elementProperties;
         public ListBox editorProperties;
+        private object currentProperty;
 
         protected bool isEnabled = false;
         public bool doUpdate = false;
@@ -235,26 +209,288 @@ namespace SceneEditor.editor
             {
                 case 0:
                     {
-                        ObjectPropertySettings.LookUpProperties(meshTiled.Value.ElementAt(num), elementProperties);
+                        LookUpProperties(meshTiled.Value.ElementAt(num), elementProperties);
                     }; break;
                 case 1:
                     {
-                        ObjectPropertySettings.LookUpProperties(sections.Value.ElementAt(num), elementProperties);
+                        LookUpProperties(sections.Value.ElementAt(num), elementProperties);
                     }; break;
                 case 2:
                     {
-                        ObjectPropertySettings.LookUpProperties(meshUneven.Value.ElementAt(num), elementProperties);
+                        LookUpProperties(meshUneven.Value.ElementAt(num), elementProperties);
                     }; break;
             }
 
-
-
             // add properties
 
-            Console.WriteLine("I\'m selected");
+            elementProperties.HorizontalContentAlignment = HorizontalAlignment.Stretch;
         }
 
+        // object settings 
+        // TODO: make @enabled@ checkbox smaller
+        private object? LookUpProperties(object itemWithProperties, ListBox list)
+        {
+            int index = -1;
+            list.Items.Clear();
 
+            bool isEnabled = false;
+            if (itemWithProperties is ComplexPlaneTile)
+            {
+                index = 0;
+                currentProperty = (ComplexPlaneTile)itemWithProperties;
+                isEnabled = (currentProperty as ComplexPlaneTile).isEnabled;
+            }
+            else if (itemWithProperties is Section)
+            {
+                index = 1;
+                currentProperty = (Section)itemWithProperties;
+                isEnabled = (currentProperty as Section).isEnabled;
+            }
+            else if (itemWithProperties is ComplexPlaneTriangular)
+            {
+                index = 2;
+                currentProperty = (ComplexPlaneTriangular)itemWithProperties;
+                isEnabled = (currentProperty as ComplexPlaneTriangular).isEnabled;
+            }
+
+            switch (index)
+            {
+                case 0:
+                    {
+                        CheckBox vertices = CreateCheckBoxSetting(
+                                                    "Show vertices",
+                                                    (currentProperty as ComplexPlaneTile).showDots,
+                                                    SwitchVerticesDisplayingForTiles
+                                                    );
+                        list.Items.Add(vertices);
+
+                        CheckBox geometry = CreateCheckBoxSetting(
+                                                    "Show geometry",
+                                                    (currentProperty as ComplexPlaneTile).showGeometry,
+                                                    SwitchDisplayMainGeometry
+                                                    );
+                        list.Items.Add(geometry);
+
+                        Button buttonStyle = Generate.Button(
+                            "Switch primitive type",
+                            SwitchDrawStyle
+                            );
+                        list.Items.Add(buttonStyle);
+
+                        
+                    }; break;
+                case 1:
+                    {
+                        //vertices
+                        ListBox listSet = new ListBox();
+                        Expander expVert = Generate.Expander("Vertices", listSet);
+                        list.Items.Add(expVert);
+
+                        if((currentProperty as Section).intersected)
+                        {
+                            CheckBox showAreaMesh = CreateCheckBoxSetting(
+                                                   "Show intersected area",
+                                                   (currentProperty as Section).showAreaMesh,
+                                                   SectionSwitchAreaDisplay
+                                                   );
+                            list.Items.Add(showAreaMesh);
+
+                            CheckBox showPolar = CreateCheckBoxSetting(
+                                                   "Show polar function",
+                                                   (currentProperty as Section).showPolar,
+                                                   SectionSwitchPolarDisplay
+                                                   );
+                            list.Items.Add(showPolar);
+                        }
+                        if (meshTiled.Value.Count != 0)
+                        {
+                            ComboBox comboChoose = new ComboBox();
+                            Button buttonIntersect = Generate.Button(
+                            "Intersect",
+                            ButtonIntersect
+                            );
+                            ListBox listOpt = new ListBox();
+                            listOpt.Items.Add(Generate.ListBoxItem(comboChoose));
+                            listOpt.Items.Add(Generate.ListBoxItem(buttonIntersect));
+
+                            for(int i = 0; i < meshTiled.Value.Count; i++)
+                            {
+                                comboChoose.Items.Add(Generate.ComboBoxItem("mesh " + (i + 1)));
+                            }
+                            comboChoose.SelectedItem = comboChoose.Items[0];
+
+                            list.Items.Add(listOpt);
+                        }
+
+                        listSet.Items.Add(CreateSettingForVector3Point(
+                            "Start point",
+                            (currentProperty as Section).chars[0],
+                            SectionVertChanged
+                            ));
+                        listSet.Items.Add(CreateSettingForVector3Point(
+                            "End point",
+                            (currentProperty as Section).chars[1],
+                            SectionVertChanged
+                            ));
+
+
+
+
+                    }; break;
+               default:
+                    {
+                        CheckBox vertices = CreateCheckBoxSetting(
+                                                    "Show vertices",
+                                                    (currentProperty as ComplexPlaneTriangular).showDots,
+                                                    SwitchVerticesDisplayingForTiles
+                                                    );
+                        list.Items.Add(vertices);
+
+                        CheckBox geometry = CreateCheckBoxSetting(
+                                                    "Show geometry",
+                                                    (currentProperty as ComplexPlaneTriangular).showGeometry,
+                                                    SwitchDisplayMainGeometry
+                                                    );
+                        list.Items.Add(geometry);
+
+
+
+                        Button buttonStyle = Generate.Button(
+                            "Switch primitive type",
+                            SwitchDrawStyle
+                            );
+                        list.Items.Add(buttonStyle);
+
+                    }; break;
+            }
+
+            CheckBox enabled = CreateCheckBoxSetting(
+                            "Enable",
+                            isEnabled,
+                            SwitchObjectDrawingEnabled
+                            );
+            list.Items.Add(enabled);
+            return null;
+        }
+
+        private void SectionVertChanged(object sender, TextChangedEventArgs e)
+        {
+            Vector3[] data = new Vector3[2];
+            ListBox list = GetListWithVector3Settings(sender);
+
+            for (int i = 0; i < 2; i++)
+            {
+                ListBoxItem item = list.Items[i] as ListBoxItem;
+                ListBox listVert = ((item.Content as DockPanel).Children[1] as ListBox);
+                for (int j = 0; j < 3; j++)
+                {
+                    TextBox box = (((listVert.Items[j] as ListBoxItem).Content as DockPanel).Children[1] as TextBox);
+                    float value;
+                    try
+                    {
+                        value = float.Parse(box.Text.ToString());
+                    } catch (Exception ex)
+                    {
+                        value = (currentProperty as Section).chars[i][j];
+                    }
+                    
+                    data[i][j] = value;
+                }
+            }
+            (currentProperty as Section).Replace(data[0], data[1]);
+        }
+
+        private void SectionSwitchAreaDisplay(object sender, RoutedEventArgs e)
+        {
+            bool state = (bool)(sender as CheckBox).IsChecked;
+            (currentProperty as Section).showAreaMesh = state;
+        }
+
+        private void ButtonIntersect(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            ListBoxItem item = (ListBoxItem)button.Parent;
+            ListBox list = (ListBox) item.Parent;
+            ListBoxItem itemCombo = (ListBoxItem)list.Items[0];
+            ComboBox comboBox = (ComboBox)itemCombo.Content;
+            ComboBoxItem comboItem = (ComboBoxItem)comboBox.SelectedItem;
+            TextBlock block = (TextBlock)comboItem.Content;
+            string text = block.Text;
+            string[] opts = text.Split(' ');
+            int ind = int.Parse(opts[opts.Length - 1]);
+            
+            if(opts[0].CompareTo("mesh") == 0)
+            {
+                ComplexPlaneTile tiled = meshTiled.Value[ind-1];
+                ((Section)currentProperty).IntersectTiled(tiled.Xmesh, tiled.Ymesh, tiled.DataBuffer);
+            }
+          
+        }
+
+        private void SectionSwitchPolarDisplay(object sender, RoutedEventArgs e)
+        {
+            bool state = (bool)(sender as CheckBox).IsChecked;
+            (currentProperty as Section).showPolar = state;
+        }
+
+        private void SwitchDrawStyle(object sender, RoutedEventArgs e)
+        {
+            if (currentProperty is ComplexPlaneTile)
+            {
+                (currentProperty as ComplexPlaneTile).SwitchDrawStyle();
+            }
+            else
+            if (currentProperty is ComplexPlaneTriangular)
+            {
+                (currentProperty as ComplexPlaneTriangular).SwitchDrawStyle();
+            }
+        }
+
+        private void SwitchVerticesDisplayingForTiles(object sender, RoutedEventArgs e)
+        {
+            bool state = (bool)(sender as CheckBox).IsChecked;
+            if (currentProperty is ComplexPlaneTile)
+            {
+                (currentProperty as ComplexPlaneTile).showDots = state;
+            } else
+            if (currentProperty is ComplexPlaneTriangular)
+            {
+                (currentProperty as ComplexPlaneTriangular).showDots = state;
+            }
+        }
+        
+        private void SwitchDisplayMainGeometry(object sender, RoutedEventArgs e)
+        {
+            bool state = (bool)(sender as CheckBox).IsChecked;
+            if (currentProperty is ComplexPlaneTile)
+            {
+                (currentProperty as ComplexPlaneTile).showGeometry = state;
+            }
+            else
+            if (currentProperty is ComplexPlaneTriangular)
+            {
+                (currentProperty as ComplexPlaneTriangular).showGeometry = state;
+            }
+        }
+
+        private void SwitchObjectDrawingEnabled(object sender, RoutedEventArgs e)
+        {
+            bool state = (bool)(sender as CheckBox).IsChecked;
+            if(currentProperty is ComplexPlaneTile) 
+            {
+                (currentProperty as ComplexPlaneTile).isEnabled = state;
+            } else
+            if (currentProperty is Section)
+            {
+                (currentProperty as Section).isEnabled = state;
+            } else
+            if (currentProperty is ComplexPlaneTriangular)
+            {
+                (currentProperty as ComplexPlaneTriangular).isEnabled = state;
+            }
+        }
+
+        // scene settings
         public void EditorChanged()
         {
             editorProperties.Items.Clear();
@@ -323,7 +559,6 @@ namespace SceneEditor.editor
         {
             return new Vector2i { X = (int)size.Width, Y = (int)size.Height };
         }
-    
 
         private ListBox CreateMeshSettings()
         {
@@ -344,7 +579,28 @@ namespace SceneEditor.editor
                 mesh.width,
                 MeshParamChanged
                 ));
-            listSet.Items.Add(Generate.ListBoxItem(CreateCheckBoxSetting("Enable", mesh.isEnabled)));
+
+            listSet.Items.Add(Generate.ListBoxItem(CreateCheckBoxSetting(
+                "mesh Oxy",
+                mesh.showMesh[0],
+                MeshTurnOxy
+                )));
+            listSet.Items.Add(Generate.ListBoxItem(CreateCheckBoxSetting(
+                "mesh Oxz",
+                mesh.showMesh[1],
+                MeshTurnOyz
+                )));
+            listSet.Items.Add(Generate.ListBoxItem(CreateCheckBoxSetting(
+                "mesh Oyz",
+                mesh.showMesh[2],
+                MeshTurnOxz
+                )));
+
+            listSet.Items.Add(Generate.ListBoxItem(CreateCheckBoxSetting(
+                "Enable",
+                mesh.isEnabled,
+                CheckBoxSwitched
+                )));
 
             listSet.HorizontalContentAlignment = HorizontalAlignment.Stretch;
             return listSet;
@@ -352,18 +608,14 @@ namespace SceneEditor.editor
 
         private CheckBox CreateCheckBoxSetting(
             string Name,
-            bool initialState
+            bool initialState,
+            RoutedEventHandler Event
             )
         {
             CheckBox checkBox = Generate.CheckBox(Generate.TextBlock(Name), initialState);
-            checkBox.Unchecked += CheckBoxSwitched;
-            checkBox.Checked += CheckBoxSwitched;
+            checkBox.Unchecked += Event;
+            checkBox.Checked += Event;
             return checkBox;
-        }
-
-        private void CheckBoxSwitched(object sender, RoutedEventArgs e)
-        {
-            mesh.isEnabled = (bool)(sender as CheckBox).IsChecked;
         }
 
         private ListBoxItem CreateItemWithValueChangeable(
@@ -415,6 +667,11 @@ namespace SceneEditor.editor
             
             item.HorizontalContentAlignment = HorizontalAlignment.Stretch;
             return item;
+        }
+
+        private ListBox GetListWithVector3Settings(object sender)
+        {
+            return (ListBox)((ListBoxItem)((DockPanel)((ListBox)((ListBoxItem)((DockPanel)((TextBox)sender).Parent).Parent).Parent).Parent).Parent).Parent;
         }
 
         private ListBoxItem CreateSettingForVector3Point(
@@ -498,6 +755,7 @@ namespace SceneEditor.editor
 
         // EVENTS FOR CAM SETTINGS START
         // -----------------------------
+
         public void CamUpdatedPosition()
         {
             Vector3 newPos = cameras[activeCam].cam.Position;
@@ -744,10 +1002,14 @@ namespace SceneEditor.editor
                 ListBoxItem item = (ListBoxItem)((DockPanel) box.Parent).Parent;
                 ListBox list = (ListBox)item.Parent;
 
-                int j = list.Items.IndexOf(item);
-                if (j == 0) ;
-                box.Text = ((int)float.Parse(box.Text.ToString())).ToString();
+                bool[] showMesh = mesh.showMesh;
+                bool isEnabled = mesh.isEnabled;
 
+                int j = list.Items.IndexOf(item);
+                if (j == 0)
+                {
+                    box.Text = ((int)float.Parse(box.Text.ToString())).ToString();
+                }
                 for(int i = 0; i < 3; i++)
                 {
                     ListBoxItem iter = (ListBoxItem) list.Items[i];
@@ -755,7 +1017,29 @@ namespace SceneEditor.editor
                     data[i] = float.Parse(value.Text.ToString());
                 }
                 mesh = new Mesh(size: (int) data[0], step: data[1], width: data[2]);
+                mesh.showMesh = showMesh;
+                mesh.isEnabled = isEnabled;
             }catch (Exception ex) { }
+        }
+
+        private void CheckBoxSwitched(object sender, RoutedEventArgs e)
+        {
+            mesh.isEnabled = (bool)(sender as CheckBox).IsChecked;
+        }
+
+        private void MeshTurnOxy(object sender, RoutedEventArgs e)
+        {
+            mesh.showMesh[0] = (bool)(sender as CheckBox).IsChecked;
+        }
+
+        private void MeshTurnOyz(object sender, RoutedEventArgs e)
+        {
+            mesh.showMesh[1] = (bool)(sender as CheckBox).IsChecked;
+        }
+
+        private void MeshTurnOxz(object sender, RoutedEventArgs e)
+        {
+            mesh.showMesh[2] = (bool)(sender as CheckBox).IsChecked;
         }
 
         // EVENTS FOR MESH SETTINGS END
@@ -822,21 +1106,9 @@ namespace SceneEditor.editor
                     meshTiled.Value[0].DataBuffer);
                 sections.Value[0].CountPolarFunction();
             }
-            if (key == Key.P)
-            {
-                meshTiled.Value[0].SwitchDotsVisibility();
-            }
             if (key == Key.O)
             {
                 meshTiled.Value[0].SwitchDrawStyle();
-            }
-            if (key == Key.L)
-            {
-                sections.Value[0].SwitchPlaneDisplaying();
-            }
-            if (key == Key.T)
-            {
-                meshUneven.Value[0].isEnabled = !meshUneven.Value[0].isEnabled;
             }
         }
     }
