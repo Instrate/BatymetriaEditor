@@ -220,11 +220,28 @@ namespace SceneEditor
             //Trender = new MultiThreader(8, editors[currentEditor].Render);
 
             editorStructure.Loaded += structureOnReady;
+            editorStructure.SelectionChanged += EditorStructureEditorChanged;
             editorSceneSettings.Loaded += EditorSceneSettingsLoaded;
+
 
             switchVisibleGLStatus();
 
             //glMain.RenderContinuously = true;
+        }
+
+        private void EditorStructureEditorChanged(object sender, SelectionChangedEventArgs e)
+        {
+            TabItem tab = (TabItem) editorStructure.SelectedItem;
+            if(tab != null)
+            {
+                if(tab.Header.ToString().CompareTo("+") == 0)
+                {
+                    editorAddNew();
+                    tab.Header = "Editor " + editors.Count;
+                    //editorStructure.Items.Add(Generate.TabItem(ButtonEventDeleteCurrentEditor));
+                }
+                structureUpdate();
+            }
         }
 
         private void EditorSceneSettingsLoaded(object sender, RoutedEventArgs e)
@@ -280,11 +297,12 @@ namespace SceneEditor
 
         private void structureUpdate()
         {
-            if (editors[currentEditorNum].isLoaded && editorStructure.IsLoaded)
+            if (editors[currentEditorNum].isLoaded && editorStructure.IsLoaded && editorStructure.SelectedItem != null)
             {
                 EditorSettings editor = editors[currentEditorNum];
                 TabItem tab = (TabItem)editorStructure.SelectedItem;
-                TreeView treeView = (TreeView)tab.Content;
+                DockPanel dock = (DockPanel) tab.Content;
+                TreeView treeView = (TreeView)dock.Children[0];
                 editor.UpdateTreeView(treeView);
             }     
         }
@@ -302,7 +320,18 @@ namespace SceneEditor
             editors.Add(new Editor(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight }));
             editorChangeCurrent(editors.Count - 1);
 
+            editorStructure.Items.Add(Generate.TabItem(ButtonEventDeleteCurrentEditor));
+
             structureUpdate();
+        }
+
+        public void ButtonEventDeleteCurrentEditor(object sender, RoutedEventArgs e)
+        {
+            editorStructure.SelectedItem = editorStructure.Items[editorStructure.SelectedIndex - 1];
+
+            DockPanel panel = (DockPanel) ((Button)sender).Parent;
+            TabItem tab = (TabItem)panel.Parent;
+            editorStructure.Items.Remove(tab);
         }
 
         private void editorChangeCurrent(int editorIndex)

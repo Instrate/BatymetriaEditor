@@ -24,13 +24,13 @@ namespace SceneEditor.editor
         private static readonly Stopwatch _stopwatch = Stopwatch.StartNew();
         private float elapsedTime = 0;
         private float timeDelta = 0;
-        
+
 
         // for the renderer
-        
+
         Matrix4 model;
         Matrix4 modelCramble;
-        
+
         int[] textureHandlers;
 
         public bool isLoaded = false;
@@ -100,6 +100,7 @@ namespace SceneEditor.editor
         {
             axis = new Axis();
             mesh = new Mesh(size: 20, step: 5, width: 0.5f);
+            mesh.showMesh[1] = mesh.showMesh[2] = false;
 
             lightBubble = new Cube(pos: new Vector3() { Z = 7f, X = 0, Y = 0 });
             lightBubble.Scale(new Vector3(0.1f));
@@ -135,7 +136,10 @@ namespace SceneEditor.editor
             shader.SetMatrix4("projection", cameras[activeCam].cam.GetProjectionMatrix());
         }
 
+        public void ExportData()
+        {
 
+        }
 
         
         [MTAThread]

@@ -70,8 +70,11 @@
                     <TabItem Header="Structure">
                         <TabControl x:Name="editorStructure">
                             <TabItem Header="Main">
-                                <TreeView>
-                                </TreeView>
+                                <DockPanel VerticalAlignment="Stretch">
+                                    <TreeView DockPanel.Dock="Top" VerticalAlignment="Top">
+
+                                    </TreeView>
+                                </DockPanel>
                             </TabItem>
                         </TabControl>
                     </TabItem>

@@ -3,12 +3,9 @@ using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace SceneEditor.editor
 {
@@ -30,91 +27,7 @@ namespace SceneEditor.editor
         };
 
         // change to the right type
-        
-    }
 
-    public static class Generate
-    {
-        public static Expander Expander(string Header, object? content = null)
-        {
-            Expander exp = new Expander();
-            exp.Header = Header;
-            exp.Content = content;
-            return exp;
-        }
-
-        public static StackPanel StackPanel(UIElement content)
-        {
-            StackPanel stackPanel = new StackPanel();
-            stackPanel.Children.Add(content);
-            return stackPanel;
-        }
-
-        public static ListBoxItem ListBoxItem(object content)
-        {
-            ListBoxItem item = new ListBoxItem();
-            item.Content = content is string ? TextBlock(content) : content;
-            item.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-            return item;
-        }
-
-        public static TextBlock TextBlock(object text)
-        {
-            TextBlock block = new TextBlock();
-            block.Text = text.ToString();
-            return block;
-        }
-
-        public static TextBox TextBox(object text)
-        {
-            TextBox block = new TextBox();
-            block.Text = text.ToString();
-            block.IsReadOnly = false;
-            return block;
-        }
-
-        public static ScrollViewer ScrollViewer(object content)
-        {
-            ScrollViewer scrollViewer = new ScrollViewer();
-            scrollViewer.Content = content;
-            return scrollViewer;
-        }
-
-        public static Thickness Thickness(double thickness)
-        {
-            return new Thickness(thickness);
-        }
-
-        public static Border Border(double thickness)
-        {
-            Border border = new Border(); 
-            border.BorderThickness = Thickness(thickness);
-            return border;
-        }
-
-        public static CheckBox CheckBox(object content, bool isChecked = false)
-        {
-            CheckBox checkBox = new CheckBox();
-            checkBox.IsChecked = isChecked;
-            checkBox.Content = content;
-            return checkBox;
-        }
-    
-        public static Button Button(string name, RoutedEventHandler Event)
-        {
-            Button button = new Button();
-            button.Content = TextBlock(name);
-            button.Click += Event;
-            return button;
-        }
-    
-        public static ComboBoxItem ComboBoxItem(string content)
-        {
-            ComboBoxItem item = new ComboBoxItem();
-            item.Content = TextBlock(content);
-            //item.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-            return item;
-        }
     }
 
     public class EditorSettings
@@ -277,7 +190,7 @@ namespace SceneEditor.editor
                             );
                         list.Items.Add(buttonStyle);
 
-                        
+
                     }; break;
                 case 1:
                     {
@@ -286,7 +199,7 @@ namespace SceneEditor.editor
                         Expander expVert = Generate.Expander("Vertices", listSet);
                         list.Items.Add(expVert);
 
-                        if((currentProperty as Section).intersected)
+                        if ((currentProperty as Section).intersected)
                         {
                             CheckBox showAreaMesh = CreateCheckBoxSetting(
                                                    "Show intersected area",
@@ -313,7 +226,7 @@ namespace SceneEditor.editor
                             listOpt.Items.Add(Generate.ListBoxItem(comboChoose));
                             listOpt.Items.Add(Generate.ListBoxItem(buttonIntersect));
 
-                            for(int i = 0; i < meshTiled.Value.Count; i++)
+                            for (int i = 0; i < meshTiled.Value.Count; i++)
                             {
                                 comboChoose.Items.Add(Generate.ComboBoxItem("mesh " + (i + 1)));
                             }
@@ -337,7 +250,7 @@ namespace SceneEditor.editor
 
 
                     }; break;
-               default:
+                default:
                     {
                         CheckBox vertices = CreateCheckBoxSetting(
                                                     "Show vertices",
@@ -389,11 +302,12 @@ namespace SceneEditor.editor
                     try
                     {
                         value = float.Parse(box.Text.ToString());
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         value = (currentProperty as Section).chars[i][j];
                     }
-                    
+
                     data[i][j] = value;
                 }
             }
@@ -410,7 +324,7 @@ namespace SceneEditor.editor
         {
             Button button = (Button)sender;
             ListBoxItem item = (ListBoxItem)button.Parent;
-            ListBox list = (ListBox) item.Parent;
+            ListBox list = (ListBox)item.Parent;
             ListBoxItem itemCombo = (ListBoxItem)list.Items[0];
             ComboBox comboBox = (ComboBox)itemCombo.Content;
             ComboBoxItem comboItem = (ComboBoxItem)comboBox.SelectedItem;
@@ -418,13 +332,13 @@ namespace SceneEditor.editor
             string text = block.Text;
             string[] opts = text.Split(' ');
             int ind = int.Parse(opts[opts.Length - 1]);
-            
-            if(opts[0].CompareTo("mesh") == 0)
+
+            if (opts[0].CompareTo("mesh") == 0)
             {
-                ComplexPlaneTile tiled = meshTiled.Value[ind-1];
+                ComplexPlaneTile tiled = meshTiled.Value[ind - 1];
                 ((Section)currentProperty).IntersectTiled(tiled.Xmesh, tiled.Ymesh, tiled.DataBuffer);
             }
-          
+
         }
 
         private void SectionSwitchPolarDisplay(object sender, RoutedEventArgs e)
@@ -452,13 +366,14 @@ namespace SceneEditor.editor
             if (currentProperty is ComplexPlaneTile)
             {
                 (currentProperty as ComplexPlaneTile).showDots = state;
-            } else
+            }
+            else
             if (currentProperty is ComplexPlaneTriangular)
             {
                 (currentProperty as ComplexPlaneTriangular).showDots = state;
             }
         }
-        
+
         private void SwitchDisplayMainGeometry(object sender, RoutedEventArgs e)
         {
             bool state = (bool)(sender as CheckBox).IsChecked;
@@ -476,14 +391,16 @@ namespace SceneEditor.editor
         private void SwitchObjectDrawingEnabled(object sender, RoutedEventArgs e)
         {
             bool state = (bool)(sender as CheckBox).IsChecked;
-            if(currentProperty is ComplexPlaneTile) 
+            if (currentProperty is ComplexPlaneTile)
             {
                 (currentProperty as ComplexPlaneTile).isEnabled = state;
-            } else
+            }
+            else
             if (currentProperty is Section)
             {
                 (currentProperty as Section).isEnabled = state;
-            } else
+            }
+            else
             if (currentProperty is ComplexPlaneTriangular)
             {
                 (currentProperty as ComplexPlaneTriangular).isEnabled = state;
@@ -499,7 +416,7 @@ namespace SceneEditor.editor
             exp.HorizontalContentAlignment = HorizontalAlignment.Stretch;
             ListBox list = new ListBox();
             list.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-            for(int i = 0; i < cameras.Length; i++)
+            for (int i = 0; i < cameras.Length; i++)
             {
                 Expander camWithSettings = Generate.Expander("camera " + (i + 1));
                 camWithSettings.Content = _getCamSettings(i);
@@ -530,7 +447,7 @@ namespace SceneEditor.editor
             {
                 List<CameraControl> buffer = cameras.ToList();
                 buffer.Add(new CameraControl(SizeToVector2i(selfSize)));
-               
+
                 activeCam = cameras.Length;
                 cameras = buffer.ToArray();
                 cameras[activeCam].cam.Fov = 90f;
@@ -621,7 +538,7 @@ namespace SceneEditor.editor
         private ListBoxItem CreateItemWithValueChangeable(
             string Name,
             float valueIn,
-            TextChangedEventHandler textEvent  
+            TextChangedEventHandler textEvent
             )
         {
             DockPanel panel = new DockPanel();
@@ -664,7 +581,7 @@ namespace SceneEditor.editor
             panel.Children.Add(value);
             panel.Children.Add(slider);
 
-            
+
             item.HorizontalContentAlignment = HorizontalAlignment.Stretch;
             return item;
         }
@@ -695,7 +612,7 @@ namespace SceneEditor.editor
             panel.Children.Add(list);
             list.HorizontalContentAlignment = HorizontalAlignment.Stretch;
 
-            for(int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 DockPanel panelValue = new DockPanel();
                 TextBlock valueName = Generate.TextBlock(names[i]);
@@ -707,7 +624,7 @@ namespace SceneEditor.editor
                 panelValue.Children.Add(value);
                 ListBoxItem itemValue = Generate.ListBoxItem(panelValue);
                 itemValue.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-                
+
                 list.Items.Add(itemValue);
             }
 
@@ -718,7 +635,7 @@ namespace SceneEditor.editor
         private ListBox _getCamSettings(int index)
         {
             ListBox list = new ListBox();
-  
+
             list.Items.Add(CreateCamSettingWithSlider(
                 "Sensitivity",
                 0,
@@ -765,22 +682,22 @@ namespace SceneEditor.editor
 
             ListBoxItem itemActive = (ListBoxItem)list.Items[activeCam];
 
-            Expander expCamI = (Expander) itemActive.Content;
+            Expander expCamI = (Expander)itemActive.Content;
 
             ListBox listSettings = (ListBox)expCamI.Content;
 
             // property now
-            ListBoxItem itemPos = (ListBoxItem) listSettings.Items[3];
+            ListBoxItem itemPos = (ListBoxItem)listSettings.Items[3];
 
             DockPanel dockPanel = (DockPanel)itemPos.Content;
 
-            ListBox listContent = (ListBox) dockPanel.Children[1];
+            ListBox listContent = (ListBox)dockPanel.Children[1];
 
             for (int i = 0; i < 3; i++)
             {
-                ListBoxItem coord = (ListBoxItem) listContent.Items[i];
-                DockPanel dockSet = (DockPanel) coord.Content;
-                TextBox text = (TextBox) dockSet.Children[1];
+                ListBoxItem coord = (ListBoxItem)listContent.Items[i];
+                DockPanel dockSet = (DockPanel)coord.Content;
+                TextBox text = (TextBox)dockSet.Children[1];
                 text.Text = newPos[i].ToString();
             }
         }
@@ -798,7 +715,7 @@ namespace SceneEditor.editor
                 }
                 else
                 {
-                    if(newValue < slider.Minimum)
+                    if (newValue < slider.Minimum)
                     {
                         newValue = slider.Minimum;
                     }
@@ -914,7 +831,7 @@ namespace SceneEditor.editor
             {
                 Slider slider = (Slider)sender;
                 DockPanel panel = (DockPanel)slider.Parent;
-                if(panel != null)
+                if (panel != null)
                 {
                     ListBoxItem item = (ListBoxItem)panel.Parent;
                     ListBox list = (ListBox)item.Parent;
@@ -930,7 +847,7 @@ namespace SceneEditor.editor
             {
                 return 0;
             }
-            
+
         }
 
         private TextBox? _getTextBoxOfCamSetting(object sender)
@@ -946,8 +863,8 @@ namespace SceneEditor.editor
             {
                 float newValue = Functions.CutFraction((float)e.NewValue, 2);
                 cameras[_getIndexOfCamFromSetting(sender)].cameraSpeed = newValue;
-                TextBox? box= _getTextBoxOfCamSetting(sender);
-                if(box != null)
+                TextBox? box = _getTextBoxOfCamSetting(sender);
+                if (box != null)
                 {
                     box.Text = newValue.ToString();
                 }
@@ -982,7 +899,7 @@ namespace SceneEditor.editor
                     box.Text = newValue.ToString();
                 }
             }
-            catch(Exception ex) { }
+            catch (Exception ex) { }
         }
 
         // EVENTS FOR CAM SETTINGS END
@@ -999,7 +916,7 @@ namespace SceneEditor.editor
             {
                 float[] data = new float[3];
                 TextBox box = (TextBox)sender;
-                ListBoxItem item = (ListBoxItem)((DockPanel) box.Parent).Parent;
+                ListBoxItem item = (ListBoxItem)((DockPanel)box.Parent).Parent;
                 ListBox list = (ListBox)item.Parent;
 
                 bool[] showMesh = mesh.showMesh;
@@ -1010,16 +927,17 @@ namespace SceneEditor.editor
                 {
                     box.Text = ((int)float.Parse(box.Text.ToString())).ToString();
                 }
-                for(int i = 0; i < 3; i++)
+                for (int i = 0; i < 3; i++)
                 {
-                    ListBoxItem iter = (ListBoxItem) list.Items[i];
+                    ListBoxItem iter = (ListBoxItem)list.Items[i];
                     TextBox value = (iter.Content as DockPanel).Children[1] as TextBox;
                     data[i] = float.Parse(value.Text.ToString());
                 }
-                mesh = new Mesh(size: (int) data[0], step: data[1], width: data[2]);
+                mesh = new Mesh(size: (int)data[0], step: data[1], width: data[2]);
                 mesh.showMesh = showMesh;
                 mesh.isEnabled = isEnabled;
-            }catch (Exception ex) { }
+            }
+            catch (Exception ex) { }
         }
 
         private void CheckBoxSwitched(object sender, RoutedEventArgs e)
