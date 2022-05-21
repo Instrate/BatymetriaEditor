@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using LearnOpenTK.Common;
 using OpenTK.Graphics.OpenGL4;
-
-using LearnOpenTK.Common;
-using System.Diagnostics;
 using OpenTK.Mathematics;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace SceneEditor.editor
@@ -18,7 +15,7 @@ namespace SceneEditor.editor
         // to remove
         ComplexPlaneTile bottom;
         Section section;
-        
+
         // fix usage
         //Vector3 lightPos;
         Cube lightBubble;
@@ -27,13 +24,13 @@ namespace SceneEditor.editor
         private static readonly Stopwatch _stopwatch = Stopwatch.StartNew();
         private float elapsedTime = 0;
         private float timeDelta = 0;
-        Size selfSize;
+        
 
         // for the renderer
-        public Shader shader;
+        
         Matrix4 model;
         Matrix4 modelCramble;
-        Matrix4 view;
+        
         int[] textureHandlers;
 
         public bool isLoaded = false;
@@ -44,11 +41,11 @@ namespace SceneEditor.editor
             selfSize = windowSize;
 
             Initialize();
-            
-            
+
+
             addNewPointsDataset(
                 new ComplexPlaneTriangular(
-                    shouldTriangulate:true,
+                    shouldTriangulate: true,
                     textureSet: new string[] { TexturePath.dark_paths,
                         TexturePath.dark_paths,
                         TexturePath.dark_paths
@@ -58,7 +55,7 @@ namespace SceneEditor.editor
 
             //bottom = meshUneven.Value[0].ConvertToTiledByInterpolation();
 
-            section = new Section(new Vector3(-4,-7,4), new Vector3(3, 6, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
+            section = new Section(new Vector3(-4, -7, 4), new Vector3(3, 6, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
 
             addNewSection(section);
 
@@ -102,7 +99,7 @@ namespace SceneEditor.editor
         private void _setupObjects()
         {
             axis = new Axis();
-            mesh = new Mesh(size: 15, step:10, width: 0.5f);
+            mesh = new Mesh(size: 15, step: 10, width: 0.5f);
 
             lightBubble = new Cube(pos: new Vector3() { Z = 7f, X = 0, Y = 0 });
             lightBubble.Scale(new Vector3(0.1f));
@@ -138,46 +135,9 @@ namespace SceneEditor.editor
             shader.SetMatrix4("projection", cameras[activeCam].cam.GetProjectionMatrix());
         }
 
-        private Vector2i SizeToVector2i(Size size)
-        {
-            return new Vector2i { X = (int)size.Width, Y = (int)size.Height };
-        }
 
-        public void addCamera(bool isOrthogonalPerspective = false)
-        {
-            if (cameras.Length != 0 && cameras.Length < 5)
-            {
-                CameraControl[] camsBuffer = new CameraControl[cameras.Length + 1];
-                for (int i = 0; i < cameras.Length; i++)
-                {
-                    camsBuffer[i] = cameras[i];
-                }
-                camsBuffer[cameras.Length] = new CameraControl(SizeToVector2i(selfSize));
-                
-                activeCam = cameras.Length;
-                cameras = camsBuffer;
-                cameras[activeCam].cam.Fov = 90f;
 
-                view = cameras[activeCam].cam.GetViewMatrix();
-                shader.SetMatrix4("view", view);
-            }
-        }
-
-        public void cameraChange(int shift = 0)
-        {
-            activeCam += shift;
-            if(activeCam == cameras.Length)
-            {
-                activeCam = 0;
-            }
-            if(activeCam < 0)
-            {
-                activeCam = cameras.Length - 1;
-            }
-            view = cameras[activeCam].cam.GetViewMatrix();
-            shader.SetMatrix4("view", cameras[activeCam].cam.GetViewMatrix());
-        }
-
+        
         [MTAThread]
         public void OnResize(Size windowSizeNew)
         {
@@ -209,14 +169,14 @@ namespace SceneEditor.editor
 
         public void OnMouseWheel(MouseWheelEventArgs e)
         {
-            
+
             //cameras[activeCam].cam.Fov = 90f - e.Delta / 10;
             //shader.SetMatrix4("projection", cameras[activeCam].cam.GetProjectionMatrix());
         }
 
         public int[] getAttribLocations(int programHandle, string[] names)
         {
-            int[] layouts = new int[names.Length]; 
+            int[] layouts = new int[names.Length];
             for (int i = 0; i < names.Length; i++)
             {
                 layouts[i] = GL.GetAttribLocation(programHandle, names[i]);
@@ -320,8 +280,8 @@ namespace SceneEditor.editor
             //var shift = 0.125f;
             //float rotation = (MathF.Pow(2, -4) * MathF.PI);
             //float scale = 1.0625f;
-           
-            if(key == Key.F)
+
+            if (key == Key.F)
             {
                 cameras[activeCam].grabedMouse = !cameras[activeCam].grabedMouse;
             }
@@ -333,79 +293,15 @@ namespace SceneEditor.editor
             }
             else
             {
-                if (key == Key.OemPlus)
-                {
-                    addCamera();
-                }
-                if (key == Key.NumPad9)
-                {
-                    cameraChange(1);
-                }
-                if (key == Key.NumPad3)
-                {
-                    cameraChange(-1);
-                }
-                if (key == Key.I)
-                {
-                    bottom.Interp(0.9f, 1);
-                }
-                if (key == Key.K)
-                {
-                    bottom.Interp(1.1f, 1);
-                }
-                if (key == Key.PageUp)
-                {
-                    bottom.MoveVisibleMesh(0, 0, 0, 0, 1, 1);
-                }
-                if (key == Key.PageDown)
-                {
-                    bottom.MoveVisibleMesh(0, 0, 0, 0, -1, -1);
-                }
-                if (key == Key.Up)
-                {
-                    bottom.MoveVisibleMesh(0, 1, 0, 0, 0, 0);
-                }
-                if (key == Key.Down)
-                {
-                    bottom.MoveVisibleMesh(0, -1, 0, 0, 0, 0);
-                }
-                if (key == Key.Left)
-                {
-                    bottom.MoveVisibleMesh(-1, 0, 0, 0, 0, 0);
-                }
-                if (key == Key.Right)
-                {
-                    bottom.MoveVisibleMesh(1, 0, 0, 0, 0, 0);
-                }
-                if (key == Key.J)
-                {
-                    // test intersection
-                    section.IntersectTiled(bottom.Xmesh, bottom.Ymesh, bottom.DataBuffer);
-                    section.CountPolarFunction();
-                }
-                if (key == Key.P)
-                {
-                    bottom.SwitchDotsVisibility();
-                }
-                if (key == Key.O)
-                {
-                    bottom.SwitchDrawStyle();
-                }
-                if (key == Key.L)
-                {
-                    section.SwitchPlaneDisplaying();
-                }
-                if (key == Key.T)
-                {
-                    meshUneven.Value[0].isEnabled = !meshUneven.Value[0].isEnabled;
-                }
+                
             }
+            
         }
 
         [MTAThread]
         public void OnMouseMove(MouseEventArgs mouse, Point pointGL, Point pointScreen)
         {
-            
+
             if (cameras[activeCam].grabedMouse)
             {
                 cameras[activeCam].OnMouseMove(mouse, selfSize, pointGL, pointScreen);
@@ -422,7 +318,7 @@ namespace SceneEditor.editor
             {
                 cameras[activeCam].OnMouseLeave();
             }
-            
+
         }
 
         ~Editor()

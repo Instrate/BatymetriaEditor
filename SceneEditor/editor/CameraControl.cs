@@ -22,6 +22,7 @@ namespace SceneEditor.editor
 
         public bool grabedMouse;
         bool _firstMove;
+        public bool isMoved = false;
 
         Vector2 _lastPos;
 
@@ -147,6 +148,7 @@ namespace SceneEditor.editor
                     }; break;
             }
 
+            isMoved = true;
         }
 
         private void cameraView()

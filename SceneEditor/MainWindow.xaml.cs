@@ -36,7 +36,8 @@ namespace SceneEditor
 
         // TODO: make it a resizable array for performance
         private List<Editor> editors = new List<Editor>();
-        private int currentEditor;
+        private EditorSettings currentEditor;
+        private int currentEditorNum;
 
         float ticker = 0;
 
@@ -104,7 +105,7 @@ namespace SceneEditor
 
         private void OnPreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
         {
-            editors[currentEditor].OnMouseWheel(e);
+            editors[currentEditorNum].OnMouseWheel(e);
         }
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
@@ -118,8 +119,9 @@ namespace SceneEditor
         private void OnMouseEnter(object sender, MouseEventArgs e)
         {
             glMain.Focus();
-            editors[currentEditor].OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
+            editors[currentEditorNum].OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
             textKey.Text = "Pressed: no key is pressed yet";
+
             
         }
 
@@ -133,9 +135,22 @@ namespace SceneEditor
             var key = e.Key;
             textKey.Text = "Pressed: " + key.ToString();
 
-            editors[currentEditor].OnKeyDown(e);
+            if (editors[currentEditorNum].cameras[editors[currentEditorNum].activeCam].grabedMouse)
+            {
+                editors[currentEditorNum].OnKeyDown(e);
+            }
+            else
+            {
+                currentEditor.OnKeyDown(e); 
+            }
 
             switchVisibleGLStatus();
+
+            if (currentEditor.cameras[currentEditor.activeCam].isMoved)
+            {
+                currentEditor.CamUpdatedPosition();
+                currentEditor.cameras[currentEditor.activeCam].isMoved = false;
+            }
         }
 
         private void OnMouseMove(object sender, MouseEventArgs mouse)
@@ -146,21 +161,32 @@ namespace SceneEditor
 
             textMouse.Text = msg;
 
-            editors[currentEditor].OnMouseMove(mouse, pos, glMain.PointToScreen(pos));
+            editors[currentEditorNum].OnMouseMove(mouse, pos, glMain.PointToScreen(pos));
+
+            //// posible event placer
+            //if (currentEditor.doInvalidate)
+            //{
+                
+            //    currentEditor.doInvalidate = false;
+            //}
+
 
             switchVisibleGLStatus();
         }
 
         private void OnPreviewMouseKeyPressed(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            editors[currentEditor].OnMouseButtonPressed(e);
-
+            if(glMain.IsMouseDirectlyOver == true)
+            {
+                editors[currentEditorNum].OnMouseButtonPressed(e);
+            }
+            
             switchVisibleGLStatus();
         }
 
         private void switchVisibleGLStatus()
         {
-            if (editors[currentEditor].cameras[editors[currentEditor].activeCam].grabedMouse)
+            if (editors[currentEditorNum].cameras[editors[currentEditorNum].activeCam].grabedMouse)
             {
                 tabWindows.Background = Brushes.Black;
                 glMain.Cursor = Cursors.None;
@@ -194,8 +220,16 @@ namespace SceneEditor
             //Trender = new MultiThreader(8, editors[currentEditor].Render);
 
             editorStructure.Loaded += structureOnReady;
+            editorSceneSettings.Loaded += EditorSceneSettingsLoaded;
 
             switchVisibleGLStatus();
+
+            //glMain.RenderContinuously = true;
+        }
+
+        private void EditorSceneSettingsLoaded(object sender, RoutedEventArgs e)
+        {
+            currentEditor.EditorChanged();
         }
 
         private float tickerFrames = 0;
@@ -210,17 +244,17 @@ namespace SceneEditor
             {
                 textFps.Text = "FPS: " + (Math.Truncate(1.0f / delta.TotalSeconds)).ToString();
                 ticker = 0;
-                if (editors[currentEditor].doUpdate)
+                if (editors[currentEditorNum].doUpdate)
                 {
                     structureUpdate();
-                    editors[currentEditor].doUpdate = false;
+                    editors[currentEditorNum].doUpdate = false;
                 }
             }
 
             tickerFrames += (float)delta.TotalSeconds;
             if (tickerFrames < 1f / 30)
             {
-                editors[currentEditor].Render();
+                editors[currentEditorNum].Render();
             }
             else
             {
@@ -231,8 +265,11 @@ namespace SceneEditor
         private void structureOnReady(object sender, RoutedEventArgs e)
         {
             editorStructure.SelectionChanged += structureSelectionChanged;
-            editorStructure.SelectedIndex = currentEditor;
+            editorStructure.SelectedIndex = currentEditorNum;
             structureUpdate();
+
+            //currentEditor = editors[currentEditorNum];
+            //currentEditor.addDependencyBoxes(editorElementSettings, editorSceneSettings);
         }
 
         private void structureSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -241,23 +278,11 @@ namespace SceneEditor
             structureUpdate();
         }
 
-        private void structureCreate()
-        {
-            editorStructure.SelectedIndex = currentEditor;
-            TabItem item = (TabItem)editorStructure.SelectedItem;
-            TreeView treeView = (TreeView)item.Content;      
-        }
-
-        private void structureViewAdd()
-        {
-
-        }
-
         private void structureUpdate()
         {
-            if (editors[currentEditor].isLoaded && editorStructure.IsLoaded)
+            if (editors[currentEditorNum].isLoaded && editorStructure.IsLoaded)
             {
-                EditorSettings editor = editors[currentEditor];
+                EditorSettings editor = editors[currentEditorNum];
                 TabItem tab = (TabItem)editorStructure.SelectedItem;
                 TreeView treeView = (TreeView)tab.Content;
                 editor.UpdateTreeView(treeView);
@@ -268,14 +293,14 @@ namespace SceneEditor
         {
             if (sender is GLWpfControl)
             {
-                editors[currentEditor].OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
+                editors[currentEditorNum].OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
             }
         }
 
         private void editorAddNew()
         {
             editors.Add(new Editor(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight }));
-            currentEditor = editors.Count - 1;
+            editorChangeCurrent(editors.Count - 1);
 
             structureUpdate();
         }
@@ -287,16 +312,17 @@ namespace SceneEditor
             {
                 return;
             }
-            currentEditor = editorIndex;
-        }
-        
-        // !!!!!
-        private void elementSettingsLoad()
-        {
+            currentEditorNum = editorIndex;
 
+            currentEditor = editors[currentEditorNum];
+            currentEditor.addDependencyBoxes(editorElementSettings, editorSceneSettings);
+
+            if (editorSceneSettings.IsLoaded)
+            {
+                currentEditor.EditorChanged();
+            }
+            
         }
 
     }
-
-
 }

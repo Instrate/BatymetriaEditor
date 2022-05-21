@@ -86,7 +86,9 @@
                         </ListBox>
                     </TabItem>
                     <TabItem Header="Scene">
+                        <ListBox Width="Auto" x:Name="editorSceneSettings">
 
+                        </ListBox>
                     </TabItem>
                 </TabControl>
             </Grid>

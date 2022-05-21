@@ -12,6 +12,12 @@ namespace SceneEditor.editor
     {
         private static readonly Random rand = new System.Random();
 
+        public static float CutFraction(float income, int amountToKeep = 0)
+        {
+            float temp = MathF.Pow(10, amountToKeep);
+            return MathF.Truncate(income * temp) / temp;
+        }
+
         public static float Random(int min = int.MinValue, int max = int.MaxValue, float amountOfAfterPoint = 0)
         {
             float num = rand.Next(min, max);
