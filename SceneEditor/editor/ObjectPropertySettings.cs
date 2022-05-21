@@ -97,6 +97,7 @@ namespace SceneEditor.editor
         {
             ListBoxItem item = new ListBoxItem();
             item.Content = content is string ? TextBlock(content) : content;
+            item.HorizontalContentAlignment = HorizontalAlignment.Stretch;
             return item;
         }
 
@@ -134,6 +135,13 @@ namespace SceneEditor.editor
             return border;
         }
 
+        public static CheckBox CheckBox(object content, bool isChecked = false)
+        {
+            CheckBox checkBox = new CheckBox();
+            checkBox.IsChecked = isChecked;
+            checkBox.Content = content;
+            return checkBox;
+        }
     }
 
     public class EditorSettings
@@ -250,51 +258,26 @@ namespace SceneEditor.editor
         public void EditorChanged()
         {
             editorProperties.Items.Clear();
-
-            
             // cameras
             Expander exp = Generate.Expander("Cameras");
             exp.HorizontalContentAlignment = HorizontalAlignment.Stretch;
             ListBox list = new ListBox();
             list.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-            //bool bounds = false;
-            //list.ClipToBounds = bounds;
             for(int i = 0; i < cameras.Length; i++)
             {
-                // to change
                 Expander camWithSettings = Generate.Expander("camera " + (i + 1));
-                //camWithSettings.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-                //camWithSettings.ClipToBounds = bounds;
-
                 camWithSettings.Content = _getCamSettings(i);
-
-
                 ListBoxItem item = Generate.ListBoxItem(camWithSettings);
-
-                //item.ClipToBounds = bounds;
                 item.BorderThickness = Generate.Thickness(2);
-
-                //item.HorizontalContentAlignment = HorizontalAlignment.Stretch;
                 list.Items.Add(item);
             }
-            //StackPanel panel = Generate.StackPanel(list);
-            //panel.Orientation = Orientation.Horizontal;
             exp.Content = list;
-
-
-
-            //DockPanel dock = new DockPanel();
-
-            //exp.Content = dock;
-            //TextBlock text = new TextBlock();
-
-            //text.Text = "O my";
-
-            //DockPanel.SetDock(exp, Dock.Left);
-
-            //dock.Children.Add(text);
-
             editorProperties.Items.Add(exp);
+
+            exp = Generate.Expander("Mesh");
+            exp.Content = CreateMeshSettings();
+            editorProperties.Items.Add(exp);
+
             editorProperties.HorizontalContentAlignment = HorizontalAlignment.Stretch;
         }
 
@@ -341,6 +324,64 @@ namespace SceneEditor.editor
             return new Vector2i { X = (int)size.Width, Y = (int)size.Height };
         }
     
+
+        private ListBox CreateMeshSettings()
+        {
+            ListBox listSet = new ListBox();
+
+            listSet.Items.Add(CreateItemWithValueChangeable(
+                "Size:",
+                mesh.size,
+                MeshParamChanged
+                ));
+            listSet.Items.Add(CreateItemWithValueChangeable(
+                "Step:",
+                mesh.step,
+                MeshParamChanged
+                ));
+            listSet.Items.Add(CreateItemWithValueChangeable(
+                "Line width:",
+                mesh.width,
+                MeshParamChanged
+                ));
+            listSet.Items.Add(Generate.ListBoxItem(CreateCheckBoxSetting("Enable", mesh.isEnabled)));
+
+            listSet.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+            return listSet;
+        }
+
+        private CheckBox CreateCheckBoxSetting(
+            string Name,
+            bool initialState
+            )
+        {
+            CheckBox checkBox = Generate.CheckBox(Generate.TextBlock(Name), initialState);
+            checkBox.Unchecked += CheckBoxSwitched;
+            checkBox.Checked += CheckBoxSwitched;
+            return checkBox;
+        }
+
+        private void CheckBoxSwitched(object sender, RoutedEventArgs e)
+        {
+            mesh.isEnabled = (bool)(sender as CheckBox).IsChecked;
+        }
+
+        private ListBoxItem CreateItemWithValueChangeable(
+            string Name,
+            float valueIn,
+            TextChangedEventHandler textEvent  
+            )
+        {
+            DockPanel panel = new DockPanel();
+            TextBlock name = Generate.TextBlock(Name);
+            TextBox value = Generate.TextBox(valueIn);
+            DockPanel.SetDock(name, Dock.Left);
+            DockPanel.SetDock(value, Dock.Right);
+            value.TextChanged += textEvent;
+            panel.Children.Add(name);
+            panel.Children.Add(value);
+            return Generate.ListBoxItem(panel);
+        }
 
         private ListBoxItem CreateCamSettingWithSlider(
             string Name,
@@ -688,6 +729,37 @@ namespace SceneEditor.editor
 
         // EVENTS FOR CAM SETTINGS END
         // ---------------------------
+
+
+
+        // EVENTS FOR MESH SETTINGS START
+        // ------------------------------
+
+        private void MeshParamChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                float[] data = new float[3];
+                TextBox box = (TextBox)sender;
+                ListBoxItem item = (ListBoxItem)((DockPanel) box.Parent).Parent;
+                ListBox list = (ListBox)item.Parent;
+
+                int j = list.Items.IndexOf(item);
+                if (j == 0) ;
+                box.Text = ((int)float.Parse(box.Text.ToString())).ToString();
+
+                for(int i = 0; i < 3; i++)
+                {
+                    ListBoxItem iter = (ListBoxItem) list.Items[i];
+                    TextBox value = (iter.Content as DockPanel).Children[1] as TextBox;
+                    data[i] = float.Parse(value.Text.ToString());
+                }
+                mesh = new Mesh(size: (int) data[0], step: data[1], width: data[2]);
+            }catch (Exception ex) { }
+        }
+
+        // EVENTS FOR MESH SETTINGS END
+        // ----------------------------
 
         public void OnKeyDown(KeyEventArgs e)
         {

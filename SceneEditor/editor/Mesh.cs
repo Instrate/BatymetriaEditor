@@ -12,36 +12,43 @@ namespace SceneEditor.editor
     public class Mesh : Moveable
     {
         public int size;
-        public int length;
+        public float step;
 
         private Line[] lines;
 
-        float width;
+        public float width;
+
+        public float height;
 
         public Mesh(int size = 20, float step = 10.0f, float height = 0, float width = 0.5f)
         {
-            length = size * 2;
-            int amount = 2 * length + 2;
+            size = size % 2 == 1  ? size : size + 1;
+            int sizeAwayFromCenter = size / 2;
+            this.size = size;
+            int amount = 2 * size;
 
             this.width = width;
+            
 
             lines = new Line[amount];
 
-            float x = -size * step;
+            this.step = step;
+            float x = -sizeAwayFromCenter * step;
             float y = x;
             float z = height;
+            this.height = height;
 
-            float yy = size * step;
-            for(int i = 0; i < length + 1; i++)
+            float yy = sizeAwayFromCenter * step;
+            for(int i = 0; i < size; i++)
             {
                 lines[i] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: x, y: yy, z: z));
                 x += step;
             }
             x = y;
-            float xx = size * step;
-            for (int i = 0; i < length + 1; i++)
+            float xx = sizeAwayFromCenter * step;
+            for (int i = 0; i < size; i++)
             {
-                lines[length + 1 + i] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: xx, y: y, z: z));
+                lines[size + i] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: xx, y: y, z: z));
                 y += step;
             }
 

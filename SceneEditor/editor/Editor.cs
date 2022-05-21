@@ -99,7 +99,7 @@ namespace SceneEditor.editor
         private void _setupObjects()
         {
             axis = new Axis();
-            mesh = new Mesh(size: 15, step: 10, width: 0.5f);
+            mesh = new Mesh(size: 30, step: 10, width: 0.5f);
 
             lightBubble = new Cube(pos: new Vector3() { Z = 7f, X = 0, Y = 0 });
             lightBubble.Scale(new Vector3(0.1f));
