@@ -54,19 +54,7 @@ namespace SceneEditor
             panelRoot.Focus();
         }
 
-        public static void EventInform(ListView console, String text)
-        {
-            var amount = console.Items.Count;
-
-            if (amount > 100)
-            {
-                console.Items.Clear();
-            }
-
-            console.Items.Add(text);
-            console.SelectedIndex = console.Items.Count;
-
-        }
+        
 
         private void initItems()
         {
@@ -92,14 +80,11 @@ namespace SceneEditor
                 
                 glMain.Start(windowSettings);
 
-                EventInform(listViewProcess, "Editor has been started successfuly");
-                EventInform(listViewProcess, "Press \"F\" or RMB over GL window to switch mouse being grabbed");
-                EventInform(listViewProcess, "Keep pressing LMB to move camera while mouse grabbed");
-                EventInform(listViewProcess, "Use WASD, Ctrl, Shift to move");
+                
             }
             catch (Exception ex)
             {
-                EventInform(listViewProcess, "An error occured");
+                //EventInform(listViewProcess, "An error occured");
                 MessageBox.Show(ex.Message);
             }
         }
@@ -350,7 +335,9 @@ namespace SceneEditor
             currentEditorNum = editorIndex;
 
             currentEditor = editors[currentEditorNum];
+            currentEditor.listViewProcess = listViewProcess;
             currentEditor.addDependencyBoxes(editorElementSettings, editorSceneSettings);
+            
 
             if (editorSceneSettings.IsLoaded)
             {

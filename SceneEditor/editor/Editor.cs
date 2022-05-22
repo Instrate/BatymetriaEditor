@@ -46,13 +46,13 @@ namespace SceneEditor.editor
             Initialize();
 
 
-            addNewPointsDataset(
-                new ComplexPlaneTriangular(
-                    shouldTriangulate: true,
-                    textureSet: new string[] { TexturePath.dark_paths,
-                        TexturePath.dark_paths,
-                        TexturePath.dark_paths
-                    }));
+            //addNewPointsDataset(
+            //    new ComplexPlaneTriangular(
+            //        shouldTriangulate: true,
+            //        textureSet: new string[] { TexturePath.dark_paths,
+            //            TexturePath.dark_paths,
+            //            TexturePath.dark_paths
+            //        }));
 
             //bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
@@ -70,6 +70,8 @@ namespace SceneEditor.editor
             _setupShader();
 
             isLoaded = true;
+
+            
         }
 
         public void Initialize()

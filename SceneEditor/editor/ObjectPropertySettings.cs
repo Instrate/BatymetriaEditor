@@ -44,6 +44,7 @@ namespace SceneEditor.editor
         public ListBox elementProperties;
         public ListBox editorProperties;
         private object? currentProperty;
+        public ListView listViewProcess;
 
         protected bool isEnabled = false;
         public bool doUpdate = false;
@@ -67,8 +68,37 @@ namespace SceneEditor.editor
             this.elementProperties = elementProperties;
             this.editorProperties = editorProperties;
 
-
+            EventInform("Editor has been started successfuly");
+            EventInform("Press \"F\" or RMB over GL window to switch mouse being grabbed");
+            EventInform("Keep pressing LMB to move camera while mouse grabbed");
+            EventInform("Use WASD, Ctrl, Shift to move");
             //EditorChanged();
+        }
+
+        public void EventInform(object? content, ListView? console = null)
+        {
+            if (console == null){
+                console = listViewProcess;
+            }
+            var amount = console.Items.Count;
+
+            if (amount > 100)
+            {
+                console.Items.Clear();
+            }
+
+            if(content is string)
+            {
+                console.Items.Add(content);
+            }
+            else
+            {
+                //complete it later
+                console.Items.Add(content);
+            }
+            
+            console.SelectedIndex = console.Items.Count;
+            console.ScrollIntoView(console.SelectedItem);
         }
 
         private void _putExistingInTree(TreeView treeView, int amount, int indexName)
@@ -357,16 +387,19 @@ namespace SceneEditor.editor
             int index = handler.Items.IndexOf(GetListItemWithVector3Settings(sender));
             (currentProperty as ComplexPlaneTriangular).dataSetAdjustable[index] = GetVectorFromListBoxOfVector3Settings(handler, index);
             (currentProperty as ComplexPlaneTriangular).UpdateVertices();
+            EventInform("Dot: new value applied");
         }
 
         private void ButtonDelete(object sender, RoutedEventArgs e)
         {
             removeCurrentItem();
+            EventInform("Item: current has been removed");
         }
 
         private void ButtonTranformTriangulatedToMesh(object sender, RoutedEventArgs e)
         {
             addNewBottom(((ComplexPlaneTriangular)currentProperty).ConvertToTiledByInterpolation());
+            EventInform("Mesh: new mesh has been created based on points dataset interpolation");
         }
 
         private void SectionVertChanged(object sender, TextChangedEventArgs e)
@@ -395,12 +428,16 @@ namespace SceneEditor.editor
                 }
             }
             (currentProperty as Section).Replace(data[0], data[1]);
+
+            EventInform("Section: position of current section has been changed");
         }
 
         private void SectionSwitchAreaDisplay(object sender, RoutedEventArgs e)
         {
             bool state = (bool)(sender as CheckBox).IsChecked;
             (currentProperty as Section).showAreaMesh = state;
+
+            EventInform("Section: switched display status for intersected area mesh");
         }
 
         private void ButtonIntersect(object sender, RoutedEventArgs e)
@@ -422,12 +459,14 @@ namespace SceneEditor.editor
                 ((Section)currentProperty).IntersectTiled(tiled.Xmesh, tiled.Ymesh, tiled.DataBuffer);
             }
 
+            EventInform("Section: intersection is done");
         }
 
         private void SectionSwitchPolarDisplay(object sender, RoutedEventArgs e)
         {
             bool state = (bool)(sender as CheckBox).IsChecked;
             (currentProperty as Section).showPolar = state;
+            EventInform("Section: switched display status for polar function on Oyz");
         }
 
         private void SwitchDrawStyle(object sender, RoutedEventArgs e)
@@ -441,16 +480,19 @@ namespace SceneEditor.editor
             {
                 (currentProperty as ComplexPlaneTriangular).SwitchDrawStyle();
             }
+            EventInform("Item: primitive type has been switched");
         }
 
         private void ShowLessCells(object sender, RoutedEventArgs e)
         {
             ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(0, 0, 0, 0, 1, 1);
+            EventInform("Mesh: amount of cells to be displayed is reduced");
         }
 
         private void ShowMoreCells(object sender, RoutedEventArgs e)
         {
             ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(0, 0, 0, 0, -1, -1);
+            EventInform("Mesh: amount of cells to be displayed is iscreased");
         }
 
         private void SwitchVerticesDisplayingForTiles(object sender, RoutedEventArgs e)
@@ -465,6 +507,7 @@ namespace SceneEditor.editor
             {
                 (currentProperty as ComplexPlaneTriangular).showDots = state;
             }
+            EventInform("Mesh: switched display status for mesh vertices");
         }
 
         private void SwitchDisplayMainGeometry(object sender, RoutedEventArgs e)
@@ -479,6 +522,7 @@ namespace SceneEditor.editor
             {
                 (currentProperty as ComplexPlaneTriangular).showGeometry = state;
             }
+            EventInform("Mesh: switched display status for mesh");
         }
 
         private void SwitchObjectDrawingEnabled(object sender, RoutedEventArgs e)
@@ -498,6 +542,7 @@ namespace SceneEditor.editor
             {
                 (currentProperty as ComplexPlaneTriangular).isEnabled = state;
             }
+            EventInform("Item: enabled status is switched for this object");
         }
 
         private void ButtonAddSection(object sender, RoutedEventArgs e)
@@ -506,6 +551,7 @@ namespace SceneEditor.editor
                 new Vector3(0),
                 new Vector3(1),
                 textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile }));
+            EventInform("Section: new section has been added");
         }
 
         // scene settings
@@ -550,6 +596,7 @@ namespace SceneEditor.editor
         {
             _addCamera();
             EditorChanged();
+            EventInform("Camera: new camera is created and ready for usage");
         }
 
         public void _addCamera(bool isOrthogonalPerspective = false)
@@ -581,6 +628,8 @@ namespace SceneEditor.editor
             }
             view = cameras[activeCam].cam.GetViewMatrix();
             shader.SetMatrix4("view", cameras[activeCam].cam.GetViewMatrix());
+
+            EventInform("Camera: switched");
         }
 
         private protected Vector2i SizeToVector2i(Size size)
@@ -841,6 +890,8 @@ namespace SceneEditor.editor
 
                 UpdateView();
             }
+
+            
         }
 
         protected private void UpdateView()
@@ -869,6 +920,7 @@ namespace SceneEditor.editor
                 }
                 slider.Value = newValue;
                 //block.Text = newValue.ToString();
+                EventInform("Camera: sensitivity has been updated");
             }
             catch (Exception ex) { }
         }
@@ -893,6 +945,7 @@ namespace SceneEditor.editor
                 }
                 slider.Value = newValue;
                 //block.Text = newValue.ToString();
+                EventInform("Camera: speed has been updated");
             }
             catch (Exception ex) { }
         }
@@ -917,6 +970,7 @@ namespace SceneEditor.editor
                 }
                 slider.Value = newValue;
                 //block.Text = newValue.ToString();
+                EventInform("Camera: field of view has been updated");
             }
             catch (Exception ex) { }
         }
@@ -960,6 +1014,7 @@ namespace SceneEditor.editor
                     Vector3 newPos = new Vector3(data[0], data[1], data[2]);
                     cameras[camIndex].cam.Position = newPos;
                     //doInvalidate = true;
+                    //EventInform("Camera: position has been updated");
                 }
             }
             catch (Exception ex) { }
@@ -1113,8 +1168,6 @@ namespace SceneEditor.editor
         // DATA IMPORT-EXPORT START
         // ------------------------
 
-
-
         public void ExportData(object sender, RoutedEventArgs e)
         {
             SaveFileDialog dialog = new SaveFileDialog();
@@ -1155,6 +1208,7 @@ namespace SceneEditor.editor
             }
 
             File.WriteAllText(dialog.FileName, sb.ToString());
+            EventInform("Status: successfuly exported data to " + dialog.FileName);
         }
 
         public void ImportData(object sender, RoutedEventArgs e)
@@ -1179,6 +1233,7 @@ namespace SceneEditor.editor
                             },
                             X: data.X, Y: data.Y, Z: data.Z
                             ));
+                        EventInform("Status: successfuly imported tiled mesh from " + dialog.FileName);
                     }
                     else
                     {
@@ -1194,6 +1249,7 @@ namespace SceneEditor.editor
                                     TexturePath.criss_cross,
                                     TexturePath.cork_board
                                 }));
+                            EventInform("Status: successfuly imported points dataset from " + dialog.FileName);
                         }
                         else
                         {
@@ -1208,10 +1264,11 @@ namespace SceneEditor.editor
                                         TexturePath.criss_cross,
                                         TexturePath.cork_board
                                 }));
+                                EventInform("Status: successfuly imported triangulated dataset from " + dialog.FileName);
                             }
                             else
                             {
-                                //event inform here
+                                EventInform("Status: failed to import from " + dialog.FileName + "\n Either file or data format not supported");
                             }
                         }
                     }
