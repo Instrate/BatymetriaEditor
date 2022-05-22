@@ -4,6 +4,7 @@ using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -35,6 +36,8 @@ namespace SceneEditor.editor
 
         public bool isLoaded = false;
 
+        public bool isRendered = false;
+
         // add switchable uniform bool useGradient
         public Editor(Size windowSize)
         {
@@ -43,21 +46,21 @@ namespace SceneEditor.editor
             Initialize();
 
 
-            addNewPointsDataset(
-                new ComplexPlaneTriangular(
-                    shouldTriangulate: true,
-                    textureSet: new string[] { TexturePath.dark_paths,
-                        TexturePath.dark_paths,
-                        TexturePath.dark_paths
-                    }));
+            //addNewPointsDataset(
+            //    new ComplexPlaneTriangular(
+            //        shouldTriangulate: true,
+            //        textureSet: new string[] { TexturePath.dark_paths,
+            //            TexturePath.dark_paths,
+            //            TexturePath.dark_paths
+            //        }));
 
             bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
-            //bottom = meshUneven.Value[0].ConvertToTiledByInterpolation();
+            ////bottom = meshUneven.Value[0].ConvertToTiledByInterpolation();
 
-            section = new Section(new Vector3(-4, -7, 4), new Vector3(3, 6, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
+            //section = new Section(new Vector3(-4, -7, 4), new Vector3(3, 6, 0), textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile });
 
-            addNewSection(section);
+            //addNewSection(section);
 
             addNewBottom(bottom);
 
@@ -146,10 +149,11 @@ namespace SceneEditor.editor
             }
             if (cameras[activeCam].grabedMouse)
             {
-                view = cameras[activeCam].cam.GetViewMatrix();
-                shader.SetMatrix4("view", cameras[activeCam].cam.GetViewMatrix());
+                UpdateView();
             }
         }
+
+        
 
         public void OnMouseWheel(MouseWheelEventArgs e)
         {
@@ -203,8 +207,8 @@ namespace SceneEditor.editor
             meshUneven.Value.ForEach(item => RenderObject(item));
         }
 
-        // rewrite shader usage for elements
-        [STAThread]
+
+        // only sync
         public void Render()
         {
             var elapsed = (float)_stopwatch.Elapsed.TotalSeconds;
@@ -216,16 +220,19 @@ namespace SceneEditor.editor
             {
                 //background cleaning
                 //var c = Color4.FromHsv(new Vector4(hue, 0.75f, 0.75f, 1));
+
                 GL.ClearColor(0.4f, 0.4f, 0.4f, 1.0f);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
                 _applyTextureUnits();
                 _applyShaderSettings();
                 _applyRenderQueue();
                 GL.Finish();
+
+                isRendered = true;
             }
         }
 
-        [STAThread]
+        [MTAThread]
         private void RenderObject(IRenderable renderable)
         {
             renderable.Render(shader.Handle);
@@ -239,7 +246,7 @@ namespace SceneEditor.editor
             }
         }
 
-        [STAThread]
+        [MTAThread]
         private void RenderObject(IRenderable[] renderable)
         {
             for (int i = 0; i < renderable.Length; i++)
@@ -272,8 +279,7 @@ namespace SceneEditor.editor
             if (cameras[activeCam].grabedMouse)
             {
                 cameras[activeCam].OnKeyDown(e, timeDelta);
-                view = cameras[activeCam].cam.GetViewMatrix();
-                shader.SetMatrix4("view", cameras[activeCam].cam.GetViewMatrix());
+                UpdateView();
             }
             else
             {

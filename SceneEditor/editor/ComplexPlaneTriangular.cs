@@ -14,13 +14,13 @@ using TriangleNet.Smoothing;
 
 namespace SceneEditor.editor
 {
-
     public class ComplexPlaneTriangular : Transformable
     {
         Triangle[]? connections = null;
         public bool showGeometry = false;
 
         public Vector3[] data;
+        private Vector3[]? dataTriangulared;
 
         Dot[] dots;
         public bool showDots = true;
@@ -89,16 +89,16 @@ namespace SceneEditor.editor
             drawStyle = stylesSwitcher[primitiveCurrent];
         }
 
-        public void generateDelaunayTriangulationFromData()
+        private Polygon _createPolyFromPoints()
         {
             Polygon poly = new Polygon();
 
-            for(int i = 0; i < data.Length - 1; i++)
+            for (int i = 0; i < data.Length - 1; i++)
             {
                 poly.Add(new Vertex(data[i].X, data[i].Y));
                 poly.Add(new Segment(
                         new Vertex(data[i].X, data[i].Y),
-                        new Vertex(data[i+1].X, data[i + 1].Y)
+                        new Vertex(data[i + 1].X, data[i + 1].Y)
                         ));
             }
             poly.Add(new Vertex(data[data.Length - 1].X, data[data.Length - 1].Y));
@@ -106,19 +106,35 @@ namespace SceneEditor.editor
                         new Vertex(data[data.Length - 1].X, data[data.Length - 1].Y),
                         new Vertex(data[0].X, data[0].Y)
                         ));
+            return poly;
+        }
 
+        public void generateDelaunayTriangulationFromData(bool makeSmooth = false, bool fixArea = false, bool accurateTriangulation = false)
+        {
             var Coptions = new ConstraintOptions();
-            //Coptions.UseRegions = true;
             Coptions.Convex = true;
-            //Coptions.SegmentSplitting = 10;
-            //Coptions.ConformingDelaunay = true;
-
+            if (accurateTriangulation)
+            {
+                Coptions.ConformingDelaunay = true;
+            }
             var Qoptions = new QualityOptions();
-            //Qoptions.MinimumAngle = 30;
-            //Qoptions.MaximumAngle = 60;
+            if (fixArea)
+            {
+                Qoptions.MaximumArea = (Math.Sqrt(3) / 4 * 0.2 * 0.2) * 1.45;
+            }
 
-            var mesh = poly.Triangulate(Coptions, Qoptions);
+            var mesh = _createPolyFromPoints().Triangulate(Coptions, Qoptions);
+            if (makeSmooth)
+            {
+                var smoother = new SimpleSmoother();
+                smoother.Smooth(mesh, 25);
+            }
 
+            _readConnectionsFromMesh(mesh);
+        }
+
+        private void _readConnectionsFromMesh(IMesh mesh)
+        {
             List<Vector2> trgs = new List<Vector2>();
             List<int> indices = new List<int>();
 
@@ -131,7 +147,7 @@ namespace SceneEditor.editor
                     var vx = t.GetVertex(j);
                     for (int i = 0; i < amount && !found; i++)
                     {
-                        if((trgs[i].X == vx.X) && (trgs[i].Y == vx.Y))
+                        if ((trgs[i].X == vx.X) && (trgs[i].Y == vx.Y))
                         {
                             indices.Add(i);
                             found = true;
@@ -150,126 +166,19 @@ namespace SceneEditor.editor
 
             Vector3[] vector3s = Functions.recalculateBySpline(interp, trgs.ToArray());
 
-            //Use.ShowVectors("res", vector3s);
-
-            //dots = new Dot[vector3s.Length];
-            //for (int i = 0; i < dots.Length; i++)
-            //{
-            //    dots[i] = new Dot(vector3s[i], ((Vector4)Color4.LimeGreen).Xyz, 8);
-            //}
-
-            connections = new Triangle[iRes.Length/3];
-
+            connections = new Triangle[iRes.Length / 3];
+            dataTriangulared = new Vector3[connections.Length * 3];
             for (int i = 0; i < connections.Length; i++)
             {
                 Vector3[] points = new Vector3[3];
                 for (int j = 0; j < 3; j++)
                 {
                     points[j] = new Vector3(vector3s[iRes[i * 3 + j]]);
+                    dataTriangulared[i * 3 + j] = points[j];
                 }
                 connections[i] = new Triangle(points);
             }
-
             showGeometry = true;
-        }
-
-        private void _generateFastTriangulationFromData(int amountOfConnections = 6)
-        {
-            Vector3[][] cons = new Vector3[data.Length][];
-
-            float maxDist = 0;
-            float minDist = (data[0].Xy - data[1].Xy).Length;
-
-            for (int i = 0; i < data.Length; i++)
-            {
-                for (int j = 0; j < data.Length; j++)
-                {
-                    if (i != j)
-                    {
-                        Vector2 test = data[i].Xy - data[j].Xy;
-                        float length = test.Length;
-                        if (length > maxDist)
-                        {
-                            maxDist = length;
-                        }
-                        else
-                        {
-                            if (length < minDist)
-                            {
-                                minDist = length;
-                            }
-                        }
-                    }
-                }
-            }
-
-            List<int> points;
-
-            for (int i = 0; i < data.Length; i++)
-            {
-                points = new List<int>();
-                points.Add(i);
-
-                int count = 0;
-                
-                float dist = minDist;
-
-                while (count < amountOfConnections && dist <= maxDist)
-                {
-                    float minNext = maxDist;
-                    for (int j = 0; j < data.Length; j++)
-                    {
-                        if (i != j && !points.Contains(j))
-                        {
-                            Vector2 temp = data[i].Xy - data[j].Xy;
-                            float length = temp.Length;
-                            if(length <= dist)
-                            {
-                                points.Add(j);
-                                count++;
-                            }
-                            else
-                            {
-                                if(length < minNext)
-                                {
-                                    minNext = length;
-                                }
-                            }
-                        }
-                    }
-                    dist = minNext;
-                }
-
-                int[] res = points.ToArray();
-                cons[i] = new Vector3[res.Length];
-                for(int j = 0; j < res.Length; j++)
-                {
-                    cons[i][j] = data[res[j]];
-                }
-            }
-
-            // ?!
-            //_ShowConnections(cons);
-            _generateTrianglesFromPoints(cons);
-        }
-
-        private void _generateTrianglesFromPoints(Vector3[][] cons)
-        {
-            List<Triangle> trgs = new List<Triangle>();
-
-            for(int i = 0; i < cons.Length; i++)
-            {
-                for (int j = 0; j < cons[i].Length - 2; j++)
-                {
-                    trgs.Add(new Triangle(new Vector3[]
-                    {
-                        cons[i][j],
-                        cons[i][j + 1],
-                        cons[i][j + 2]
-                    }));
-                }
-            }
-            connections = trgs.ToArray();
         }
 
         private void _ShowConnections(Vector3[][] cons)
@@ -356,6 +265,29 @@ namespace SceneEditor.editor
                 primitiveCurrent = 0;
             }
             drawStyle = stylesSwitcher[primitiveCurrent];
+        }
+
+        public List<PointValue>? ExportPointDataSet()
+        {
+            if(dataTriangulared != null)
+            {
+                List<PointValue> cons = new List<PointValue>();
+                for(int i = 0; i < dataTriangulared.Length; i++)
+                {
+                    PointValue vector = new PointValue();
+                    vector.X = dataTriangulared[i].X;
+                    vector.Y = dataTriangulared[i].Y;
+                    vector.Z = dataTriangulared[i].Z;
+                    cons.Add(vector);
+                }
+                return cons;
+            }
+            return null;
+        }
+
+        public Vector3[]? ExportPoints()
+        {
+            return data;
         }
 
         private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)

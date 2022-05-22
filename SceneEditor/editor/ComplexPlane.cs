@@ -8,20 +8,6 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
-    public class TileDataSet
-    {
-        public float[] X { get; set; }
-        public float[] Y { get; set; }
-        public float[][] Z { get; set; }
-
-        public TileDataSet(float[] X, float[] Y, float[][] Z)
-        {
-            this.X = X;
-            this.Y = Y;
-            this.Z = Z;
-        }
-    }
-
     public class ComplexPlaneTile : Transformable
     {
         public Square[]? tiles;
@@ -127,7 +113,7 @@ namespace SceneEditor.editor
         public void MeshCompatibleRange()
         {
             // appropriate limit for 2Gb of VRAM
-            int limit = 60;
+            int limit = 40;
             int xfactor = 0;
             int yfactor = 0;
             if (Xmesh.Length > limit)
@@ -242,6 +228,8 @@ namespace SceneEditor.editor
             }
 
             dots = new Dot[Xmesh.Length * Ymesh.Length];
+
+            //rewatch
             for (int i = 0; i <= rows; i++)
             {
                 for(int j = 0; j <= cols; j++)

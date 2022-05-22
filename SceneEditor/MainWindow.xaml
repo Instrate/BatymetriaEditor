@@ -21,8 +21,8 @@
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="1*"/>
             </Grid.RowDefinitions>
-            <Rectangle Fill="GreenYellow" Grid.Row="0"></Rectangle>
-            <Rectangle Fill="DarkSeaGreen" Grid.Row="1"></Rectangle>
+            <Rectangle Fill="CadetBlue" Grid.Row="0"></Rectangle>
+            <Rectangle Fill="CadetBlue" Grid.Row="1"></Rectangle>
             <GridSplitter Grid.Row="0" BorderThickness="2" BorderBrush="Black" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
 
             <Grid Grid.Row="0" x:Name="panelTabs">
@@ -33,7 +33,7 @@
 
                 <glWpfControl:NonReloadingTabControl Grid.Row="0" Margin="5" x:Name="tabWindows" Background="Wheat">
                     <TabItem Header="Main" x:Name="glControl1">
-                        <glWpfControl:GLWpfControl x:Name="glMain" Margin="5" Focusable="True" Render="OnRender" PreviewMouseWheel="OnPreviewMouseWheel"/>
+                        <glWpfControl:GLWpfControl x:Name="glMain" Margin="5" Focusable="True" Render="OnRender"  PreviewMouseWheel="OnPreviewMouseWheel"/>
                     </TabItem>
                 </glWpfControl:NonReloadingTabControl>
 

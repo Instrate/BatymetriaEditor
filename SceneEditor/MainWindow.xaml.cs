@@ -41,7 +41,10 @@ namespace SceneEditor
 
         float ticker = 0;
 
-        
+        float fps_max = 1f / 30;
+        float fps_min = 1f / 10;
+        float fps_lim = 1f / 30;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -193,9 +196,11 @@ namespace SceneEditor
             {
                 tabWindows.Background = Brushes.Black;
                 glMain.Cursor = Cursors.None;
+                fps_lim = fps_max;
             }
             else
             {
+                fps_lim = fps_min;
                 tabWindows.Background = Brushes.FloralWhite;
                 if (glMain.IsFocused)
                 {
@@ -213,15 +218,13 @@ namespace SceneEditor
             GL.Enable(EnableCap.Blend);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.LineSmooth);
-            //GL.Enable(EnableCap.PolygonSmooth);
-            //GL.Enable(EnableCap.ScissorTest);
+            GL.Enable(EnableCap.PolygonSmooth);
+            //GL.Enable(EnableCap.AutoNormal);
+            //GL.Enable(EnableCap.PointSmooth);
+            //GL.Enable(EnableCap.Lighting);
             //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
             editorAddNew();
-
-            //seamless optimization but is it?
-            //Trender = new MultiThreader(8, editors[currentEditor].Render);
-
             editorStructure.Loaded += structureOnReady;
             editorStructure.SelectionChanged += EditorStructureEditorChanged;
             editorSceneSettings.Loaded += EditorSceneSettingsLoaded;
@@ -254,16 +257,16 @@ namespace SceneEditor
 
         private float tickerFrames = 0;
 
-        [MTAThread]
+        [STAThread]
         private void OnRender(TimeSpan delta)
         {
-
-
-            ticker += (float)delta.TotalSeconds;
-            if (ticker >= 0.5)
+            float elapsed = (float)delta.TotalSeconds;
+            ticker += elapsed;
+            float fps = MathF.Truncate(1.0f / elapsed);
+            if (ticker >= 0.5f)
             {
-                textFps.Text = "FPS: " + (Math.Truncate(1.0f / delta.TotalSeconds)).ToString();
-                ticker = 0;
+                textFps.Text = "FPS: " + (fps).ToString();
+                ticker -= 0.5f;
                 if (editors[currentEditorNum].doUpdate)
                 {
                     structureUpdate();
@@ -271,14 +274,14 @@ namespace SceneEditor
                 }
             }
 
-            tickerFrames += (float)delta.TotalSeconds;
-            if (tickerFrames < 1f / 30)
+            tickerFrames += elapsed;
+
+            if (tickerFrames >= fps_lim)
             {
+                //&& currentEditor.cameras[currentEditor.activeCam].grabedMouse
                 editors[currentEditorNum].Render();
-            }
-            else
-            {
-                tickerFrames = 0;
+                //editors[currentEditorNum].isRendered = false;
+                tickerFrames -= fps_lim;
             }
         }
 

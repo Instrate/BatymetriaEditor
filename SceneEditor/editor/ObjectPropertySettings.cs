@@ -1,14 +1,16 @@
 ﻿using LearnOpenTK.Common;
+using Microsoft.Win32;
+using Newtonsoft.Json;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Text.Json;
-using Microsoft.Win32;
-using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
@@ -28,17 +30,16 @@ namespace SceneEditor.editor
             "Sections",
             "Mesh uneven"
         };
-
-        // change to the right type
-
     }
 
     public class EditorSettings
     {
+        public Task? renderTask;
+
         protected Size selfSize;
 
         //make it private later
-        public Lazy<List<TreeViewItem>> objectsWithProperties = new Lazy<List<TreeViewItem>>();
+        //public Lazy<List<TreeViewItem>> objectsWithProperties = new Lazy<List<TreeViewItem>>();
 
         public ListBox elementProperties;
         public ListBox editorProperties;
@@ -82,7 +83,7 @@ namespace SceneEditor.editor
                     TreeViewItem item = _addNewTreeMember(header.ToLower() + " " + (i + 1));
                     view.Items.Add(item);
                     item.Selected += ObjectSelected;
-                    objectsWithProperties.Value.Add(item);
+                    //objectsWithProperties.Value.Add(item);
                 }
             }
         }
@@ -109,6 +110,7 @@ namespace SceneEditor.editor
 
         private void ObjectSelected(object sender, RoutedEventArgs e)
         {
+
             TreeViewItem item = (TreeViewItem)sender;
             TreeViewItem parent = (TreeViewItem)item.Parent;
 
@@ -294,6 +296,18 @@ namespace SceneEditor.editor
                             );
                         list.Items.Add(buttonStyle);
 
+                        Button buttonToMesh = Generate.Button(
+                            "Tranform to mesh",
+                            ButtonTranformTriangulatedToMesh
+                            );
+                        list.Items.Add(buttonToMesh);
+
+                        Button buttonExport = Generate.Button(
+                            "Export data",
+                            ExportData
+                            );
+                        list.Items.Add(buttonExport);
+
                     }; break;
             }
 
@@ -315,6 +329,11 @@ namespace SceneEditor.editor
         private void ButtonDelete(object sender, RoutedEventArgs e)
         {
             removeCurrentItem();
+        }
+
+        private void ButtonTranformTriangulatedToMesh(object sender, RoutedEventArgs e)
+        {
+            addNewBottom(((ComplexPlaneTriangular)currentProperty).ConvertToTiledByInterpolation());
         }
 
         private void SectionVertChanged(object sender, TextChangedEventArgs e)
@@ -448,6 +467,14 @@ namespace SceneEditor.editor
             }
         }
 
+        private void ButtonAddSection(object sender, RoutedEventArgs e)
+        {
+            addNewSection(new Section(
+                new Vector3(0),
+                new Vector3(1),
+                textureSet: new string[] { TexturePath.criss_cross, TexturePath.pxtile }));
+        }
+
         // scene settings
         public void EditorChanged()
         {
@@ -472,8 +499,13 @@ namespace SceneEditor.editor
             exp.Content = CreateMeshSettings();
             editorProperties.Items.Add(exp);
 
+            Button buttonAddSection = Generate.Button(
+                "Add section",
+                ButtonAddSection);
+            editorProperties.Items.Add(buttonAddSection);
+
             Button buttonImportTileset = Generate.Button(
-                "Import mesh",
+                "Import data",
                 ImportData);
             editorProperties.Items.Add(buttonImportTileset);
 
@@ -746,6 +778,14 @@ namespace SceneEditor.editor
                 TextBox text = (TextBox)dockSet.Children[1];
                 text.Text = newPos[i].ToString();
             }
+
+            UpdateView();
+        }
+
+        protected private void UpdateView()
+        {
+            view = cameras[activeCam].cam.GetViewMatrix();
+            shader.SetMatrix4("view", cameras[activeCam].cam.GetViewMatrix());
         }
 
         private void CamSensitivityTextChanged(object sender, TextChangedEventArgs e)
@@ -1011,26 +1051,41 @@ namespace SceneEditor.editor
 
         // DATA IMPORT-EXPORT START
         // ------------------------
+
+
+
         public void ExportData(object sender, RoutedEventArgs e)
         {
-            string jsonString = "";
-            
-            if (currentProperty is ComplexPlaneTile)
-            {
-                ComplexPlaneTile export = (ComplexPlaneTile) currentProperty;
-                TileDataSet data = new TileDataSet(export.Xmesh, export.Ymesh, export.DataBuffer);
-
-                jsonString = JsonSerializer.Serialize(data, typeof(TileDataSet));
-
-            }
-
             SaveFileDialog dialog = new SaveFileDialog();
-            //dialog.InitialDirectory = "../../../";
             dialog.Filter = "JSON file (*.json)|*.json";
-            if(dialog.ShowDialog() == true)
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+
+            if (dialog.ShowDialog() == true) 
             {
-                File.WriteAllText(dialog.FileName, jsonString);
+                
+                FileStream file = new FileStream(dialog.FileName, FileMode.OpenOrCreate);
+                using (StreamWriter stream = new StreamWriter(file))
+                using (JsonWriter writer = new JsonTextWriter(sw))
+                {
+                    writer.Formatting = Formatting.Indented;
+                    if (currentProperty is ComplexPlaneTile)
+                    {
+                        ComplexPlaneTile export = (ComplexPlaneTile)currentProperty;
+                        TileDataSet data = new TileDataSet(export.Xmesh, export.Ymesh, export.DataBuffer);
+                        data.WriteStream(writer);
+                        
+                    }
+                    else if (currentProperty is ComplexPlaneTriangular)
+                    {
+                        ComplexPlaneTriangular export = (ComplexPlaneTriangular)currentProperty;
+                        //TriangularedDataSet data = new TriangularedDataSet(export.ExportPointDataSet().ToArray());
+                        //PointsDataSet pointsSet = new PointsDataSet(export.ExportPoints());
+                    }
+                }
             }
+
+            File.WriteAllText(dialog.FileName, sb.ToString());
         }
 
         public void ImportData(object sender, RoutedEventArgs e)
@@ -1042,17 +1097,46 @@ namespace SceneEditor.editor
             {
                 jsonString = File.ReadAllText(dialog.FileName);
 
-                TileDataSet? income = JsonSerializer.Deserialize<TileDataSet>(jsonString);
-
-                if (income != null)
+                // add triangulated data supportion
+                try
                 {
-                    TileDataSet data = (TileDataSet)income;
-
-                    addNewBottom(new ComplexPlaneTile(
-                        textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross },
-                        X: data.X, Y: data.Y, Z: data.Z
-                        ));
+                    TileDataSet? income = JsonConvert.DeserializeObject<TileDataSet>(jsonString);
+                    if (income != null)
+                    {
+                        TileDataSet data = (TileDataSet)income;
+                        addNewBottom(new ComplexPlaneTile(
+                            textureSet: new string[] {
+                                TexturePath.dark_paths,
+                                TexturePath.cork_board,
+                                TexturePath.criss_cross
+                            },
+                            X: data.X, Y: data.Y, Z: data.Z
+                            ));
+                    }
                 }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        PointsDataSet? income = JsonConvert.DeserializeObject<PointsDataSet>(jsonString);
+                        if (income != null)
+                        {
+                            PointsDataSet data = (PointsDataSet)income;
+                            addNewPointsDataset(new ComplexPlaneTriangular(
+                                shouldTriangulate: true,
+                                textureSet: new string[] {
+                                    TexturePath.dark_paths,
+                                    TexturePath.criss_cross,
+                                    TexturePath.cork_board
+                                }));
+                        }
+                    }
+                    catch (Exception ex2)
+                    {
+
+                    }
+                }
+
             }
         }
 
@@ -1061,7 +1145,7 @@ namespace SceneEditor.editor
 
         public void removeCurrentItem()
         {
-            if(currentProperty is ComplexPlaneTile)
+            if (currentProperty is ComplexPlaneTile)
             {
                 meshTiled.Value.Remove((ComplexPlaneTile)currentProperty);
             }
@@ -1074,6 +1158,8 @@ namespace SceneEditor.editor
                 sections.Value.Remove((Section)currentProperty);
             }
             currentProperty = null;
+            editorProperties.Items.Clear();
+
             doUpdate = true;
         }
 
