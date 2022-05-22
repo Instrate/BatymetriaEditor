@@ -46,15 +46,15 @@ namespace SceneEditor.editor
             Initialize();
 
 
-            //addNewPointsDataset(
-            //    new ComplexPlaneTriangular(
-            //        shouldTriangulate: true,
-            //        textureSet: new string[] { TexturePath.dark_paths,
-            //            TexturePath.dark_paths,
-            //            TexturePath.dark_paths
-            //        }));
+            addNewPointsDataset(
+                new ComplexPlaneTriangular(
+                    shouldTriangulate: true,
+                    textureSet: new string[] { TexturePath.dark_paths,
+                        TexturePath.dark_paths,
+                        TexturePath.dark_paths
+                    }));
 
-            bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
+            //bottom = new ComplexPlaneTile(textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross });
 
             ////bottom = meshUneven.Value[0].ConvertToTiledByInterpolation();
 
@@ -62,7 +62,7 @@ namespace SceneEditor.editor
 
             //addNewSection(section);
 
-            addNewBottom(bottom);
+            //addNewBottom(bottom);
 
             _setupCam();
             _setupObjects();

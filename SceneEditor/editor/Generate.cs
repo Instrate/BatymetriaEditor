@@ -15,6 +15,7 @@ namespace SceneEditor.editor
             Expander exp = new Expander();
             exp.Header = Header;
             exp.Content = content;
+            exp.IsExpanded = true;
             return exp;
         }
 

@@ -3,13 +3,8 @@ using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using TriangleNet;
 using TriangleNet.Geometry;
 using TriangleNet.Meshing;
-using TriangleNet.Meshing.Algorithm;
 using TriangleNet.Smoothing;
 
 namespace SceneEditor.editor
@@ -17,10 +12,11 @@ namespace SceneEditor.editor
     public class ComplexPlaneTriangular : Transformable
     {
         Triangle[]? connections = null;
+        private TriangularedDataSet? dataTriangulared = null;
         public bool showGeometry = false;
 
         public Vector3[] data;
-        private Vector3[]? dataTriangulared;
+        public List<Vector3> dataSetAdjustable;
 
         Dot[] dots;
         public bool showDots = true;
@@ -46,29 +42,27 @@ namespace SceneEditor.editor
                                       string[]? textureSet = null,
                                       bool shouldTriangulate = true)
         {
-            if(inputData == null)
+            if (inputData == null)
             {
-                if(X == null || Y == null || Z == null)
+                if (X == null || Y == null || Z == null)
                 {
-                    if(shouldTriangulate)
-                        Functions.GenerateRandomPoints(out data, start: -10f, end: 10f, amountLow:100, amountHigh: 200);
-                    else
-                        Functions.GenerateRandomPoints(out data, start: -10f, end: 10f, amountLow: 1000, amountHigh: 3000);
+                    Functions.GenerateRandomPoints(out data, start: -20f, end: 20f, amountLow: 100, amountHigh: 200);
+                    //if (shouldTriangulate)
+                    //    Functions.GenerateRandomPoints(out data, start: -20f, end: 20f, amountLow:100, amountHigh: 200);
+                    //else
+                    //Functions.GenerateRandomPoints(out data, start: -20f, end: 20f, amountLow: 1000, amountHigh: 3000);
                     data = Functions.FixLowHight(data);
                 }
             }
             else
             {
-
+                data = inputData;
             }
+           
+            dataSetAdjustable = data.ToList();
             lineWidth = 1;
-            dots = new Dot[data.Length];
-            for (int i = 0; i < dots.Length; i++)
-            {
-                dots[i] = new Dot(data[i], ((Vector4)Color4.Red).Xyz, 6);
-            }
 
-            interp = Functions.Interpolate(data);
+            UpdateVertices();
 
             //_generateFastTriangulationFromData();
             if (shouldTriangulate)
@@ -87,6 +81,47 @@ namespace SceneEditor.editor
 
             isEnabled = true;
             drawStyle = stylesSwitcher[primitiveCurrent];
+        }
+
+        public ComplexPlaneTriangular(TriangularedDataSet dataSet,
+                                      string[]? textureSet = null)
+        {
+            connections = new Triangle[dataSet.Triangles.Length];
+            dataSetAdjustable = new();
+            for (int i = 0; i < connections.Length; i++)
+            {
+                Vector3[] points = dataSet.Triangles[i].ToVector3Set();
+                connections[i] = new Triangle(points);
+                for (int j = 0; j < points.Length; j++)
+                {
+                    dataSetAdjustable.Add(points[j]);
+                }
+            }
+
+            lineWidth = 1;
+            UpdateVertices();
+
+            if (textureSet != null)
+            {
+                textureHandlers = new int[textureSet.Length];
+                for (int i = 0; i < textureSet.Length; i++)
+                {
+                    textureHandlers[i] = TextureLoader.LoadFromFile(textureSet[i]);
+                }
+            }
+
+            isEnabled = true;
+            drawStyle = stylesSwitcher[primitiveCurrent];
+        }
+
+        public void UpdateVertices()
+        {
+            data = dataSetAdjustable.ToArray();
+            dots = new Dot[data.Length];
+            for (int i = 0; i < dots.Length; i++)
+            {
+                dots[i] = new Dot(data[i], ((Vector4)Color4.Red).Xyz, 6);
+            }
         }
 
         private Polygon _createPolyFromPoints()
@@ -111,6 +146,7 @@ namespace SceneEditor.editor
 
         public void generateDelaunayTriangulationFromData(bool makeSmooth = false, bool fixArea = false, bool accurateTriangulation = false)
         {
+            interp = Functions.Interpolate(data);
             var Coptions = new ConstraintOptions();
             Coptions.Convex = true;
             if (accurateTriangulation)
@@ -135,8 +171,8 @@ namespace SceneEditor.editor
 
         private void _readConnectionsFromMesh(IMesh mesh)
         {
-            List<Vector2> trgs = new List<Vector2>();
-            List<int> indices = new List<int>();
+            List<Vector2> trgs = new();
+            List<int> indices = new();
 
             foreach (var t in mesh.Triangles)
             {
@@ -167,24 +203,25 @@ namespace SceneEditor.editor
             Vector3[] vector3s = Functions.recalculateBySpline(interp, trgs.ToArray());
 
             connections = new Triangle[iRes.Length / 3];
-            dataTriangulared = new Vector3[connections.Length * 3];
+            TriangleInfo[] triangles = new TriangleInfo[connections.Length];
             for (int i = 0; i < connections.Length; i++)
             {
                 Vector3[] points = new Vector3[3];
                 for (int j = 0; j < 3; j++)
                 {
-                    points[j] = new Vector3(vector3s[iRes[i * 3 + j]]);
-                    dataTriangulared[i * 3 + j] = points[j];
+                    points[j] = new(vector3s[iRes[i * 3 + j]]);
                 }
-                connections[i] = new Triangle(points);
+                triangles[i] = new(points);
+                connections[i] = new(points);
             }
+            dataTriangulared = new(triangles);
             showGeometry = true;
         }
 
         private void _ShowConnections(Vector3[][] cons)
         {
             Console.WriteLine("\n Connections:");
-            for(int i = 0; i < cons.Length; i++)
+            for (int i = 0; i < cons.Length; i++)
             {
                 Console.WriteLine("[" + i + "]: " + cons[i][0].ToString());
                 Vector2 parent = cons[i][0].Xy;
@@ -228,7 +265,7 @@ namespace SceneEditor.editor
                 }
                 else
                 {
-                    if(xmax < vx)
+                    if (xmax < vx)
                     {
                         xmax = vx;
                     }
@@ -252,7 +289,7 @@ namespace SceneEditor.editor
             float[] Y = Functions.Arrange(ymin, ymax, (ymax - ymin) / mindify > limitSide ? dividery : mindify);
             float[][] Z = Functions.recalculateBySpline(interp, X, Y);
 
-            return new ComplexPlaneTile(X: X, Y: Y, Z:Z,
+            return new ComplexPlaneTile(X: X, Y: Y, Z: Z,
                 textureHandlersCopy: copyCurrentTexturePack ? (textureHandlers != null ? textureHandlers : null) : null
                 );
         }
@@ -267,22 +304,9 @@ namespace SceneEditor.editor
             drawStyle = stylesSwitcher[primitiveCurrent];
         }
 
-        public List<PointValue>? ExportPointDataSet()
+        public TriangularedDataSet? ExportPointDataSet()
         {
-            if(dataTriangulared != null)
-            {
-                List<PointValue> cons = new List<PointValue>();
-                for(int i = 0; i < dataTriangulared.Length; i++)
-                {
-                    PointValue vector = new PointValue();
-                    vector.X = dataTriangulared[i].X;
-                    vector.Y = dataTriangulared[i].Y;
-                    vector.Z = dataTriangulared[i].Z;
-                    cons.Add(vector);
-                }
-                return cons;
-            }
-            return null;
+            return dataTriangulared;
         }
 
         public Vector3[]? ExportPoints()

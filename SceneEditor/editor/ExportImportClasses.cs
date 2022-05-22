@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using OpenTK.Mathematics;
+using System;
 using System.Collections.Generic;
 
 namespace SceneEditor.editor
@@ -10,6 +11,7 @@ namespace SceneEditor.editor
         public float Y { get; set; }
         public float Z { get; set; }
 
+        [JsonConstructor]
         public PointValue(float X, float Y, float Z)
         {
             this.X = X;
@@ -22,6 +24,11 @@ namespace SceneEditor.editor
             this.X = data.X;
             this.Y = data.Y;
             this.Z = data.Z;
+        }
+
+        public Vector3 ToVector3()
+        {
+            return new Vector3((float)X, (float)Y, (float)Z);
         }
 
         public PointValue() { }
@@ -41,11 +48,22 @@ namespace SceneEditor.editor
 
     public class TriangleInfo
     {
-        public PointValue[] Vertices;
+        public PointValue[] Vertices { get; set; }
 
+        [JsonConstructor]
         public TriangleInfo(PointValue[] Vertices)
         {
             this.Vertices = Vertices;
+        }
+
+        public Vector3[] ToVector3Set()
+        {
+            Vector3[] result = new Vector3[Vertices.Length];
+            for(int i = 0; i < Vertices.Length; i++)
+            {
+                result[i] = Vertices[i].ToVector3();
+            }
+            return result;
         }
 
         public TriangleInfo(Vector3[] Vertices)
@@ -75,6 +93,7 @@ namespace SceneEditor.editor
     {
         public TriangleInfo[] Triangles { get; set; }
 
+        [JsonConstructor]
         public TriangularedDataSet(TriangleInfo[] Triangles)
         {
             this.Triangles = Triangles;
@@ -93,7 +112,7 @@ namespace SceneEditor.editor
         public void WriteStream(JsonWriter writer)
         {
             writer.WriteStartObject();
-            writer.WritePropertyName("Triangles");
+            writer.WritePropertyName(nameof(Triangles));
             writer.WriteStartArray();
             foreach (var t in Triangles)
             {
@@ -106,11 +125,21 @@ namespace SceneEditor.editor
 
     public class PointsDataSet
     {
-        public PointValue[] Points { get; set; }
+        public List<PointValue> Points { get; set; }
+
+        [JsonConstructor]
+        public PointsDataSet(List<PointValue> Points)
+        {
+            this.Points = Points;
+        }
 
         public PointsDataSet(PointValue[] Points)
         {
-            this.Points = Points;
+            this.Points = new (); 
+            foreach(var p in Points)
+            {
+                this.Points.Add(p);
+            }
         }
 
         public PointsDataSet(Vector3[] Points)
@@ -120,7 +149,18 @@ namespace SceneEditor.editor
             {
                 list.Add(new PointValue(p));
             }
-            this.Points = list.ToArray();
+            this.Points = list;
+        }
+
+        public Vector3[] ToVector3Set()
+        {
+            PointValue[] Points = this.Points.ToArray();
+            Vector3[] result = new Vector3[Points.Length];
+            for (int i = 0; i < Points.Length; i++)
+            {
+                result[i] = Points[i].ToVector3();
+            }
+            return result;
         }
 
         public void WriteStream(JsonWriter writer)
@@ -143,6 +183,7 @@ namespace SceneEditor.editor
         public float[] Y { get; set; }
         public float[][] Z { get; set; }
 
+        [JsonConstructor]
         public TileDataSet(float[] X, float[] Y, float[][] Z)
         {
             this.X = X;

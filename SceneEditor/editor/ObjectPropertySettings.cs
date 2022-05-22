@@ -288,8 +288,6 @@ namespace SceneEditor.editor
                                                     );
                         list.Items.Add(geometry);
 
-
-
                         Button buttonStyle = Generate.Button(
                             "Switch primitive type",
                             SwitchDrawStyle
@@ -297,16 +295,41 @@ namespace SceneEditor.editor
                         list.Items.Add(buttonStyle);
 
                         Button buttonToMesh = Generate.Button(
-                            "Tranform to mesh",
+                            "Tranform to mesh (in developing)",
                             ButtonTranformTriangulatedToMesh
                             );
                         list.Items.Add(buttonToMesh);
-
+                                                
                         Button buttonExport = Generate.Button(
                             "Export data",
                             ExportData
                             );
                         list.Items.Add(buttonExport);
+
+                        ListBox pointsList = new ListBox();
+                        Expander pointsListExp = Generate.Expander("Points dataset", pointsList);
+                        pointsListExp.IsExpanded = false;
+
+                        for (int i = 0; i < (currentProperty as ComplexPlaneTriangular).data.Length; i++) 
+                        {
+                            var pointValue = (currentProperty as ComplexPlaneTriangular).data[i];
+                            pointsList.Items.Add(CreateSettingForVector3Point(
+                                "Point " + (i + 1),
+                                pointValue,
+                                TextChanedVector3PointValueTriangular
+                                ));
+                        }
+
+                        // add add/remove buttons for points in dataset
+
+                        list.Items.Add(pointsListExp);
+
+
+                        ListBox triangOptList = new ListBox();
+                        Expander triangOptListExp = Generate.Expander("Points dataset", triangOptList);
+
+
+
 
                     }; break;
             }
@@ -324,6 +347,16 @@ namespace SceneEditor.editor
                             );
             list.Items.Add(buttonRemove);
             return null;
+        }
+
+
+
+        private void TextChanedVector3PointValueTriangular(object sender, RoutedEventArgs e)
+        {
+            ListBox handler = GetListWithVector3Settings(sender);
+            int index = handler.Items.IndexOf(GetListItemWithVector3Settings(sender));
+            (currentProperty as ComplexPlaneTriangular).dataSetAdjustable[index] = GetVectorFromListBoxOfVector3Settings(handler, index);
+            (currentProperty as ComplexPlaneTriangular).UpdateVertices();
         }
 
         private void ButtonDelete(object sender, RoutedEventArgs e)
@@ -664,9 +697,33 @@ namespace SceneEditor.editor
             return item;
         }
 
+        private Vector3 GetVectorFromListBoxOfVector3Settings(ListBox sender, int index)
+        {
+            Vector3 result = new Vector3();
+
+            ListBox verts = ((ListBox)((DockPanel)((ListBoxItem)sender.Items[index]).Content).Children[1]);
+
+            for(int i = 0; i < 3; i++)
+            {
+                TextBox box = ((TextBox)((DockPanel)((ListBoxItem)verts.Items[i]).Content).Children[1]);
+                try
+                {
+                    float value = float.Parse(box.Text.ToString());
+                    result[i] = value;
+                }catch(Exception ex) { }
+            }
+
+            return result;
+        }
+
+        private ListBoxItem GetListItemWithVector3Settings(object sender)
+        {
+            return ((ListBoxItem)((DockPanel)((ListBox)((ListBoxItem)((DockPanel)((TextBox)sender).Parent).Parent).Parent).Parent).Parent);
+        }
+
         private ListBox GetListWithVector3Settings(object sender)
         {
-            return (ListBox)((ListBoxItem)((DockPanel)((ListBox)((ListBoxItem)((DockPanel)((TextBox)sender).Parent).Parent).Parent).Parent).Parent).Parent;
+            return (ListBox)GetListItemWithVector3Settings(sender).Parent;
         }
 
         private ListBoxItem CreateSettingForVector3Point(
@@ -755,31 +812,35 @@ namespace SceneEditor.editor
         {
             Vector3 newPos = cameras[activeCam].cam.Position;
 
-            Expander exp = (Expander)editorProperties.Items[0];
-            ListBox list = (ListBox)exp.Content;
-
-            ListBoxItem itemActive = (ListBoxItem)list.Items[activeCam];
-
-            Expander expCamI = (Expander)itemActive.Content;
-
-            ListBox listSettings = (ListBox)expCamI.Content;
-
-            // property now
-            ListBoxItem itemPos = (ListBoxItem)listSettings.Items[3];
-
-            DockPanel dockPanel = (DockPanel)itemPos.Content;
-
-            ListBox listContent = (ListBox)dockPanel.Children[1];
-
-            for (int i = 0; i < 3; i++)
+            if(editorProperties.Items.Count != 0)
             {
-                ListBoxItem coord = (ListBoxItem)listContent.Items[i];
-                DockPanel dockSet = (DockPanel)coord.Content;
-                TextBox text = (TextBox)dockSet.Children[1];
-                text.Text = newPos[i].ToString();
-            }
+                Expander exp = (Expander)editorProperties.Items[0];
 
-            UpdateView();
+                ListBox list = (ListBox)exp.Content;
+
+                ListBoxItem itemActive = (ListBoxItem)list.Items[activeCam];
+
+                Expander expCamI = (Expander)itemActive.Content;
+
+                ListBox listSettings = (ListBox)expCamI.Content;
+
+                // property now
+                ListBoxItem itemPos = (ListBoxItem)listSettings.Items[3];
+
+                DockPanel dockPanel = (DockPanel)itemPos.Content;
+
+                ListBox listContent = (ListBox)dockPanel.Children[1];
+
+                for (int i = 0; i < 3; i++)
+                {
+                    ListBoxItem coord = (ListBoxItem)listContent.Items[i];
+                    DockPanel dockSet = (DockPanel)coord.Content;
+                    TextBox text = (TextBox)dockSet.Children[1];
+                    text.Text = newPos[i].ToString();
+                }
+
+                UpdateView();
+            }
         }
 
         protected private void UpdateView()
@@ -1074,13 +1135,21 @@ namespace SceneEditor.editor
                         ComplexPlaneTile export = (ComplexPlaneTile)currentProperty;
                         TileDataSet data = new TileDataSet(export.Xmesh, export.Ymesh, export.DataBuffer);
                         data.WriteStream(writer);
-                        
+
                     }
                     else if (currentProperty is ComplexPlaneTriangular)
                     {
                         ComplexPlaneTriangular export = (ComplexPlaneTriangular)currentProperty;
-                        //TriangularedDataSet data = new TriangularedDataSet(export.ExportPointDataSet().ToArray());
-                        //PointsDataSet pointsSet = new PointsDataSet(export.ExportPoints());
+                        TriangularedDataSet? data = export.ExportPointDataSet();
+                        if (data == null)
+                        {
+                            PointsDataSet pointsData = new(export.ExportPoints());
+                            pointsData.WriteStream(writer);
+                        }
+                        else
+                        {
+                            data.WriteStream(writer);
+                        }
                     }
                 }
             }
@@ -1090,20 +1159,18 @@ namespace SceneEditor.editor
 
         public void ImportData(object sender, RoutedEventArgs e)
         {
-            string jsonString = "";
             OpenFileDialog dialog = new OpenFileDialog();
-            //dialog.InitialDirectory = "../../../";
             if (dialog.ShowDialog() == true)
             {
-                jsonString = File.ReadAllText(dialog.FileName);
+                string jsonString = File.ReadAllText(dialog.FileName);
 
                 // add triangulated data supportion
                 try
                 {
                     TileDataSet? income = JsonConvert.DeserializeObject<TileDataSet>(jsonString);
-                    if (income != null)
+                    if (income != null && income.X != null && income.Y != null && income.Z != null)
                     {
-                        TileDataSet data = (TileDataSet)income;
+                        TileDataSet data = income;
                         addNewBottom(new ComplexPlaneTile(
                             textureSet: new string[] {
                                 TexturePath.dark_paths,
@@ -1113,30 +1180,43 @@ namespace SceneEditor.editor
                             X: data.X, Y: data.Y, Z: data.Z
                             ));
                     }
-                }
-                catch (Exception ex)
-                {
-                    try
+                    else
                     {
-                        PointsDataSet? income = JsonConvert.DeserializeObject<PointsDataSet>(jsonString);
-                        if (income != null)
+                        PointsDataSet? inpoints = JsonConvert.DeserializeObject<PointsDataSet>(jsonString);
+                        if (inpoints != null && inpoints.Points != null)
                         {
-                            PointsDataSet data = (PointsDataSet)income;
+                            PointsDataSet data = inpoints;
                             addNewPointsDataset(new ComplexPlaneTriangular(
-                                shouldTriangulate: true,
+                                inputData: data.ToVector3Set(),
+                                shouldTriangulate: false,
                                 textureSet: new string[] {
                                     TexturePath.dark_paths,
                                     TexturePath.criss_cross,
                                     TexturePath.cork_board
                                 }));
                         }
-                    }
-                    catch (Exception ex2)
-                    {
-
+                        else
+                        {
+                            TriangularedDataSet? inDataSet = JsonConvert.DeserializeObject<TriangularedDataSet>(jsonString);
+                            if (inDataSet != null && inDataSet.Triangles != null)
+                            {
+                                TriangularedDataSet data = inDataSet;
+                                addNewPointsDataset(new ComplexPlaneTriangular(
+                                    data,
+                                    textureSet: new string[] {
+                                        TexturePath.dark_paths,
+                                        TexturePath.criss_cross,
+                                        TexturePath.cork_board
+                                }));
+                            }
+                            else
+                            {
+                                //event inform here
+                            }
+                        }
                     }
                 }
-
+                catch (Exception ex) { }
             }
         }
 

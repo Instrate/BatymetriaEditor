@@ -60,8 +60,8 @@
 
         <Grid x:Name="panelInfo" Background="CadetBlue" Grid.Column="1" Focusable="True">
             <Grid.RowDefinitions>
-                <RowDefinition Height="2*"></RowDefinition>
-                <RowDefinition Height="1*"></RowDefinition>
+                <RowDefinition Height="1.2*"></RowDefinition>
+                <RowDefinition Height="2.3*"></RowDefinition>
             </Grid.RowDefinitions>
             <GridSplitter Grid.Row="0" BorderThickness="2" BorderBrush="Black" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
 
@@ -84,14 +84,18 @@
             <Grid Grid.Row="1">
                 <TabControl Margin="5">
                     <TabItem Header="Settings">
-                        <ListBox Width="Auto" x:Name="editorElementSettings">
-                            
-                        </ListBox>
+                        <ScrollViewer>
+                            <ListBox Width="Auto" x:Name="editorElementSettings">
+
+                            </ListBox>
+                        </ScrollViewer>
                     </TabItem>
                     <TabItem Header="Scene">
-                        <ListBox Width="Auto" x:Name="editorSceneSettings">
+                        <ScrollViewer>
+                            <ListBox Width="Auto" x:Name="editorSceneSettings">
 
-                        </ListBox>
+                            </ListBox>
+                        </ScrollViewer>
                     </TabItem>
                 </TabControl>
             </Grid>
