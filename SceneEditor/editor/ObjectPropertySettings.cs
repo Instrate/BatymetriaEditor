@@ -175,7 +175,8 @@ namespace SceneEditor.editor
         }
 
         // object settings 
-        // TODO: make @enabled@ checkbox smaller
+        // TODO: make @enabled@ checkbox smaller 
+        // var dataItem = currentProperty is ComplexPlaneTile ? (ComplexPlaneTile) currentProperty : (ComplexPlaneTriangular) currentProperty;
         private object? LookUpProperties(object itemWithProperties, ListBox list)
         {
             int index = -1;
@@ -379,7 +380,11 @@ namespace SceneEditor.editor
             return null;
         }
 
-
+        private ListBox CreateRangedList(object source, List<object> listValues, int lower = 0, int maxAmount = 20)
+        {
+            // do it later
+            return new();
+        }
 
         private void TextChanedVector3PointValueTriangular(object sender, RoutedEventArgs e)
         {
@@ -1333,10 +1338,6 @@ namespace SceneEditor.editor
             if (key == Key.NumPad3)
             {
                 cameraChange(-1);
-            }
-            if (key == Key.F)
-            {
-                cameras[activeCam].grabedMouse = !cameras[activeCam].grabedMouse;
             }
             if (key == Key.I)
             {

@@ -33,86 +33,64 @@ namespace SceneEditor.editor
             _camSize = size;
             cam = new Camera(Vector3.UnitZ * 4, size.X / (float)size.Y, isOrtogonal);
 
-            cam.Yaw = 0;
+            //cam.Yaw = 0;
 
             _firstMove = true;
             grabedMouse = false;
         }
 
-
-        ~CameraControl()
-        {
-
-        }
-
-        public void OnRender(int handle)
-        {
-           //Matrix4 model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(0));
-
-           //shader.SetMatrix4("model", model);
-           //shader.SetMatrix4("view", camera.GetViewMatrix());
-           //shader.SetMatrix4("projection", camera.GetProjectionMatrix());
-
-           //cameraView();
-        }
-
+        
         public void OnMouseMove(System.Windows.Input.MouseEventArgs mouse, Size size, Point pointGL, Point pointScreen)
         {
-
-            if (_firstMove)
+            Vector2 point = new((float)pointGL.X, (float)pointGL.Y);
+            float deltaX = 0;
+            float deltaY = 0;
+            if (mouse.LeftButton == MouseButtonState.Pressed)
             {
-                System.Windows.Forms.Cursor.Position = new System.Drawing.Point()
+                if (_firstMove)
                 {
-                    X = (int)(pointScreen.X - (pointGL.X - size.Width / 2.0)),
-                    Y = (int)(pointScreen.Y - (pointGL.Y - size.Height / 2.0))
+                    _firstMove = false;
+                    _lastPos = point;
+                    return;
+                }
+                
+                deltaX = point.X - _lastPos.X;
+                deltaY = point.Y - _lastPos.Y;
+
+                cam.Yaw -= deltaX * sensitivity;
+                cam.Pitch -= deltaY * sensitivity;
+            }
+            else
+            {
+                _firstMove = true;
+                return;
+            }
+            if(deltaX != 0 || deltaY != 0)
+            {
+                Vector2 newPos = new Vector2
+                {
+                    X = _lastPos.X + deltaX,
+                    Y = _lastPos.Y + deltaY
                 };
-                _firstMove = false;
-                if (!grabedMouse)
-                {
-                    _lastPos = new Vector2(0, 0);
-                }               
+                _lastPos = newPos;
             }
-            else 
-            {
-                // ! fix later
-                if (mouse.LeftButton == MouseButtonState.Pressed)
-                {
-                    // Calculate the offset of the mouse position
-                    float deltaX = (float)(pointGL.X * Screen.PrimaryScreen.Bounds.Width / size.Width - _lastPos.X);
+            
 
-                    float deltaY = (float)(pointGL.Y * Screen.PrimaryScreen.Bounds.Height / size.Height - _lastPos.Y);
-
-                    Vector2 newPos = new Vector2
-                    {
-                        X = _lastPos.X + deltaX,
-                        Y = _lastPos.Y + deltaY
-                    };
-
-                    //// Apply the camera pitch and yaw (we clamp the pitch in the camera class)
-                    cam.Yaw -= deltaX * sensitivity;
-                    cam.Pitch -= deltaY * sensitivity; // reversed since y-coordinates range from bottom to top
-                    _lastPos = newPos;
-                }
-                else
-                {
-                    //_lastPos = new Vector2((float)size.Width, (float)size.Height);
-                    System.Windows.Forms.Cursor.Position = new System.Drawing.Point()
-                    {
-                        X = (int)(pointScreen.X - (pointGL.X - size.Width / 2.0)),
-                        Y = (int)(pointScreen.Y - (pointGL.Y - size.Height / 2.0))
-                    };
-                }
-                //Console.WriteLine("lastPos");
-                //Console.WriteLine(_lastPos);
-            }
+            //Console.WriteLine("lastPos: ");
+            //Console.WriteLine(_lastPos);
+            //Console.WriteLine();
         }
 
         public void OnMouseLeave()
         {
             grabedMouse = false;
             _firstMove = true;
-            _lastPos = Vector2.Zero;
-            //Cursor.Show();
+            //_lastPos = Vector2.Zero;
+        }
+
+        public void OnMouseEnter()
+        {
+            grabedMouse = true;
         }
 
         public void OnKeyDown(System.Windows.Input.KeyEventArgs e, float timeDelta)
@@ -149,28 +127,6 @@ namespace SceneEditor.editor
             }
 
             isMoved = true;
-        }
-
-        private void cameraView()
-        {
-            //switch (viewStyle)
-            //{
-            //    case 1:
-            //        {
-            //            //camera.Yaw = 90;
-            //            camera.Pitch = 0;
-            //        }; break;
-            //    case 2: { }; break;
-            //    case 3: { }; break;
-            //    case 4: { }; break;
-            //    default: break;
-            //}
-
-        }
-
-        public void Rotate()
-        {
-
         }
     }
 }

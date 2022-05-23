@@ -266,7 +266,7 @@ namespace SceneEditor.editor
         }
 
         [MTAThread]
-        public void OnKeyDown(KeyEventArgs e)
+        public new void OnKeyDown(KeyEventArgs e)
         {
             var key = e.Key;
 
@@ -274,10 +274,6 @@ namespace SceneEditor.editor
             //float rotation = (MathF.Pow(2, -4) * MathF.PI);
             //float scale = 1.0625f;
 
-            if (key == Key.F)
-            {
-                cameras[activeCam].grabedMouse = !cameras[activeCam].grabedMouse;
-            }
             if (cameras[activeCam].grabedMouse)
             {
                 cameras[activeCam].OnKeyDown(e, timeDelta);
@@ -290,27 +286,14 @@ namespace SceneEditor.editor
             
         }
 
-        [MTAThread]
+        [STAThread]
         public void OnMouseMove(MouseEventArgs mouse, Point pointGL, Point pointScreen)
         {
-
             if (cameras[activeCam].grabedMouse)
             {
                 cameras[activeCam].OnMouseMove(mouse, selfSize, pointGL, pointScreen);
-
-                view = cameras[activeCam].cam.GetViewMatrix();
-                shader.SetMatrix4("view", view);
-
-                if (mouse.LeftButton == MouseButtonState.Pressed)
-                {
-                    //axis.RotateAlongWithCamera(cameras[activeCam]);
-                }
+                UpdateView();
             }
-            else
-            {
-                cameras[activeCam].OnMouseLeave();
-            }
-
         }
 
         ~Editor()

@@ -42,7 +42,7 @@ namespace SceneEditor
         float ticker = 0;
 
         float fps_max = 1f / 30;
-        float fps_min = 1f / 10;
+        float fps_min = 1f / 5;
         float fps_lim = 1f / 30;
 
         public MainWindow()
@@ -101,19 +101,21 @@ namespace SceneEditor
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
         {
+            currentEditor.cameras[currentEditor.activeCam].OnMouseLeave();
             panelRoot.Focus();
             String msg = "MousePosition: outside the window";
             textMouse.Text = msg;
-            textKey.Text = "Pressed: window isn't focused";
+            //textKey.Text = "Pressed: window isn't focused";
+            switchVisibleGLStatus();
         }
 
         private void OnMouseEnter(object sender, MouseEventArgs e)
         {
             glMain.Focus();
             editors[currentEditorNum].OnResize(new Size { Width = glMain.ActualWidth, Height = glMain.ActualHeight });
-            textKey.Text = "Pressed: no key is pressed yet";
-
-            
+            //textKey.Text = "Pressed: no key is pressed yet";
+            currentEditor.cameras[currentEditor.activeCam].OnMouseEnter();
+            switchVisibleGLStatus();
         }
 
         private void OnKeyUp(object sender, KeyEventArgs e)
@@ -154,14 +156,6 @@ namespace SceneEditor
 
             editors[currentEditorNum].OnMouseMove(mouse, pos, glMain.PointToScreen(pos));
 
-            //// posible event placer
-            //if (currentEditor.doInvalidate)
-            //{
-                
-            //    currentEditor.doInvalidate = false;
-            //}
-
-
             switchVisibleGLStatus();
         }
 
@@ -180,7 +174,8 @@ namespace SceneEditor
             if (editors[currentEditorNum].cameras[editors[currentEditorNum].activeCam].grabedMouse)
             {
                 tabWindows.Background = Brushes.Black;
-                glMain.Cursor = Cursors.None;
+
+                //glMain.Cursor = Cursors.None;
                 fps_lim = fps_max;
             }
             else
