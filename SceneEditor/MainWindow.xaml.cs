@@ -156,7 +156,7 @@ namespace SceneEditor
 
             editors[currentEditorNum].OnMouseMove(mouse, pos, glMain.PointToScreen(pos));
 
-            switchVisibleGLStatus();
+            //switchVisibleGLStatus();
         }
 
         private void OnPreviewMouseKeyPressed(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -173,23 +173,16 @@ namespace SceneEditor
         {
             if (editors[currentEditorNum].cameras[editors[currentEditorNum].activeCam].grabedMouse)
             {
-                tabWindows.Background = Brushes.Black;
+                //tabWindows.Background = Brushes.Black;
+                glMain.Cursor = Cursors.Cross;
 
-                //glMain.Cursor = Cursors.None;
                 fps_lim = fps_max;
             }
             else
             {
                 fps_lim = fps_min;
-                tabWindows.Background = Brushes.FloralWhite;
-                if (glMain.IsFocused)
-                {
-                    glMain.Cursor = Cursors.Cross;
-                }
-                else
-                {
-                    glMain.Cursor = Cursors.Arrow;
-                }
+                //tabWindows.Background = Brushes.FloralWhite;
+                glMain.Cursor = Cursors.Arrow;
             }
         }
 

@@ -42,50 +42,41 @@ namespace SceneEditor.editor
         
         public void OnMouseMove(System.Windows.Input.MouseEventArgs mouse, Size size, Point pointGL, Point pointScreen)
         {
-            Vector2 point = new((float)pointGL.X, (float)pointGL.Y);
-            float deltaX = 0;
-            float deltaY = 0;
             if (mouse.LeftButton == MouseButtonState.Pressed)
             {
+                Vector2 point = new((float)pointGL.X, (float)pointGL.Y);
                 if (_firstMove)
                 {
                     _firstMove = false;
                     _lastPos = point;
                     return;
                 }
-                
-                deltaX = point.X - _lastPos.X;
-                deltaY = point.Y - _lastPos.Y;
+                float deltaX = point.X - _lastPos.X;
+                float deltaY = point.Y - _lastPos.Y;
 
                 cam.Yaw -= deltaX * sensitivity;
                 cam.Pitch -= deltaY * sensitivity;
+
+                if (deltaX != 0 || deltaY != 0)
+                {
+                    Vector2 newPos = new Vector2
+                    {
+                        X = _lastPos.X + deltaX,
+                        Y = _lastPos.Y + deltaY
+                    };
+                    _lastPos = newPos;
+                }
             }
             else
             {
                 _firstMove = true;
-                return;
             }
-            if(deltaX != 0 || deltaY != 0)
-            {
-                Vector2 newPos = new Vector2
-                {
-                    X = _lastPos.X + deltaX,
-                    Y = _lastPos.Y + deltaY
-                };
-                _lastPos = newPos;
-            }
-            
-
-            //Console.WriteLine("lastPos: ");
-            //Console.WriteLine(_lastPos);
-            //Console.WriteLine();
         }
 
         public void OnMouseLeave()
         {
             grabedMouse = false;
             _firstMove = true;
-            //_lastPos = Vector2.Zero;
         }
 
         public void OnMouseEnter()

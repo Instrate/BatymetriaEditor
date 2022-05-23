@@ -144,15 +144,10 @@ namespace SceneEditor.editor
 
         public void OnMouseButtonPressed(MouseButtonEventArgs mouse)
         {
-
-            if (mouse.RightButton == MouseButtonState.Pressed)
-            {
-                cameras[activeCam].grabedMouse = !cameras[activeCam].grabedMouse;
-            }
-            if (cameras[activeCam].grabedMouse)
-            {
-                UpdateView();
-            }
+            //if (cameras[activeCam].grabedMouse)
+            //{
+            //    UpdateView();
+            //}
         }
 
         
