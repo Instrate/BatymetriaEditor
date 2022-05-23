@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace SceneEditor.editor
 {
@@ -395,12 +396,19 @@ namespace SceneEditor.editor
             ComplexPlaneTriangular data = (ComplexPlaneTriangular)currentProperty;
             ListBox list = (ListBox)((Button)sender).Parent;
             bool[] options = new bool[3];
+
+           
+            
             for(int i = 0; i < 3; i++)
             {
                 CheckBox check = (CheckBox) list.Items[i];
                 options[i] = check.IsChecked.Value;
             }
+            var clock = new Stopwatch();
+            clock.Start();
             data.generateDelaunayTriangulationFromData(options[0], options[1], options[2]);
+            EventInform("Triangulation has completed and took " + clock.Elapsed.TotalSeconds);
+            clock.Stop();
         }
 
         private Expander CreateRangedListVector3Points(
