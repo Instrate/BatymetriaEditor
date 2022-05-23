@@ -337,31 +337,23 @@ namespace SceneEditor.editor
                             );
                         list.Items.Add(buttonExport);
 
-                        ListBox pointsList = new ListBox();
-                        Expander pointsListExp = Generate.Expander("Points dataset", pointsList);
+
+                        Expander pointsListExp = CreateRangedListVector3Points(
+                            "Points dataset",
+                            (currentProperty as ComplexPlaneTriangular).dataSetAdjustable,
+                            TextChanedVector3PointValueTriangular,
+                            SliderPointsListSlide,
+                            ButtonPointAdd,
+                            ButtonPointDeleteSelected
+                            );
                         pointsListExp.IsExpanded = false;
-
-                        for (int i = 0; i < (currentProperty as ComplexPlaneTriangular).data.Length; i++) 
-                        {
-                            var pointValue = (currentProperty as ComplexPlaneTriangular).data[i];
-                            pointsList.Items.Add(CreateSettingForVector3Point(
-                                "Point " + (i + 1),
-                                pointValue,
-                                TextChanedVector3PointValueTriangular
-                                ));
-                        }
-
-                        // add add/remove buttons for points in dataset
 
                         list.Items.Add(pointsListExp);
 
+                        Expander expTriangulate = CreateTriangulationExpander();
+                        expTriangulate.IsExpanded = false;
 
-                        ListBox triangOptList = new ListBox();
-                        Expander triangOptListExp = Generate.Expander("Points dataset", triangOptList);
-
-
-
-
+                        list.Items.Add(expTriangulate);
                     }; break;
             }
 
@@ -380,19 +372,194 @@ namespace SceneEditor.editor
             return null;
         }
 
-        private ListBox CreateRangedList(object source, List<object> listValues, int lower = 0, int maxAmount = 20)
+        private Expander CreateTriangulationExpander()
         {
-            // do it later
-            return new();
+            ListBox list = new();
+
+            Expander expander = Generate.Expander("Triangulation options", list);
+
+            CheckBox check1 = Generate.CheckBox("Make resulting mesh smoother");
+            CheckBox check2 = Generate.CheckBox("Use stricted area for triangles");
+            CheckBox check3 = Generate.CheckBox("Confirm Delaunay statement");
+            Button button = Generate.Button("Triangulate\n(may take a while)", ButtonTriangulate);
+
+            list.Items.Add(check1);
+            list.Items.Add(check2);
+            list.Items.Add(check3);
+            list.Items.Add(button);
+            return expander;
         }
 
+        private void ButtonTriangulate(object sender, RoutedEventArgs e)
+        {
+            ComplexPlaneTriangular data = (ComplexPlaneTriangular)currentProperty;
+            ListBox list = (ListBox)((Button)sender).Parent;
+            bool[] options = new bool[3];
+            for(int i = 0; i < 3; i++)
+            {
+                CheckBox check = (CheckBox) list.Items[i];
+                options[i] = check.IsChecked.Value;
+            }
+            data.generateDelaunayTriangulationFromData(options[0], options[1], options[2]);
+        }
+
+        private Expander CreateRangedListVector3Points(
+            string name,
+            List<Vector3> listValues,
+            TextChangedEventHandler textHandlerEvent,
+            RoutedPropertyChangedEventHandler<double> slideEvent,
+            RoutedEventHandler buttonEventAdd,
+            RoutedEventHandler buttonEventRemove,
+            int lowerInd = 0,
+            int maxAmount = 5)
+        {
+            
+            DockPanel panel = new();
+            Expander exp = Generate.Expander(name, panel);
+            Slider slider = new();
+            slider.Orientation = Orientation.Vertical;
+            slider.VerticalAlignment = VerticalAlignment.Stretch;
+            slider.Minimum = 0;
+            slider.Maximum = listValues.Count - 1;
+            slider.Width = 30;
+            slider.TickPlacement = System.Windows.Controls.Primitives.TickPlacement.TopLeft;
+            ListBox listHandler = new();
+            ScrollViewer scroll = Generate.ScrollViewer(listHandler);
+            scroll.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            scroll.HorizontalAlignment = HorizontalAlignment.Stretch;
+            
+            Button buttonCreatePoint = Generate.Button("Add point", buttonEventAdd);
+            Button buttonRemovePoint = Generate.Button("Remove selected point", buttonEventRemove);
+
+            DockPanel.SetDock(slider, Dock.Left);
+            DockPanel.SetDock(scroll, Dock.Top);
+            DockPanel.SetDock(buttonCreatePoint, Dock.Bottom);
+            DockPanel.SetDock(buttonRemovePoint, Dock.Bottom);
+            buttonCreatePoint.VerticalAlignment = VerticalAlignment.Bottom;
+            buttonRemovePoint.VerticalAlignment = buttonCreatePoint.VerticalAlignment;
+            panel.Children.Add(slider);
+            panel.Children.Add(scroll);
+            panel.Children.Add(buttonCreatePoint);
+            panel.Children.Add(buttonRemovePoint);
+
+            if (lowerInd + maxAmount >= listValues.Count)
+            {
+                lowerInd = listValues.Count - maxAmount - 1;
+            }
+            if (lowerInd < 0)
+            {
+                lowerInd = 0;
+            }
+
+            slider.Value = listValues.Count - lowerInd - 1;
+            slider.IsSnapToTickEnabled = true;
+            slider.TickFrequency = 1;
+            slider.ValueChanged += slideEvent;
+            slider.MouseWheel += SliderMouseWheel;
+
+            var selectedItems = listValues.Where(el => {
+                int temp = listValues.IndexOf(el) - lowerInd;
+                return temp >= 0 && temp < maxAmount;
+            }).ToArray();
+
+            if (selectedItems.Length >= maxAmount)
+            {
+                for (int i = 0; i < maxAmount; i++)
+                {
+                        var point = selectedItems[i];
+                        listHandler.Items.Add(CreateSettingForVector3Point(
+                            "Point " + (lowerInd + i + 1),
+                            point,
+                            textHandlerEvent
+                            ));
+                }
+            }
+            return exp;
+        }
+
+
+        private void RecreateListOfPoints(ListBox list, Expander exp, int value)
+        {
+            int ind = list.Items.IndexOf(exp);
+            list.Items[ind] = CreateRangedListVector3Points(
+                exp.Header.ToString(),
+                (currentProperty as ComplexPlaneTriangular).dataSetAdjustable,
+                TextChanedVector3PointValueTriangular,
+                SliderPointsListSlide,
+                ButtonPointAdd,
+                ButtonPointDeleteSelected,
+                value
+                );
+        }
+
+        private void SliderMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            Slider slider = (Slider)sender;
+            Expander exp = ((Expander)((DockPanel)slider.Parent).Parent);
+            ListBox? list = ((ListBox) exp.Parent);
+            if (list != null && e.Delta != 0)
+            {
+                ComplexPlaneTriangular data = (ComplexPlaneTriangular)currentProperty;
+                int abs = e.Delta / Math.Abs(e.Delta);
+                int value = data.dataSetAdjustable.Count - (int)slider.Value - abs * list.Items.Count - 1;
+                RecreateListOfPoints(list, exp, value);
+            }
+        }
+
+        private void SliderPointsListSlide(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Expander exp = ((Expander)((DockPanel)((Slider)sender).Parent).Parent);
+            ListBox? list = ((ListBox) exp.Parent);
+            if(list != null)
+            {
+                int value = (currentProperty as ComplexPlaneTriangular).dataSetAdjustable.Count - (int)e.NewValue;
+                RecreateListOfPoints(list, exp, value);
+            }
+        }
+
+        //fix wrong index
         private void TextChanedVector3PointValueTriangular(object sender, RoutedEventArgs e)
         {
+            ComplexPlaneTriangular data = (ComplexPlaneTriangular)currentProperty;
             ListBox handler = GetListWithVector3Settings(sender);
-            int index = handler.Items.IndexOf(GetListItemWithVector3Settings(sender));
-            (currentProperty as ComplexPlaneTriangular).dataSetAdjustable[index] = GetVectorFromListBoxOfVector3Settings(handler, index);
-            (currentProperty as ComplexPlaneTriangular).UpdateVertices();
+            Slider slider = ((Slider) ((DockPanel) ((ScrollViewer) handler.Parent).Parent).Children[0]);
+
+            int amount = handler.Items.Count;
+            //int amountSet = (currentProperty as ComplexPlaneTriangular).dataSetAdjustable.Count;
+
+            int index = handler.Items.IndexOf(GetListItemWithVector3Settings(sender)) + data.dataSetAdjustable.Count - ((int) slider.Value) - 1;
+            data.dataSetAdjustable[index] = GetVectorFromListBoxOfVector3Settings(handler, index);
+            data.UpdateVertices();
             EventInform("Dot: new value applied");
+        }
+
+        private void ButtonPointDeleteSelected(object sender, RoutedEventArgs e)
+        {
+            ListBox list = ((ListBox)((ScrollViewer)((DockPanel)((Button)sender).Parent).Children[1]).Content);
+            if (list.SelectedIndex != -1)
+            {
+                ComplexPlaneTriangular data = (ComplexPlaneTriangular)currentProperty;
+                Slider slider = (Slider)((DockPanel)((Button)sender).Parent).Children[0];
+                Expander exp = ((Expander)((DockPanel)slider.Parent).Parent);
+                ListBox? listHandler = ((ListBox)exp.Parent);
+                int value = data.dataSetAdjustable.Count - (int)slider.Value + list.SelectedIndex - 1;
+                data.dataSetAdjustable.Remove(data.dataSetAdjustable[value]);
+                data.UpdateVertices();
+                RecreateListOfPoints(listHandler, exp, value);
+            }
+        }
+
+        private void ButtonPointAdd(object sender, RoutedEventArgs e)
+        {
+            ComplexPlaneTriangular data = (ComplexPlaneTriangular)currentProperty;
+            ListBox list = (ListBox)((ScrollViewer)((DockPanel)((Button)sender).Parent).Children[1]).Content;
+            Slider slider = (Slider)((DockPanel)((ScrollViewer)list.Parent).Parent).Children[0];
+            Expander exp = (Expander)((DockPanel)slider.Parent).Parent;
+            ListBox? listHandler = ((ListBox)exp.Parent);
+            data.dataSetAdjustable.Add(Vector3.Zero);
+            data.UpdateVertices();
+            int value = data.dataSetAdjustable.Count - (int)slider.Value + list.SelectedIndex - 1;
+            RecreateListOfPoints(listHandler, exp, value);
         }
 
         private void ButtonDelete(object sender, RoutedEventArgs e)
@@ -615,8 +782,7 @@ namespace SceneEditor.editor
                 cameras = buffer.ToArray();
                 cameras[activeCam].cam.Fov = 90f;
 
-                view = cameras[activeCam].cam.GetViewMatrix();
-                shader.SetMatrix4("view", view);
+                UpdateView();
             }
         }
 
@@ -631,9 +797,8 @@ namespace SceneEditor.editor
             {
                 activeCam = cameras.Length - 1;
             }
-            view = cameras[activeCam].cam.GetViewMatrix();
-            shader.SetMatrix4("view", cameras[activeCam].cam.GetViewMatrix());
 
+            UpdateView();
             EventInform("Camera: switched");
         }
 
@@ -751,6 +916,7 @@ namespace SceneEditor.editor
             return item;
         }
 
+        
         private Vector3 GetVectorFromListBoxOfVector3Settings(ListBox sender, int index)
         {
             Vector3 result = new Vector3();

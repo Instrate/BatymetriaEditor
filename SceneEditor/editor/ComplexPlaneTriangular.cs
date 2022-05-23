@@ -163,7 +163,7 @@ namespace SceneEditor.editor
             if (makeSmooth)
             {
                 var smoother = new SimpleSmoother();
-                smoother.Smooth(mesh, 25);
+                smoother.Smooth(mesh);
             }
 
             _readConnectionsFromMesh(mesh);
