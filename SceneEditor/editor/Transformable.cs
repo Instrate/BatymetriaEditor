@@ -1,4 +1,7 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using LearnOpenTK.Common;
+using OpenTK.Graphics.OpenGL4;
+//using OpenTK.Graphics.OpenGL;
+//using OpenTK.Graphics.ES30;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -19,6 +22,11 @@ namespace SceneEditor.editor
         private protected new Matrix4 originShift = Matrix4.Identity;
         private protected Matrix4 rotation = Matrix4.Identity;
         private protected Matrix4 scale = Matrix4.Identity;
+
+        private protected Vector2 _range = new Vector2(0,0);
+        private protected bool _rangeAssigned = false;
+
+        private protected Transformable? parent = null;
 
         public virtual new void Move(Vector3 shifts)
         {
@@ -52,30 +60,35 @@ namespace SceneEditor.editor
             transform = scale = originShift = rotation = Matrix4.Identity;
         }
 
-        private protected void _applyTextures()
+        private protected void _applyTextures(Shader shader)
         {
-            if (textureHandlers != null && textureHandlers.Length > 0)
-            {
-                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-                {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                }
-            }
+            TextureLoader.UseMany(shader, textureHandlers);
         }
 
-        private protected override void _prepareRendering(int shaderHandle)
+        private protected override void _prepareRendering(Shader shader)
         {
-            var id = GL.GetUniformLocation(shaderHandle, "transform");
+            var id = GL.GetUniformLocation(shader.Handle, "transform");
             GL.UniformMatrix4(id, false, ref transform);
+
+            int attr = GL.GetUniformLocation(shader.Handle, "textureGradRange");
+            if(parent == null)
+            {
+                GL.Uniform2(attr, ref _range);
+            }
+            else
+            {
+                GL.Uniform2(attr, parent._range);
+            }
+            
         }
 
-        public override void Render(int shaderHandle, PrimitiveType? primitive = null)
+        public override void Render(Shader shader, PrimitiveType? primitive = null)
         {
             if (isEnabled)
             {
-                _applyTextures();
-                _prepareRendering(shaderHandle);
-                _renderObjects(shaderHandle, primitive);
+                _applyTextures(shader);
+                _prepareRendering(shader);
+                _renderObjects(shader, primitive);
             }
         }
     }

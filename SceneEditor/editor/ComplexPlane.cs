@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using LearnOpenTK.Common;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ namespace SceneEditor.editor
         Dot[] dots;
         public bool showDots = false;
 
+        Vector2 heightRange = new Vector2(-1, 1);
 
         int primitiveCurrent = 0;
         float lineWidth;
@@ -53,7 +55,7 @@ namespace SceneEditor.editor
             {
                 if (X == null || Y == null || Z == null)
                 {
-                    Functions.GenerateMesh(out X, out Y, out Z, start: -20, end: 20);
+                    Functions.GenerateMesh(out X, out Y, out Z, start: -20, end: 20, divider: 50);
                 }
                 LoadData(X, Y, Z);
                 this.lineWidth = lineWidth;
@@ -86,8 +88,6 @@ namespace SceneEditor.editor
             DataStock = Data;
             DataBuffer = Functions.MatrixCopy(DataStock);
 
-            ResetMeshVisibility();
-            MeshCompatibleRange();
             RebuildRelief();
         }
 
@@ -113,7 +113,7 @@ namespace SceneEditor.editor
         public void MeshCompatibleRange()
         {
             // appropriate limit for 2Gb of VRAM
-            int limit = 40;
+            int limit = 30;
             int xfactor = 0;
             int yfactor = 0;
             if (Xmesh.Length > limit)
@@ -222,7 +222,8 @@ namespace SceneEditor.editor
                     tiles[i * cols + j] = new Square(
                         builder: new Vector2[] { top_left, bottom_right },
                         heights: heights,
-                        fixHeight: false
+                        fixHeight: false,
+                        parent: this
                         );
                 }
             }
@@ -234,9 +235,11 @@ namespace SceneEditor.editor
             {
                 for(int j = 0; j <= cols; j++)
                 {
-                    dots[i * (cols + 1) + j] = new Dot(pos: new Vector3(Xmesh[j], Ymesh[i], DataBuffer[j][i]), size: 3);
+                    dots[i * (cols + 1) + j] = new Dot(pos: new Vector3(Xmesh[i], Ymesh[j], DataBuffer[i][j]), size: 3);
                 }
             }
+
+            _calcHeightRange();
             ResetMeshVisibility();
             MeshCompatibleRange();
         }
@@ -251,13 +254,58 @@ namespace SceneEditor.editor
             drawStyle = stylesSwitcher[primitiveCurrent];
         }
 
-        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
+        private void _calcHeightRange()
+        {
+            float min = DataBuffer[0][0];
+            float max = DataBuffer[0][0];
+            for (int i = 0; i < DataBuffer.Length; i++)
+            {
+                for(int j = 0; j < DataBuffer[i].Length; j++)
+                {
+                    float v = DataBuffer[i][j];
+                    if (v < min)
+                    {
+                        min = v;
+                    }
+                    else
+                    {
+                        if(v > max)
+                        {
+                            max = v;
+                        }
+                    }
+                }
+            }
+            
+            _range = new Vector2(min, max);
+        }
+
+        public override void Move(Vector3 shifts)
+        {
+            for(int i = 0; i < Xmesh.Length; i++)
+            {
+                Xmesh[i] += shifts.X;
+                for(int j = 0; j < Ymesh.Length; j++)
+                {
+                    DataBuffer[i][j] += shifts.Z;
+                }
+            }
+
+            for (int i = 0; i < Ymesh.Length; i++)
+            {
+                Ymesh[i] += shifts.Y;
+            }
+
+            RebuildRelief();
+        }
+
+        private protected override void _renderObjects(Shader shader, PrimitiveType? primitive)
         {
             if (showDots)
             {
                 for (int i = 0; i < dots.Length; i++)
                 {
-                    dots[i].Render(shaderHandle);
+                    dots[i].Render(shader);
                 }
             }
 
@@ -268,12 +316,13 @@ namespace SceneEditor.editor
                 //var amount = tiles.Length;
                 GL.LineWidth(lineWidth);
                 GL.PointSize(lineWidth * 5);
+                                
                 for (int i = Range[0]; i <= Range[2]; i++)
                 {
                     int ii = i * rows;
                     for (int j = Range[1]; j <= Range[3]; j++)
                     {
-                        tiles[ii + j].Render(shaderHandle, drawStyle);
+                        tiles[ii + j].Render(shader, drawStyle);
                     }
                 }
             }

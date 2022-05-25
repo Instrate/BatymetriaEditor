@@ -218,12 +218,29 @@ namespace SceneEditor.editor
             writer.WriteEndArray();
         }
 
-        public void WriteStream(JsonWriter writer)
+        public void WriteStreamTileSafe(JsonWriter writer)
         {
             writer.WriteStartObject();
             _writeStreamArray(writer, nameof(X), X);
             _writeStreamArray(writer, nameof(Y), Y);
             _writeStreamArray(writer, nameof(Z), Z);
+            writer.WriteEndObject();
+        }
+
+        public void WriteStreamPointsDataset(JsonWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WritePropertyName(nameof(PointsDataSet.Points));
+            writer.WriteStartArray();
+            for (int i = 0; i < X.Length; i++)
+            {
+                for(int j = 0; j < Y.Length; j++)
+                {
+                    var p = new PointValue(X[i], Y[i], Z[i][j]);
+                    p.WriteStream(writer);
+                }
+            }
+            writer.WriteEndArray();
             writer.WriteEndObject();
         }
     }

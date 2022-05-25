@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using LearnOpenTK.Common;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace SceneEditor.editor
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 3 * sizeof(float));
         }
 
-        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
+        private protected override void _renderObjects(Shader shader, PrimitiveType? primitive)
         {
             GL.PointSize(size);
 

@@ -41,7 +41,7 @@ namespace SceneEditor
 
         float ticker = 0;
 
-        float fps_max = 1f / 30;
+        float fps_max = 1f / 120;
         float fps_min = 1f / 5;
         float fps_lim = 1f / 30;
 
@@ -190,8 +190,12 @@ namespace SceneEditor
         {
             GL.Enable(EnableCap.Blend);
             GL.Enable(EnableCap.DepthTest);
+            //GL.DepthMask(false);
+            GL.DepthFunc(DepthFunction.Less);
             GL.Enable(EnableCap.LineSmooth);
             GL.Enable(EnableCap.PolygonSmooth);
+            GL.Enable(EnableCap.StencilTest);
+            GL.Enable(EnableCap.VertexProgramPointSize);
             //GL.Enable(EnableCap.AutoNormal);
             //GL.Enable(EnableCap.PointSmooth);
             //GL.Enable(EnableCap.Lighting);
@@ -243,6 +247,7 @@ namespace SceneEditor
                 if (editors[currentEditorNum].doUpdate)
                 {
                     structureUpdate();
+                    
                     editors[currentEditorNum].doUpdate = false;
                 }
             }
@@ -283,7 +288,12 @@ namespace SceneEditor
                 DockPanel dock = (DockPanel) tab.Content;
                 TreeView treeView = (TreeView)dock.Children[0];
                 editor.UpdateTreeView(treeView);
-            }     
+                
+                if (editor.CurrentProperyGetState() == false)
+                {
+                    editorElementSettings.Items.Clear();
+                }   
+            }
         }
 
         private void onResize(object sender, SizeChangedEventArgs e)

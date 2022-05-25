@@ -10,6 +10,7 @@ using System.Drawing.Imaging;
 using PixelFormat = OpenTK.Graphics.OpenGL4.PixelFormat;
 
 using OpenTK.Mathematics;
+using LearnOpenTK.Common;
 
 namespace SceneEditor.editor
 {
@@ -20,7 +21,7 @@ namespace SceneEditor.editor
         public static int LoadFromFile(string path, bool hasBorder = false, int borderWidth = 0,
                                         Color4 borderColor = default,
                                         TextureWrapMode style = TextureWrapMode.Repeat, 
-                                        TextureMinFilter LODbiasMIN = TextureMinFilter.NearestMipmapNearest,
+                                        TextureMinFilter LODbiasMIN = TextureMinFilter.LinearMipmapLinear,
                                         TextureMagFilter LODbiasMAG = TextureMagFilter.Linear)
         {
             int handle = GL.GenTexture();
@@ -67,7 +68,25 @@ namespace SceneEditor.editor
         {
             GL.ActiveTexture(unit);
             GL.BindTexture(TextureTarget.Texture2D, handle);
+           
+        }
 
+        public static void UseMany(Shader shader, int[]? textureHandlers)
+        {
+            if(textureHandlers == null)
+            {
+                return;
+            }
+
+            shader.Use();
+            int attrLoc = GL.GetUniformLocation(shader.Handle, "textures[0]");
+
+            GL.Uniform1(attrLoc, textureHandlers.Length, textureHandlers);
+            for (int i = 0; i < textureHandlers.Length; i++)
+            {
+                GL.ActiveTexture(units_all[i]);
+            }
+            GL.BindTextures(textureHandlers[0], textureHandlers.Length, textureHandlers);
         }
         
     }

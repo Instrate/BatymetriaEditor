@@ -45,8 +45,8 @@ namespace SceneEditor.editor
         };
 
         public static uint[] indices = {
-            0, 1, 3,
-            1, 2, 3
+            0, 1, 2,
+            0, 3, 2
         };
 
         public static int offset = 11;
@@ -183,9 +183,11 @@ namespace SceneEditor.editor
                       Vector3? pos = null,
                       Vector3? color = default,
                       bool fixHeight = false,
-                      bool isSection = false
+                      bool isSection = false,
+                      Transformable? parent = null
                       )
         {
+            this.parent = parent;
 
             if(builder == null) 
             {
@@ -243,7 +245,7 @@ namespace SceneEditor.editor
             GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 8 * sizeof(float));
         }
 
-        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
+        private protected override void _renderObjects(Shader shader, PrimitiveType? primitive)
         {
             GL.BindVertexArray(VAO);
             GL.DrawElements(

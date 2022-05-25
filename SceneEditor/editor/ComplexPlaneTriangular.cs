@@ -1,8 +1,10 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using LearnOpenTK.Common;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using TriangleNet.Geometry;
 using TriangleNet.Meshing;
 using TriangleNet.Smoothing;
@@ -19,7 +21,9 @@ namespace SceneEditor.editor
         public List<Vector3> dataSetAdjustable;
 
         Dot[] dots;
+        private int dotsize = 6;
         public bool showDots = true;
+
 
         private alglib.spline2dinterpolant? interp = null;
 
@@ -34,6 +38,7 @@ namespace SceneEditor.editor
                 PrimitiveType.Points
             };
         public PrimitiveType drawStyle;
+
 
         public ComplexPlaneTriangular(Vector3[]? inputData = null,
                                       float[]? X = null,
@@ -58,7 +63,7 @@ namespace SceneEditor.editor
             {
                 data = inputData;
             }
-           
+
             dataSetAdjustable = data.ToList();
             lineWidth = 1;
 
@@ -120,7 +125,7 @@ namespace SceneEditor.editor
             dots = new Dot[data.Length];
             for (int i = 0; i < dots.Length; i++)
             {
-                dots[i] = new Dot(data[i], ((Vector4)Color4.Red).Xyz, 6);
+                dots[i] = new Dot(data[i], ((Vector4)Color4.Red).Xyz, dotsize);
             }
         }
 
@@ -144,11 +149,12 @@ namespace SceneEditor.editor
             return poly;
         }
 
-        public void generateDelaunayTriangulationFromData(bool makeSmooth = false, bool fixArea = false, bool accurateTriangulation = false)
+        public void generateDelaunayTriangulationFromData(bool isConvex = false, bool fixArea = false, bool accurateTriangulation = false)
         {
             interp = Functions.Interpolate(data);
             var Coptions = new ConstraintOptions();
-            Coptions.Convex = true;
+
+            Coptions.Convex = isConvex;
             if (accurateTriangulation)
             {
                 Coptions.ConformingDelaunay = true;
@@ -160,13 +166,38 @@ namespace SceneEditor.editor
             }
 
             var mesh = _createPolyFromPoints().Triangulate(Coptions, Qoptions);
-            if (makeSmooth)
-            {
-                var smoother = new SimpleSmoother();
-                smoother.Smooth(mesh);
-            }
 
-            _readConnectionsFromMesh(mesh);
+            if (accurateTriangulation && fixArea)
+            {
+                try
+                {
+                    var smoother = new SimpleSmoother();
+                    smoother.Smooth(mesh, 25);
+                    _readConnectionsFromMesh(mesh);
+                }
+                catch (Exception ex)
+                {
+                    _readConnectionsFromMesh(mesh);
+                    MessageBox.Show("Failed to make mesh smoother");
+                }
+            }
+            else
+            {
+                _readConnectionsFromMesh(mesh);
+            }
+        }
+
+        public void HiglightDot(int index)
+        {
+            for (int i = 0; i < index; i++)
+            {
+                dots[i] = new Dot(dots[i].position, ((Vector4)Color4.Red).Xyz, dotsize);
+            }
+            dots[index] = new Dot(dots[index].position, new Vector3(0, 255, 0), dotsize * 3);
+            for (int i = index + 1; i < dots.Length; i++)
+            {
+                dots[i] = new Dot(dots[i].position, ((Vector4)Color4.Red).Xyz, dotsize);
+            }
         }
 
         private void _readConnectionsFromMesh(IMesh mesh)
@@ -234,8 +265,12 @@ namespace SceneEditor.editor
             }
         }
 
-        public ComplexPlaneTile ConvertToTiledByInterpolation(int limitSide = 100, bool copyCurrentTexturePack = false)
+        public ComplexPlaneTile ConvertToTiledByInterpolation(int limitSide = 200, bool copyCurrentTexturePack = false)
         {
+            if (interp == null)
+            {
+                interp = Functions.Interpolate(data);
+            }
             float xmin = data[0].X;
             float xmax = xmin;
             float ymin = data[0].Y;
@@ -314,13 +349,13 @@ namespace SceneEditor.editor
             return data;
         }
 
-        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
+        private protected override void _renderObjects(Shader shader, PrimitiveType? primitive)
         {
             if (showDots)
             {
                 for (int i = 0; i < dots.Length; i++)
                 {
-                    dots[i].Render(shaderHandle);
+                    dots[i].Render(shader);
                 }
             }
 
@@ -330,7 +365,7 @@ namespace SceneEditor.editor
                 GL.PointSize(lineWidth * 5);
                 for (int i = 0; i < connections.Length; i++)
                 {
-                    connections[i].Render(shaderHandle, drawStyle);
+                    connections[i].Render(shader, drawStyle);
                 }
             }
         }

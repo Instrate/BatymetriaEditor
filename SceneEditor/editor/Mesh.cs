@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using OpenTK.Graphics.OpenGL4;
+using LearnOpenTK.Common;
 
 namespace SceneEditor.editor
 {
@@ -26,7 +27,7 @@ namespace SceneEditor.editor
 
         public Mesh(int size = 20, float step = 10.0f, float height = 0, float width = 0.5f)
         {
-            size = size % 2 == 1  ? size : size + 1;
+            size = size % 2 == 1 ? size : size + 1;
             this.step = step;
             this.width = width;
             this.size = size;
@@ -70,19 +71,19 @@ namespace SceneEditor.editor
             if (rotate == 1){
                 float x = -sizeAwayFromCenter * step;
                 float y = x;
-                float z = height;
+                float z = 0;
 
                 float yy = sizeAwayFromCenter * step;
                 for (int i = 0; i < size; i++)
                 {
-                    lines[i] = new Line(new Vector3(x: z, y: y, z: x), new Vector3(x: z, y: yy, z: x));
+                    lines[i] = new Line(new Vector3(x: z, y: y, z: x + height), new Vector3(x: z, y: yy, z: x + height));
                     x += step;
                 }
                 x = y;
                 float xx = sizeAwayFromCenter * step;
                 for (int i = 0; i < size; i++)
                 {
-                    lines[size + i] = new Line(new Vector3(x: z, y: y, z: x), new Vector3(x: z, y: y, z: xx));
+                    lines[size + i] = new Line(new Vector3(x: z, y: y, z: x + height), new Vector3(x: z, y: y, z: xx + height));
                     y += step;
                 }
             }
@@ -90,19 +91,19 @@ namespace SceneEditor.editor
             {
                 float x = -sizeAwayFromCenter * step;
                 float y = x;
-                float z = height;
+                float z = 0;
 
                 float yy = sizeAwayFromCenter * step;
                 for (int i = 0; i < size; i++)
                 {
-                    lines[i] = new Line(new Vector3(x: x, y: z, z: y), new Vector3(x: x, y: z, z: yy));
+                    lines[i] = new Line(new Vector3(x: x, y: z, z: y + height), new Vector3(x: x, y: z, z: yy + height));
                     x += step;
                 }
                 x = y;
                 float xx = sizeAwayFromCenter * step;
                 for (int i = 0; i < size; i++)
                 {
-                    lines[size + i] = new Line(new Vector3(x: x, y: z, z: y), new Vector3(x: xx, y: z, z: y));
+                    lines[size + i] = new Line(new Vector3(x: x, y: z, z: y + height), new Vector3(x: xx, y: z, z: y + height));
                     y += step;
                 }
             }
@@ -110,14 +111,14 @@ namespace SceneEditor.editor
             return lines;
         }
 
-        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
+        private protected override void _renderObjects(Shader shader, PrimitiveType? primitive)
         {
             GL.LineWidth(width);
             for (int i = 0; i < lines.Length; i++)
             {
                 for(int j = 0; j < lines[i].Length && showMesh[i]; j++)
                 {
-                    lines[i][j].Render(shaderHandle, primitive);
+                    lines[i][j].Render(shader, primitive);
                 }
             }
         }

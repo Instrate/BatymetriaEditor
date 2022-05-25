@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using LearnOpenTK.Common;
+using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace SceneEditor.editor
 {
     public interface IRenderable
     {
-        void Render(int shaderHandle, PrimitiveType? primitive = null);
+        void Render(Shader shader, PrimitiveType? primitive = null);
     }
 }

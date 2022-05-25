@@ -107,7 +107,7 @@ namespace SceneEditor.editor
 
     //    }
 
-    //    public void Render(int shaderHandle, PrimitiveType primitiveType = 0)
+    //    public void Render(Shader shader, PrimitiveType primitiveType = 0)
     //    {
 
     //        //texture loading
@@ -121,12 +121,12 @@ namespace SceneEditor.editor
     //        }
 
     //        //geometry
-    //        var id = GL.GetUniformLocation(shaderHandle, "transform");
+    //        var id = GL.GetUniformLocation(shader.Handle, "transform");
     //        GL.UniformMatrix4(id, false, ref transform);
 
     //        // drawing processed geometry
-    //        trgs[0].Render(shaderHandle);
-    //        trgs[1].Render(shaderHandle);
+    //        trgs[0].Render(shader.Handle);
+    //        trgs[1].Render(shader.Handle);
 
     //        // for safe drawing
     //        //GL.BindVertexArray(0);

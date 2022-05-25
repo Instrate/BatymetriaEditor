@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using LearnOpenTK.Common;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -133,7 +134,7 @@ namespace SceneEditor.editor
 
         // Is there a better solution
 
-        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
+        private protected override void _renderObjects(Shader shader, PrimitiveType? primitive)
         {
             GL.BindVertexArray(VAO);
             GL.DrawArrays(

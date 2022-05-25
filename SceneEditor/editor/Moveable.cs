@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using LearnOpenTK.Common;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
+    // add virtual event on object selected
     public class Moveable : IRenderable
     {
         public bool isEnabled = false;
@@ -35,23 +37,23 @@ namespace SceneEditor.editor
             transform = originShift = Matrix4.Identity;
         }
 
-        private protected virtual void _renderObjects(int shaderHandle, PrimitiveType? primitive)
+        private protected virtual void _renderObjects(Shader shader, PrimitiveType? primitive)
         {
             return;
         }
 
-        private protected virtual void _prepareRendering(int shaderHandle)
+        private protected virtual void _prepareRendering(Shader shader)
         {
-            var id = GL.GetUniformLocation(shaderHandle, "transform");
+            var id = GL.GetUniformLocation(shader.Handle, "transform");
             GL.UniformMatrix4(id, false, ref transform);
         }
 
-        public virtual void Render(int shaderHandle, PrimitiveType? primitive = null)
+        public virtual void Render(Shader shader, PrimitiveType? primitive = null)
         {
             if (isEnabled)
             {
-                _prepareRendering(shaderHandle);
-                _renderObjects(shaderHandle, primitive);
+                _prepareRendering(shader);
+                _renderObjects(shader, primitive);
             }
         }
 

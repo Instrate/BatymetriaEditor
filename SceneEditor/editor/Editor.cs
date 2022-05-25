@@ -62,7 +62,8 @@ namespace SceneEditor.editor
 
             //addNewSection(section);
 
-            //addNewBottom(bottom);
+            //addNewBottom(new ComplexPlaneTile(
+            //    textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross }));
 
             _setupCam();
             _setupObjects();
@@ -107,6 +108,7 @@ namespace SceneEditor.editor
             cameras = new CameraControl[1];
             cameras[activeCam] = new CameraControl(new Vector2i() { X = 800, Y = 600 }, false);
             cameras[activeCam].cam.Fov = 90f;
+            cameras[activeCam].cam.Position = new Vector3(-40, 0, 50);
             activeCam = 0;
         }
 
@@ -117,7 +119,8 @@ namespace SceneEditor.editor
 
             model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(0f));
             modelCramble = Matrix4.Transpose(model.Inverted());
-            shader.SetMatrix4("model_cramble", modelCramble);
+            
+            //shader.SetMatrix4("model_cramble", modelCramble);
 
             view = cameras[activeCam].cam.GetViewMatrix();
             shader.SetMatrix4("view", view);
@@ -171,10 +174,7 @@ namespace SceneEditor.editor
 
         private void _applyTextureUnits()
         {
-            for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-            {
-                TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-            }
+            TextureLoader.UseMany(shader, textureHandlers);
         }
 
         private void _applyShaderSettings()
@@ -182,15 +182,17 @@ namespace SceneEditor.editor
             shader.Use();
             shader.SetMatrix4("model", model);
             //shader.SetVector3("lightColor", new Vector3(c.R, c.G, c.B));
-            shader.SetVector3("lightColor", new Vector3(1));
-            shader.SetVector3("lightPos", lightBubble.position - new Vector3(0, 0, -0.2f));
-            //shader.SetVector3("lightPos", cameras[activeCam].cam.Position);
-            shader.SetVector3("viewPos", cameras[activeCam].cam.Position);
 
-            for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-            {
-                shader.SetInt("texture" + (i + 1).ToString(), i);
-            }
+            //shader.SetFloat("lightPosHeight", 10f);
+            //shader.SetVector3("lightColor", new Vector3(1));
+            //shader.SetVector3("lightPos", lightBubble.position - new Vector3(0, 0, -0.2f));
+            shader.SetVector3("LightPos", cameras[activeCam].cam.Position);
+            //shader.SetVector3("viewPos", cameras[activeCam].cam.Position);
+
+            //for (int i = 0; i < textureHandlers.Length && i < 32; i++)
+            //{
+            //    shader.SetInt("texture" + (i + 1).ToString(), i);
+            //}
         }
 
         private void _applyRenderQueue()
@@ -220,8 +222,8 @@ namespace SceneEditor.editor
 
                 GL.ClearColor(0.4f, 0.4f, 0.4f, 1.0f);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-                _applyTextureUnits();
                 _applyShaderSettings();
+                _applyTextureUnits();
                 _applyRenderQueue();
                 GL.Finish();
 
@@ -232,15 +234,8 @@ namespace SceneEditor.editor
         [MTAThread]
         private void RenderObject(IRenderable renderable)
         {
-            renderable.Render(shader.Handle);
-
-            if (textureHandlers != null)
-            {
-                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-                {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                }
-            }
+            renderable.Render(shader);
+            TextureLoader.UseMany(shader, textureHandlers);
         }
 
         [MTAThread]
@@ -248,16 +243,9 @@ namespace SceneEditor.editor
         {
             for (int i = 0; i < renderable.Length; i++)
             {
-                renderable[i].Render(shader.Handle);
+                renderable[i].Render(shader);
             }
-
-            if (textureHandlers != null)
-            {
-                for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-                {
-                    TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                }
-            }
+            TextureLoader.UseMany(shader, textureHandlers);
         }
 
         [MTAThread]

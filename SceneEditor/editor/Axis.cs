@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using LearnOpenTK.Common;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -44,11 +45,11 @@ namespace SceneEditor.editor
             isEnabled = true;
         }
 
-        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
+        private protected override void _renderObjects(Shader shader, PrimitiveType? primitive)
         {
             foreach (var c in axis)
             {
-                c.Render(shaderHandle, primitive);
+                c.Render(shader, primitive);
             }
         }
 

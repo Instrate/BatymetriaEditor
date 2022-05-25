@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using LearnOpenTK.Common;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -538,42 +539,36 @@ namespace SceneEditor.editor
             isEnabled = !isEnabled;
         }
 
-        public void Render(int shaderHandle, PrimitiveType? primitive = null)
+        public void Render(Shader shader, PrimitiveType? primitive = null)
         {
             if (intersected)
             {
                 for (int i = 0; i < dots.Length && showAreaMesh; i++)
                 {
-                    dots[i].Render(shaderHandle, primitive);
+                    dots[i].Render(shader, primitive);
                 }
                 for (int i = 0; i < funcLine.Length && showAreaMesh; i++)
                 {
-                    funcLine[i].Render(shaderHandle, primitive);
+                    funcLine[i].Render(shader, primitive);
                 }
                 for (int i = 0; i < areaMesh.Length && showAreaMesh; i++)
                 {
-                    areaMesh[i].Render(shaderHandle, primitive);
+                    areaMesh[i].Render(shader, primitive);
                 }
                 if (hasPolar && showPolar)
                 {
                     for(int i = 0; i < funcPolar.Length; i++)
                     {
-                        funcPolar[i].Render(shaderHandle, primitive);
+                        funcPolar[i].Render(shader, primitive);
                     }
                 }
             }
 
             if (isEnabled)
             {
-                if (textureHandlers != null && textureHandlers.Length > 0)
-                {
-                    for (int i = 0; i < textureHandlers.Length && i < 32; i++)
-                    {
-                        TextureLoader.Use(TextureLoader.units_all[i], textureHandlers[i]);
-                    }
-                }
+                TextureLoader.UseMany(shader, textureHandlers);
 
-                sqr.Render(shaderHandle);
+                sqr.Render(shader);
             }
 
         }

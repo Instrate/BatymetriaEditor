@@ -13,6 +13,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
+/*
+    things to add
+    highlighting selected point
+    mesh size to size(m)
+    water plane with opacity and maybe simulation
+ */
+
 namespace SceneEditor.editor
 {
     public enum StructuresNames
@@ -76,6 +83,11 @@ namespace SceneEditor.editor
             //EditorChanged();
         }
 
+        public bool CurrentProperyGetState()
+        {
+            return currentProperty != null;
+        }
+
         public void EventInform(object? content, ListView? console = null)
         {
             if (console == null){
@@ -116,6 +128,7 @@ namespace SceneEditor.editor
                     item.Selected += ObjectSelected;
                     //objectsWithProperties.Value.Add(item);
                 }
+                view.IsExpanded = true;
             }
         }
 
@@ -376,14 +389,14 @@ namespace SceneEditor.editor
         private Expander CreateTriangulationExpander()
         {
             ListBox list = new();
-
+            list.HorizontalContentAlignment = HorizontalAlignment.Stretch;
             Expander expander = Generate.Expander("Triangulation options", list);
 
-            CheckBox check1 = Generate.CheckBox("Make resulting mesh smoother");
+            CheckBox check1 = Generate.CheckBox("Mesh should be convex");
             CheckBox check2 = Generate.CheckBox("Use stricted area for triangles");
             CheckBox check3 = Generate.CheckBox("Confirm Delaunay statement");
             Button button = Generate.Button("Triangulate\n(may take a while)", ButtonTriangulate);
-
+            button.HorizontalAlignment = HorizontalAlignment.Stretch;
             list.Items.Add(check1);
             list.Items.Add(check2);
             list.Items.Add(check3);
@@ -407,7 +420,7 @@ namespace SceneEditor.editor
             var clock = new Stopwatch();
             clock.Start();
             data.generateDelaunayTriangulationFromData(options[0], options[1], options[2]);
-            EventInform("Triangulation has completed and took " + clock.Elapsed.TotalSeconds);
+            EventInform("Triangulation has been completed and took " + clock.Elapsed.TotalSeconds + " seconds");
             clock.Stop();
         }
 
@@ -435,7 +448,9 @@ namespace SceneEditor.editor
             ScrollViewer scroll = Generate.ScrollViewer(listHandler);
             scroll.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
             scroll.HorizontalAlignment = HorizontalAlignment.Stretch;
-            
+
+            listHandler.SelectionChanged += EventListPointSelectedTriangularSet;
+
             Button buttonCreatePoint = Generate.Button("Add point", buttonEventAdd);
             Button buttonRemovePoint = Generate.Button("Remove selected point", buttonEventRemove);
 
@@ -485,6 +500,17 @@ namespace SceneEditor.editor
             return exp;
         }
 
+        private void EventListPointSelectedTriangularSet(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox list = (ListBox)sender;
+            if(list.SelectedIndex != -1)
+            {
+                Slider slider = (Slider)((DockPanel)((ScrollViewer)list.Parent).Parent).Children[0];
+                var data = (ComplexPlaneTriangular)currentProperty;
+                int index = data.dataSetAdjustable.Count - (int)slider.Value + list.SelectedIndex;
+                data.HiglightDot(index);
+            }
+        }
 
         private void RecreateListOfPoints(ListBox list, Expander exp, int value)
         {
@@ -789,7 +815,7 @@ namespace SceneEditor.editor
                 activeCam = cameras.Length;
                 cameras = buffer.ToArray();
                 cameras[activeCam].cam.Fov = 90f;
-
+                cameras[activeCam].cam.Position = new Vector3(-40,0,50);
                 UpdateView();
             }
         }
@@ -830,8 +856,8 @@ namespace SceneEditor.editor
                 MeshParamChanged
                 ));
             listSet.Items.Add(CreateItemWithValueChangeable(
-                "Line width:",
-                mesh.width,
+                "Height:",
+                mesh.height,
                 MeshParamChanged
                 ));
 
@@ -1314,7 +1340,7 @@ namespace SceneEditor.editor
                     TextBox value = (iter.Content as DockPanel).Children[1] as TextBox;
                     data[i] = float.Parse(value.Text.ToString());
                 }
-                mesh = new Mesh(size: (int)data[0], step: data[1], width: data[2]);
+                mesh = new Mesh(size: (int)data[0], step: data[1], height: data[2]);
                 mesh.showMesh = showMesh;
                 mesh.isEnabled = isEnabled;
             }
@@ -1356,7 +1382,10 @@ namespace SceneEditor.editor
 
             if (dialog.ShowDialog() == true) 
             {
-                
+                if (dialog.FileName.Length == 0)
+                {
+                    return;
+                }
                 FileStream file = new FileStream(dialog.FileName, FileMode.OpenOrCreate);
                 using (StreamWriter stream = new StreamWriter(file))
                 using (JsonWriter writer = new JsonTextWriter(sw))
@@ -1366,7 +1395,7 @@ namespace SceneEditor.editor
                     {
                         ComplexPlaneTile export = (ComplexPlaneTile)currentProperty;
                         TileDataSet data = new TileDataSet(export.Xmesh, export.Ymesh, export.DataBuffer);
-                        data.WriteStream(writer);
+                        data.WriteStreamPointsDataset(writer);
 
                     }
                     else if (currentProperty is ComplexPlaneTriangular)
@@ -1385,7 +1414,10 @@ namespace SceneEditor.editor
                     }
                 }
             }
-
+            if (dialog.FileName.Length == 0)
+            {
+                return;
+            }
             File.WriteAllText(dialog.FileName, sb.ToString());
             EventInform("Status: successfuly exported data to " + dialog.FileName);
         }
@@ -1395,6 +1427,10 @@ namespace SceneEditor.editor
             OpenFileDialog dialog = new OpenFileDialog();
             if (dialog.ShowDialog() == true)
             {
+                if(dialog.FileName.Length == 0)
+                {
+                    return;
+                }
                 string jsonString = File.ReadAllText(dialog.FileName);
 
                 // add triangulated data supportion

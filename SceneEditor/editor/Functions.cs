@@ -141,13 +141,18 @@ namespace SceneEditor.editor
                     res[i][j] = FuncTestValue(x, y);
                 }
             }
-            res = RaiseToZero(res);
+            //res = RaiseToZero(res);
             return res;
         }
 
         public static float FuncTestValue(float x, float y)
         {
             return (MathF.Cos(x / 3f) - MathF.Sin(y / 2f)) * (MathF.Cos(y / 3f) - MathF.Sin(x / 2f)) / 1.5f;
+        }
+
+        public static float FunctTestWaterLine(float x, float y)
+        {
+            return 5;
         }
 
         public static alglib.spline2dinterpolant Interpolate(float[] X, float[] Y, float[][] data, int type = 0)

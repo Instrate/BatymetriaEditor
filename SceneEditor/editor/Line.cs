@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using OpenTK.Graphics.OpenGL4;
+using LearnOpenTK.Common;
 
 namespace SceneEditor.editor
 {
@@ -72,7 +73,7 @@ namespace SceneEditor.editor
         //    TransformCombiner();
         //}
 
-        private protected override void _renderObjects(int shaderHandle, PrimitiveType? primitive)
+        private protected override void _renderObjects(Shader shader, PrimitiveType? primitive)
         {
             GL.LineWidth(width);
             GL.BindVertexArray(VAO);
