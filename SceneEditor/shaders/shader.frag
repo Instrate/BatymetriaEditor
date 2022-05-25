@@ -14,9 +14,6 @@ const int amountOfTextures = 3;
 
 
 uniform sampler2D textures[amountOfTextures];
-//uniform sampler2D texture1;
-//uniform sampler2D texture2;
-//uniform sampler2D texture3;
 
 uniform vec3 lightColor = vec3(1);
 
@@ -24,15 +21,15 @@ uniform vec3 viewPos;
 
 uniform float lightPosHeight;
 
-//struct Material {
-//    vec3 ambient;
-//    vec3 diffuse;
-//    vec3 specular;
-//    float shininess;
-//    float opacity;
-//}; 
-//
-//uniform Material material;
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+    float opacity;
+}; 
+
+uniform Material material;
 
 float textureGradCalc(vec2 range, float value){
     
@@ -93,8 +90,7 @@ vec4 textureMixCalc(float grad){
 
 void main()
 {
-    float ambientStrength = 0.6;
-    vec3 ambient = ambientStrength * lightColor;
+    vec3 ambient = material.ambient * lightColor;
 
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPos);
@@ -102,18 +98,16 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
 
-    float specularStrength = 0.1;
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 1);
-    vec3 specular = specularStrength * spec * lightColor; 
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    vec3 specular = material.specular * spec * lightColor; 
 
-    float diffStrength = 0.1;
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * lightColor * diffStrength;
+    vec3 diffuse = diff * lightColor * material.diffuse;
 
     //float textureGradient = 0.5;
     vec4 oTexture = textureMixCalc(textureGradCalc(TextureGradRange, height));
 
     vec3 colorBrightness = (ambient + diffuse) * vertexColor;
 
-    FragColor = oTexture * vec4(colorBrightness, 1);
+    FragColor = oTexture * vec4(colorBrightness, material.opacity);
 }

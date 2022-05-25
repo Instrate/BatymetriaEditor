@@ -41,7 +41,7 @@ namespace SceneEditor
 
         float ticker = 0;
 
-        float fps_max = 1f / 120;
+        float fps_max = 1f / 60;
         float fps_min = 1f / 5;
         float fps_lim = 1f / 30;
 
@@ -190,14 +190,35 @@ namespace SceneEditor
         {
             GL.Enable(EnableCap.Blend);
             GL.Enable(EnableCap.DepthTest);
-            //GL.DepthMask(false);
+            GL.DepthFunc(DepthFunction.Always);
+            GL.Enable(EnableCap.AlphaTest);
+            //GL.AlphaFunc(AlphaFunction.Less, 0.5f);
+
+            // upper water
+            //GL.BlendFunc(BlendingFactor.OneMinusDstColor, BlendingFactor.SrcAlpha);
+
+            // wireframe all light
+            //GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcColor);
+
+            // wirframe all dark
+            //GL.BlendFunc(BlendingFactor.SrcColor, BlendingFactor.OneMinusSrcAlpha);
+
+            // default with wireframe
+            //GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
+
+            // same but more transperent
+            //GL.BlendFunc(BlendingFactor.OneMinusDstColor, BlendingFactor.One);
+
+            // default
+            GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
+
             GL.DepthFunc(DepthFunction.Less);
             GL.Enable(EnableCap.LineSmooth);
             GL.Enable(EnableCap.PolygonSmooth);
             GL.Enable(EnableCap.StencilTest);
             GL.Enable(EnableCap.VertexProgramPointSize);
             //GL.Enable(EnableCap.AutoNormal);
-            //GL.Enable(EnableCap.PointSmooth);
+            GL.Enable(EnableCap.PointSmooth);
             //GL.Enable(EnableCap.Lighting);
             //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 

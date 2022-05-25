@@ -26,6 +26,7 @@ namespace SceneEditor.editor
         private float elapsedTime = 0;
         private float timeDelta = 0;
 
+        
 
         // for the renderer
 
@@ -38,6 +39,8 @@ namespace SceneEditor.editor
 
         public bool isRendered = false;
 
+        
+
         // add switchable uniform bool useGradient
         public Editor(Size windowSize)
         {
@@ -48,7 +51,7 @@ namespace SceneEditor.editor
 
             //addNewPointsDataset(
             //    new ComplexPlaneTriangular(
-            //        shouldTriangulate: true,
+            //        shouldTriangulate: false,
             //        textureSet: new string[] { TexturePath.dark_paths,
             //            TexturePath.dark_paths,
             //            TexturePath.dark_paths
@@ -62,8 +65,10 @@ namespace SceneEditor.editor
 
             //addNewSection(section);
 
-            //addNewBottom(new ComplexPlaneTile(
-            //    textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross }));
+            addNewBottom(new ComplexPlaneTile(
+                textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross }));
+
+
 
             _setupCam();
             _setupObjects();
@@ -93,7 +98,11 @@ namespace SceneEditor.editor
 
             lightBubble = new Cube(pos: new Vector3() { Z = 7f, X = 0, Y = 0 });
             lightBubble.Scale(new Vector3(0.1f));
+
+            CreateWaterLevel(1);
         }
+
+
 
         private void _setupTextures()
         {
@@ -108,7 +117,7 @@ namespace SceneEditor.editor
             cameras = new CameraControl[1];
             cameras[activeCam] = new CameraControl(new Vector2i() { X = 800, Y = 600 }, false);
             cameras[activeCam].cam.Fov = 90f;
-            cameras[activeCam].cam.Position = new Vector3(-40, 0, 50);
+            //cameras[activeCam].cam.Position = new Vector3(-40, 0, 50);
             activeCam = 0;
         }
 
@@ -197,13 +206,17 @@ namespace SceneEditor.editor
 
         private void _applyRenderQueue()
         {
+            
+            meshTiled.Value.ForEach(bottom => RenderObject(bottom));
+            sections.Value.ForEach(section => RenderObject(section));
+            meshUneven.Value.ForEach(item => RenderObject(item));
+
             RenderObject(mesh);
             RenderObject(axis);
             //RenderObject(lightBubble);
 
-            meshTiled.Value.ForEach(bottom => RenderObject(bottom));
-            sections.Value.ForEach(section => RenderObject(section));
-            meshUneven.Value.ForEach(item => RenderObject(item));
+            // should be last
+            RenderObject(water);
         }
 
 

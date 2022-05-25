@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using OpenTK.Graphics.OpenGL4;
 
 /*
     things to add
@@ -64,12 +65,52 @@ namespace SceneEditor.editor
 
         public Mesh mesh;
         public Axis axis;
+        public ComplexPlaneTile water;
 
         public CameraControl[] cameras;
         public int activeCam;
 
+        public int blendingStyle = 0;
         public Shader shader;
         protected Matrix4 view;
+
+        public void ChangeBlending()
+        {
+            blendingStyle++;
+            if (blendingStyle == 6)
+            {
+                blendingStyle = 0;
+            }
+
+            switch (blendingStyle)
+            {
+                case 1:
+                    {
+                        GL.BlendFunc(BlendingFactor.OneMinusDstColor, BlendingFactor.SrcAlpha);
+                    }; break;
+                case 2:
+                    {
+                        GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcColor);
+                    }; break;
+                case 3:
+                    {
+                        GL.BlendFunc(BlendingFactor.SrcColor, BlendingFactor.OneMinusSrcAlpha);
+                    }; break;
+                case 4:
+                    {
+                        GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
+                    }; break;
+                case 5:
+                    {
+                        GL.BlendFunc(BlendingFactor.OneMinusDstColor, BlendingFactor.One);
+                    }; break;
+
+                default:
+                    {
+                        GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
+                    }; break;
+            }
+        }
 
         public void addDependencyBoxes(ListBox? elementProperties, ListBox? editorProperties)
         {
@@ -449,6 +490,7 @@ namespace SceneEditor.editor
             scroll.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
             scroll.HorizontalAlignment = HorizontalAlignment.Stretch;
 
+            // TODO: make a passing parameter 
             listHandler.SelectionChanged += EventListPointSelectedTriangularSet;
 
             Button buttonCreatePoint = Generate.Button("Add point", buttonEventAdd);
@@ -794,7 +836,15 @@ namespace SceneEditor.editor
                 ImportData);
             editorProperties.Items.Add(buttonImportTileset);
 
+            Button buttonBlendStyle = Generate.Button("Switch blending", ButtonSwitchBlending);
+            editorProperties.Items.Add(buttonBlendStyle);
+
             editorProperties.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+        }
+
+        public void ButtonSwitchBlending(object sender, RoutedEventArgs e)
+        {
+            ChangeBlending();
         }
 
         // isNeeded
@@ -815,7 +865,6 @@ namespace SceneEditor.editor
                 activeCam = cameras.Length;
                 cameras = buffer.ToArray();
                 cameras[activeCam].cam.Fov = 90f;
-                cameras[activeCam].cam.Position = new Vector3(-40,0,50);
                 UpdateView();
             }
         }
@@ -1513,6 +1562,24 @@ namespace SceneEditor.editor
             editorProperties.Items.Clear();
 
             doUpdate = true;
+        }
+
+        public void CreateWaterLevel(float height, float area = 100)
+        {
+            float[] X = Functions.Arrange(-area, area, area);
+            float[][] Z = Functions.FunctWaterLine(X, X, height);
+            water = new ComplexPlaneTile(
+                    X:X,
+                    Y:X,
+                    Z:Z,
+                    textureSet: new string[] {
+                                        TexturePath.dark_paths,
+                                        TexturePath.dark_paths,
+                                        TexturePath.dark_paths
+                                        },
+                    material: new(opacity: 0.01f)
+                );
+            water.Move(new Vector3(0, 0, 0));
         }
 
         public void addNewBottom(ComplexPlaneTile tiledBottom)

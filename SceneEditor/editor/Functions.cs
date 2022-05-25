@@ -150,9 +150,20 @@ namespace SceneEditor.editor
             return (MathF.Cos(x / 3f) - MathF.Sin(y / 2f)) * (MathF.Cos(y / 3f) - MathF.Sin(x / 2f)) / 1.5f;
         }
 
-        public static float FunctTestWaterLine(float x, float y)
+        public static float[][] FunctWaterLine(float[] X, float[] Y, float height)
         {
-            return 5;
+            float[][] res = new float[X.Length][];
+            for (int i = 0; i < X.Length; i++)
+            {
+                res[i] = new float[Y.Length];
+                for (int j = 0; j < Y.Length; j++)
+                {
+                    float x = X[i];
+                    float y = Y[j];
+                    res[i][j] = height;
+                }
+            }
+            return res;
         }
 
         public static alglib.spline2dinterpolant Interpolate(float[] X, float[] Y, float[][] data, int type = 0)

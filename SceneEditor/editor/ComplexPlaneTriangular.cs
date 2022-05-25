@@ -22,6 +22,8 @@ namespace SceneEditor.editor
 
         Dot[] dots;
         private int dotsize = 6;
+        private Vector3 dotColor = new Vector3(255, 0, 0);
+        private Vector3 dotColorHighlighted = new Vector3(0, 255, 0);
         public bool showDots = true;
 
 
@@ -125,7 +127,7 @@ namespace SceneEditor.editor
             dots = new Dot[data.Length];
             for (int i = 0; i < dots.Length; i++)
             {
-                dots[i] = new Dot(data[i], ((Vector4)Color4.Red).Xyz, dotsize);
+                dots[i] = new Dot(data[i], dotColor, dotsize);
             }
         }
 
@@ -191,12 +193,12 @@ namespace SceneEditor.editor
         {
             for (int i = 0; i < index; i++)
             {
-                dots[i] = new Dot(dots[i].position, ((Vector4)Color4.Red).Xyz, dotsize);
+                dots[i] = new Dot(dots[i].position, dotColor, dotsize);
             }
-            dots[index] = new Dot(dots[index].position, new Vector3(0, 255, 0), dotsize * 3);
+            dots[index] = new Dot(dots[index].position, dotColorHighlighted, dotsize * 3);
             for (int i = index + 1; i < dots.Length; i++)
             {
-                dots[i] = new Dot(dots[i].position, ((Vector4)Color4.Red).Xyz, dotsize);
+                dots[i] = new Dot(dots[i].position, dotColor, dotsize);
             }
         }
 

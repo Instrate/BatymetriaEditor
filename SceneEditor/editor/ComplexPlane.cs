@@ -49,7 +49,9 @@ namespace SceneEditor.editor
                                 float[][]? Z = null,
                                 string[]? textureSet = null,
                                 int[]? textureHandlersCopy = null, 
-                                float lineWidth = 2f)
+                                float lineWidth = 2f,
+                                Material? material = null
+                                )
         {
             if (inputData == null)
             {
@@ -75,7 +77,11 @@ namespace SceneEditor.editor
                     textureHandlers = textureHandlersCopy;
                 }
             }
-            
+            if(material != null)
+            {
+                this.material = material;
+            }
+
             isEnabled = true;
             showGeometry = true;
             drawStyle = stylesSwitcher[primitiveCurrent];
@@ -282,6 +288,7 @@ namespace SceneEditor.editor
 
         public override void Move(Vector3 shifts)
         {
+            position += shifts;
             for(int i = 0; i < Xmesh.Length; i++)
             {
                 Xmesh[i] += shifts.X;

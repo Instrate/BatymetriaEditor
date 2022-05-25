@@ -11,6 +11,36 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
+    public class Material
+    {
+        public Vector3 ambient = new Vector3(1);
+        public Vector3 diffuse = new Vector3(0.1f);
+        public Vector3 specular = new Vector3(1);
+        public float shininess = 1;
+        public float opacity = 1;
+
+        public Material(
+            Vector3? ambient = null,
+            Vector3? diffuse = null,
+            Vector3? specular = null,
+            float? shininess = null,
+            float? opacity = null
+            )
+        {
+            if (ambient != null)
+                this.ambient = ambient.Value;
+            if(diffuse != null)
+                this.diffuse = diffuse.Value;
+            if(specular != null)
+                this.specular = specular.Value;
+            if (shininess != null)
+                this.shininess = shininess.Value;
+            if(opacity != null)
+                this.opacity = opacity.Value;
+        }
+    }
+
+
     public class Transformable : Moveable
     {
         
@@ -27,6 +57,7 @@ namespace SceneEditor.editor
         private protected bool _rangeAssigned = false;
 
         private protected Transformable? parent = null;
+        private protected Material material = new();
 
         public virtual new void Move(Vector3 shifts)
         {
@@ -65,6 +96,17 @@ namespace SceneEditor.editor
             TextureLoader.UseMany(shader, textureHandlers);
         }
 
+        private protected void _applyMaterial(Shader shader)
+        {
+            Material mat = (parent != null) ? parent.material : new();
+
+            shader.SetVector3("material.ambient", mat.ambient);
+            shader.SetVector3("material.diffuse", mat.diffuse);
+            //shader.SetVector3("material.specular", mat.specular);
+            //shader.SetFloat("material.shininess", mat.shininess);
+            shader.SetFloat("material.opacity", mat.opacity);
+        }
+
         private protected override void _prepareRendering(Shader shader)
         {
             var id = GL.GetUniformLocation(shader.Handle, "transform");
@@ -88,6 +130,7 @@ namespace SceneEditor.editor
             {
                 _applyTextures(shader);
                 _prepareRendering(shader);
+                _applyMaterial(shader);
                 _renderObjects(shader, primitive);
             }
         }
