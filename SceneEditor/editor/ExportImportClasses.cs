@@ -234,9 +234,9 @@ namespace SceneEditor.editor
             writer.WriteStartArray();
             for (int i = 0; i < X.Length; i++)
             {
-                for(int j = 0; j < Y.Length; j++)
+                for (int j = 0; j < Y.Length; j++)
                 {
-                    var p = new PointValue(X[i], Y[i], Z[i][j]);
+                    var p = new PointValue(X[i], Y[j], Z[i][j]);
                     p.WriteStream(writer);
                 }
             }

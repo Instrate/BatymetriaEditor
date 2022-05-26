@@ -238,7 +238,11 @@ namespace SceneEditor.editor
             return heigths;
         }
 
-        public Cube(string[]? textureSet = null, Vector3 pos = default, Vector3? color = default)
+        public Cube(
+            string[]? textureSet = null,
+            Vector3 pos = default,
+            Vector3? color = default
+            )
         {
             concatSet(Color: color);
 

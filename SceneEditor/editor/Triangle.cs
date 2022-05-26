@@ -67,13 +67,17 @@ namespace SceneEditor.editor
 
     public class Triangle : Transformable
     {
-        float[] vertices;
+        private float[] vertices;
 
         private int VBO = -1;
         private int VAO = -1;
 
         //implement color usage
-        public Triangle(Vector3[] pointsV, Vector3? color = default, string[]? textureSet = null, bool keepHeight = true)
+        public Triangle(
+            Vector3[] pointsV,
+            Vector3? color = default,
+            string[]? textureSet = null,
+            bool keepHeight = true)
         {
             float min1 = pointsV[0].Z;
             float min2 = MathF.Min(pointsV[1].Z, pointsV[2].Z);

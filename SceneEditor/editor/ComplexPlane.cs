@@ -25,14 +25,12 @@ namespace SceneEditor.editor
 
         public int[] Range = new int[4];
 
-        Dot[] dots;
+        private Dot[] dots;
         public bool showDots = false;
-
-        Vector2 heightRange = new Vector2(-1, 1);
-
-        int primitiveCurrent = 0;
-        float lineWidth;
-        PrimitiveType[] stylesSwitcher = new PrimitiveType[]
+                
+        private int primitiveCurrent = 0;
+        private float lineWidth;
+        private PrimitiveType[] stylesSwitcher = new PrimitiveType[]
             {
                 PrimitiveType.Triangles,
                 PrimitiveType.Lines,

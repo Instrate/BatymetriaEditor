@@ -189,7 +189,7 @@ namespace SceneEditor.editor
             }
         }
 
-        public void HiglightDot(int index)
+        public void HighlightDot(int index)
         {
             for (int i = 0; i < index; i++)
             {
@@ -267,7 +267,10 @@ namespace SceneEditor.editor
             }
         }
 
-        public ComplexPlaneTile ConvertToTiledByInterpolation(int limitSide = 200, bool copyCurrentTexturePack = false)
+        public ComplexPlaneTile ConvertToTiledByInterpolation(
+            int limitSide = 50,
+            bool copyCurrentTexturePack = false
+            )
         {
             if (interp == null)
             {
@@ -287,6 +290,7 @@ namespace SceneEditor.editor
                 float vy = data[i].Y;
                 float lengthx = MathF.Abs(data[i - 1].X - data[i].X);
                 float lengthy = MathF.Abs(data[i - 1].Y - data[i].Y);
+
                 if (mindifx > lengthx)
                 {
                     mindifx = lengthx;
@@ -320,10 +324,10 @@ namespace SceneEditor.editor
                 }
             }
 
-            float dividerx = (xmax - xmin) / limitSide / 2;
-            float dividery = (ymax - ymin) / limitSide / 2;
-            float[] X = Functions.Arrange(xmin, xmax, (xmax - xmin) / mindifx > limitSide ? dividerx : mindifx);
-            float[] Y = Functions.Arrange(ymin, ymax, (ymax - ymin) / mindify > limitSide ? dividery : mindify);
+            float dividerx = (xmax - xmin) / limitSide;
+            float dividery = (ymax - ymin) / limitSide;
+            float[] X = Functions.Arrange(xmin, xmax, (xmax - xmin) / mindifx > limitSide * 2 ? dividerx : mindifx);
+            float[] Y = Functions.Arrange(ymin, ymax, (ymax - ymin) / mindify > limitSide * 2 ? dividery : mindify);
             float[][] Z = Functions.recalculateBySpline(interp, X, Y);
 
             return new ComplexPlaneTile(X: X, Y: Y, Z: Z,

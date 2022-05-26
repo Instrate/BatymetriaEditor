@@ -14,9 +14,9 @@ namespace SceneEditor.editor
     public class Material
     {
         public Vector3 ambient = new Vector3(1);
-        public Vector3 diffuse = new Vector3(0.1f);
+        public Vector3 diffuse = new Vector3(1f);
         public Vector3 specular = new Vector3(1);
-        public float shininess = 1;
+        public float shininess = 32;
         public float opacity = 1;
 
         public Material(

@@ -11,7 +11,7 @@ namespace SceneEditor.editor
 {
     public class Axis : Transformable
     {
-        Cube[] axis = new Cube[3];
+        private Cube[] axis = new Cube[3];
 
         public Axis(string[]? textureSet = null)
         {

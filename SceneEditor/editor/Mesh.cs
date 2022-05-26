@@ -19,13 +19,18 @@ namespace SceneEditor.editor
         public bool[] showMesh = new bool[3];
         //private Line[] linesAdditional;
 
-        private bool _isRotated = false;
+        //private bool _isRotated = false;
 
         public float width;
 
         public float height;
 
-        public Mesh(int size = 20, float step = 10.0f, float height = 0, float width = 0.5f)
+        public Mesh(
+            int size = 20,
+            float step = 10.0f,
+            float height = 0,
+            float width = 0.5f
+            )
         {
             size = size % 2 == 1 ? size : size + 1;
             this.step = step;
@@ -42,7 +47,12 @@ namespace SceneEditor.editor
             isEnabled = true;
         }
 
-        private Line[] _generateMesh(int size, float step, float height, float width, int rotate = 0)
+        private Line[] _generateMesh(
+            int size,
+            float step,
+            float height,
+            float width,
+            int rotate = 0)
         {
             int sizeAwayFromCenter = size / 2;
             int amount = 2 * size;
@@ -57,14 +67,14 @@ namespace SceneEditor.editor
                 float yy = sizeAwayFromCenter * step;
                 for (int i = 0; i < size; i++)
                 {
-                    lines[i] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: x, y: yy, z: z));
+                    lines[i] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: x, y: yy, z: z), width: width);
                     x += step;
                 }
                 x = y;
                 float xx = sizeAwayFromCenter * step;
                 for (int i = 0; i < size; i++)
                 {
-                    lines[size + i] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: xx, y: y, z: z));
+                    lines[size + i] = new Line(new Vector3(x: x, y: y, z: z), new Vector3(x: xx, y: y, z: z), width: width);
                     y += step;
                 }
             } else 
@@ -76,14 +86,14 @@ namespace SceneEditor.editor
                 float yy = sizeAwayFromCenter * step;
                 for (int i = 0; i < size; i++)
                 {
-                    lines[i] = new Line(new Vector3(x: z, y: y, z: x + height), new Vector3(x: z, y: yy, z: x + height));
+                    lines[i] = new Line(new Vector3(x: z, y: y, z: x + height), new Vector3(x: z, y: yy, z: x + height), width: width);
                     x += step;
                 }
                 x = y;
                 float xx = sizeAwayFromCenter * step;
                 for (int i = 0; i < size; i++)
                 {
-                    lines[size + i] = new Line(new Vector3(x: z, y: y, z: x + height), new Vector3(x: z, y: y, z: xx + height));
+                    lines[size + i] = new Line(new Vector3(x: z, y: y, z: x + height), new Vector3(x: z, y: y, z: xx + height), width: width);
                     y += step;
                 }
             }
@@ -96,14 +106,14 @@ namespace SceneEditor.editor
                 float yy = sizeAwayFromCenter * step;
                 for (int i = 0; i < size; i++)
                 {
-                    lines[i] = new Line(new Vector3(x: x, y: z, z: y + height), new Vector3(x: x, y: z, z: yy + height));
+                    lines[i] = new Line(new Vector3(x: x, y: z, z: y + height), new Vector3(x: x, y: z, z: yy + height), width: width);
                     x += step;
                 }
                 x = y;
                 float xx = sizeAwayFromCenter * step;
                 for (int i = 0; i < size; i++)
                 {
-                    lines[size + i] = new Line(new Vector3(x: x, y: z, z: y + height), new Vector3(x: xx, y: z, z: y + height));
+                    lines[size + i] = new Line(new Vector3(x: x, y: z, z: y + height), new Vector3(x: xx, y: z, z: y + height), width: width);
                     y += step;
                 }
             }

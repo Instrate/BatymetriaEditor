@@ -23,13 +23,6 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace SceneEditor.editor
 {
-    public enum StructuresNames
-    {
-        TiledMeshes,
-        Sections,
-        UnevenMesh
-    }
-
     public static class ObjectPropertySettings
     {
         // length is Enum.GetNames(typeof(StructuresNames)).Length
@@ -43,7 +36,7 @@ namespace SceneEditor.editor
 
     public class EditorSettings
     {
-        public Task? renderTask;
+        //public Task? renderTask;
 
         protected Size selfSize;
 
@@ -57,7 +50,7 @@ namespace SceneEditor.editor
 
         protected bool isEnabled = false;
         public bool doUpdate = false;
-        public bool doInvalidate = false;
+        //public bool doInvalidate = false;
 
         public Lazy<List<ComplexPlaneTile>> meshTiled;
         public Lazy<List<ComplexPlaneTriangular>> meshUneven;
@@ -124,7 +117,7 @@ namespace SceneEditor.editor
             //EditorChanged();
         }
 
-        public bool CurrentProperyGetState()
+        public bool CurrentPropertyGetState()
         {
             return currentProperty != null;
         }
@@ -284,7 +277,7 @@ namespace SceneEditor.editor
                         
                         Expander expTranform = Generate.Expander(
                             "Transform",
-                            CreateListTranformForTiles()
+                            CreateListTransformForTiles()
                             );
                         expTranform.IsExpanded = false;
                         list.Items.Add(expTranform);
@@ -378,8 +371,8 @@ namespace SceneEditor.editor
                         list.Items.Add(buttonStyle);
 
                         Button buttonToMesh = Generate.Button(
-                            "Tranform to mesh (in developing)",
-                            ButtonTranformTriangulatedToMesh
+                            "Tranform to mesh",
+                            ButtonTransformTriangulatedToMesh
                             );
                         list.Items.Add(buttonToMesh);
                                                 
@@ -393,7 +386,7 @@ namespace SceneEditor.editor
                         Expander pointsListExp = CreateRangedListVector3Points(
                             "Points dataset",
                             (currentProperty as ComplexPlaneTriangular).dataSetAdjustable,
-                            TextChanedVector3PointValueTriangular,
+                            TextChangedVector3PointValueTriangular,
                             SliderPointsListSlide,
                             ButtonPointAdd,
                             ButtonPointDeleteSelected
@@ -424,7 +417,7 @@ namespace SceneEditor.editor
             return null;
         }
 
-        private ListBox CreateListTranformForTiles()
+        private ListBox CreateListTransformForTiles()
         {
             ListBox list = new();
 
@@ -647,7 +640,7 @@ namespace SceneEditor.editor
                 Slider slider = (Slider)((DockPanel)((ScrollViewer)list.Parent).Parent).Children[0];
                 var data = (ComplexPlaneTriangular)currentProperty;
                 int index = data.dataSetAdjustable.Count - (int)slider.Value + list.SelectedIndex;
-                data.HiglightDot(index);
+                data.HighlightDot(index);
             }
         }
 
@@ -657,7 +650,7 @@ namespace SceneEditor.editor
             list.Items[ind] = CreateRangedListVector3Points(
                 exp.Header.ToString(),
                 (currentProperty as ComplexPlaneTriangular).dataSetAdjustable,
-                TextChanedVector3PointValueTriangular,
+                TextChangedVector3PointValueTriangular,
                 SliderPointsListSlide,
                 ButtonPointAdd,
                 ButtonPointDeleteSelected,
@@ -691,7 +684,7 @@ namespace SceneEditor.editor
         }
 
         //fix wrong index
-        private void TextChanedVector3PointValueTriangular(object sender, RoutedEventArgs e)
+        private void TextChangedVector3PointValueTriangular(object sender, RoutedEventArgs e)
         {
             ComplexPlaneTriangular data = (ComplexPlaneTriangular)currentProperty;
             ListBox handler = GetListWithVector3Settings(sender);
@@ -741,7 +734,7 @@ namespace SceneEditor.editor
             EventInform("Item: current has been removed");
         }
 
-        private void ButtonTranformTriangulatedToMesh(object sender, RoutedEventArgs e)
+        private void ButtonTransformTriangulatedToMesh(object sender, RoutedEventArgs e)
         {
             addNewBottom(((ComplexPlaneTriangular)currentProperty).ConvertToTiledByInterpolation());
             EventInform("Mesh: new mesh has been created based on points dataset interpolation");
@@ -930,19 +923,7 @@ namespace SceneEditor.editor
             editorProperties.HorizontalContentAlignment = HorizontalAlignment.Stretch;
         }
 
-        //private ListBox CreateComplexPlaneTileMoveSettings(ComplexPlaneTile tileSet)
-        //{
-
-
-
-        //}
-
-        //private ListBox CreateWaterLevelSettings()
-        //{
-
-        //}
-
-        public void ButtonSwitchBlending(object sender, RoutedEventArgs e)
+        private void ButtonSwitchBlending(object sender, RoutedEventArgs e)
         {
             ChangeBlending();
         }
@@ -955,7 +936,7 @@ namespace SceneEditor.editor
             EventInform("Camera: new camera is created and ready for usage");
         }
 
-        public void _addCamera(bool isOrthogonalPerspective = false)
+        private void _addCamera(bool isOrthogonalPerspective = false)
         {
             if (cameras.Length < 10)
             {
@@ -1030,7 +1011,7 @@ namespace SceneEditor.editor
             listSet.Items.Add(Generate.ListBoxItem(CreateCheckBoxSetting(
                 "Enable",
                 mesh.isEnabled,
-                CheckBoxSwitched
+                CheckBoxMeshSwitched
                 )));
 
             listSet.HorizontalContentAlignment = HorizontalAlignment.Stretch;
@@ -1497,7 +1478,7 @@ namespace SceneEditor.editor
             catch (Exception ex) { }
         }
 
-        private void CheckBoxSwitched(object sender, RoutedEventArgs e)
+        private void CheckBoxMeshSwitched(object sender, RoutedEventArgs e)
         {
             mesh.isEnabled = (bool)(sender as CheckBox).IsChecked;
         }
@@ -1645,7 +1626,7 @@ namespace SceneEditor.editor
         // DATA IMPORT-EXPORT END
         // ----------------------
 
-        public void removeCurrentItem()
+        private void removeCurrentItem()
         {
             if (currentProperty is ComplexPlaneTile)
             {
@@ -1683,19 +1664,19 @@ namespace SceneEditor.editor
             water.Move(new Vector3(0, 0, 0));
         }
 
-        public void addNewBottom(ComplexPlaneTile tiledBottom)
+        private void addNewBottom(ComplexPlaneTile tiledBottom)
         {
             meshTiled.Value.Add(tiledBottom);
             doUpdate = true;
         }
 
-        public void addNewSection(Section section)
+        private void addNewSection(Section section)
         {
             sections.Value.Add(section);
             doUpdate = true;
         }
 
-        public void addNewPointsDataset(ComplexPlaneTriangular item)
+        private void addNewPointsDataset(ComplexPlaneTriangular item)
         {
             meshUneven.Value.Add(item);
             doUpdate = true;

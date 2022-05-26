@@ -13,10 +13,6 @@ namespace SceneEditor.editor
 {
     public class Editor : EditorSettings
     {
-        // to remove
-        ComplexPlaneTile bottom;
-        Section section;
-
         // fix usage
         //Vector3 lightPos;
         Cube lightBubble;
@@ -26,10 +22,8 @@ namespace SceneEditor.editor
         private float elapsedTime = 0;
         private float timeDelta = 0;
 
-        
 
         // for the renderer
-
         Matrix4 model;
         Matrix4 modelCramble;
 
@@ -65,8 +59,8 @@ namespace SceneEditor.editor
 
             //addNewSection(section);
 
-            addNewBottom(new ComplexPlaneTile(
-                textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross }));
+            //addNewBottom(new ComplexPlaneTile(
+            //    textureSet: new string[] { TexturePath.dark_paths, TexturePath.cork_board, TexturePath.criss_cross }));
 
 
 
@@ -154,6 +148,8 @@ namespace SceneEditor.editor
             GL.Viewport(0, 0, (int)selfSize.Width, (int)selfSize.Height);
         }
 
+
+        // OLD: not used
         public void OnMouseButtonPressed(MouseButtonEventArgs mouse)
         {
             //if (cameras[activeCam].grabedMouse)
@@ -163,14 +159,13 @@ namespace SceneEditor.editor
         }
 
         
-
+        // OLD: not used
         public void OnMouseWheel(MouseWheelEventArgs e)
         {
 
-            //cameras[activeCam].cam.Fov = 90f - e.Delta / 10;
-            //shader.SetMatrix4("projection", cameras[activeCam].cam.GetProjectionMatrix());
         }
 
+        // OLD: not used
         public int[] getAttribLocations(int programHandle, string[] names)
         {
             int[] layouts = new int[names.Length];
@@ -282,19 +277,14 @@ namespace SceneEditor.editor
             
         }
 
-        [STAThread]
-        public void OnMouseMove(MouseEventArgs mouse, Point pointGL, Point pointScreen)
+        [MTAThread]
+        public void OnMouseMove(MouseEventArgs mouse, Point pointGL)
         {
             if (cameras[activeCam].grabedMouse)
             {
-                cameras[activeCam].OnMouseMove(mouse, selfSize, pointGL, pointScreen);
+                cameras[activeCam].OnMouseMove(mouse, pointGL);
                 UpdateView();
             }
-        }
-
-        ~Editor()
-        {
-            //GL.DeleteShader(shader.Handle);
         }
     }
 }

@@ -30,11 +30,11 @@ namespace LearnOpenTK.Common
 
         bool isOrtogonal = false;
 
-        public Camera(Vector3 position, float aspectRatio, bool isOrtogonal)
+        public Camera(Vector3 position, float aspectRatio, bool isOrthogonal)
         {
             Position = position;
             AspectRatio = aspectRatio;
-            this.isOrtogonal = isOrtogonal;
+            this.isOrtogonal = isOrthogonal;
         }
 
         // The position of the camera

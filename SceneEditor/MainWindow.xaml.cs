@@ -154,7 +154,7 @@ namespace SceneEditor
 
             textMouse.Text = msg;
 
-            editors[currentEditorNum].OnMouseMove(mouse, pos, glMain.PointToScreen(pos));
+            editors[currentEditorNum].OnMouseMove(mouse, pos);
 
             //switchVisibleGLStatus();
         }
@@ -294,7 +294,7 @@ namespace SceneEditor
                 TreeView treeView = (TreeView)dock.Children[0];
                 editor.UpdateTreeView(treeView);
                 
-                if (editor.CurrentProperyGetState() == false)
+                if (editor.CurrentPropertyGetState() == false)
                 {
                     editorElementSettings.Items.Clear();
                 }   

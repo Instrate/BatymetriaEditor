@@ -236,35 +236,40 @@ namespace SceneEditor.editor
 
     public class Section : IRenderable
     {
-        public int[]? textureHandlers = null;
+        private int[]? textureHandlers = null;
 
-        Square sqr;
+        private Square sqr;
         public bool isEnabled = false;
 
 
         public Vector3[] chars = new Vector3[2];
 
-        PlaneFunction plane;
+        private PlaneFunction plane;
 
-        Dot[] dots;
+        private Dot[] dots;
 
-        Line[] areaMesh;
+        private Line[] areaMesh;
         public bool showAreaMesh = false;
 
-        Line[] funcLine;
+        private Line[] funcLine;
 
-        Line[] funcPolar;
-        bool hasPolar = false;
+        private Line[] funcPolar;
+        private bool hasPolar = false;
         public bool showPolar = false;
 
-        float[][] funcPolarArgs;
+        private float[][] funcPolarArgs;
         //Line[] funcSphere;
         //bool hasSphere = false;
         //float[][] funcSphereArgs;
 
         public bool intersected = false;
 
-        public Section(Vector3 start, Vector3 end, string[]? textureSet = null, Vector3? color = default)
+        public Section(
+            Vector3 start,
+            Vector3 end,
+            string[]? textureSet = null,
+            Vector3? color = default
+            )
         {
             Replace(start, end);
 
@@ -468,7 +473,7 @@ namespace SceneEditor.editor
             }
         }
 
-        public void CountPolarFunction(int accuracyStrength = 1)
+        private void CountPolarFunction()
         {
             if (intersected)
             {

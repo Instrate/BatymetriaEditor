@@ -27,7 +27,12 @@ namespace SceneEditor.editor
         public Vector3 start;
         public Vector3 end;
 
-        public Line(Vector3 start = default, Vector3 end = default, Vector3? color = null, float width = 1f)
+        public Line(
+            Vector3 start = default,
+            Vector3 end = default,
+            Vector3? color = null,
+            float width = 1f
+            )
         {
             float[] c = new float[] {0, 0, 0};
             if (color != null)
