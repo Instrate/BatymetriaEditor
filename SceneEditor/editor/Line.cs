@@ -24,6 +24,9 @@ namespace SceneEditor.editor
 
         public float width;
 
+        public Vector3 start;
+        public Vector3 end;
+
         public Line(Vector3 start = default, Vector3 end = default, Vector3? color = null, float width = 1f)
         {
             float[] c = new float[] {0, 0, 0};
@@ -36,6 +39,8 @@ namespace SceneEditor.editor
 
             Move(start);
 
+            this.start = start;
+            this.end = end;
             Vector3 a = end - start;
 
             vertices = new float[12] 

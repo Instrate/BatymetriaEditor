@@ -46,15 +46,15 @@ namespace SceneEditor.editor
         
         protected int[] textureHandlers;
 
-        public new Vector3 position = Vector3.Zero;
+        //public new Vector3 position = Vector3.Zero;
 
-        private protected new Matrix4 transform = Matrix4.Identity;
-        private protected new Matrix4 originShift = Matrix4.Identity;
+        //private protected new Matrix4 transform = Matrix4.Identity;
+        //private protected new Matrix4 originShift = Matrix4.Identity;
         private protected Matrix4 rotation = Matrix4.Identity;
         private protected Matrix4 scale = Matrix4.Identity;
 
         private protected Vector2 _range = new Vector2(0,0);
-        private protected bool _rangeAssigned = false;
+        //private protected bool _rangeAssigned = false;
 
         private protected Transformable? parent = null;
         private protected Material material = new();

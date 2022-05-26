@@ -438,7 +438,7 @@ namespace SceneEditor.editor
             areaMesh = new Line[lines.Length];
             for (int i = 0; i < lines.Length; i++)
             {
-                areaMesh[i] = new Line(lines[i].start, lines[i].end, ((Vector4)Color4.Cyan).Xyz, width: 2);
+                areaMesh[i] = new Line(lines[i].start, lines[i].end, ((Vector4)Color4.Cyan).Xyz, width: 3);
             }
             showAreaMesh = true;
         }
@@ -501,6 +501,17 @@ namespace SceneEditor.editor
                             width: 3
                             );
                     }
+                    
+                    // TODO: recheck it
+                    //for (int i = 0; i < areaMesh.Length; i++)
+                    //{
+                    //    Vector3 start, end;
+                    //    start = areaMesh[i].start;
+                    //    end = areaMesh[i].end;
+                    //    var line = new LineFunction(new float[] { start.X, end.X, start.Y, end.Y, start.Z, end.Z });
+                    //    line.Rotate(angle);
+                    //    areaMesh[i] = new Line(line.start, line.end, ((Vector4)Color4.Cyan).Xyz, width: 3);
+                    //}
 
                     funcPolarArgs = new float[dots.Length][];
                     for(int i = 0; i < funcPolarArgs.Length; i++)

@@ -281,17 +281,14 @@ namespace SceneEditor.editor
                             );
                         list.Items.Add(buttonStyle);
 
-                        Button buttonShowLess = Generate.Button(
-                            "Show less cells",
-                            ShowLessCells
+                        
+                        Expander expTranform = Generate.Expander(
+                            "Transform",
+                            CreateListTranformForTiles()
                             );
-                        list.Items.Add(buttonShowLess);
+                        expTranform.IsExpanded = false;
+                        list.Items.Add(expTranform);
 
-                        Button buttonShowMore = Generate.Button(
-                            "Show more cells",
-                            ShowMoreCells
-                            );
-                        list.Items.Add(buttonShowMore);
 
                         Button buttonExport = Generate.Button(
                             "Export data",
@@ -425,6 +422,106 @@ namespace SceneEditor.editor
                             );
             list.Items.Add(buttonRemove);
             return null;
+        }
+
+        private ListBox CreateListTranformForTiles()
+        {
+            ListBox list = new();
+
+            Button buttonShowLess = Generate.Button("Shrink", ShowLessCells);
+            Button buttonMoveLeft = Generate.Button("Shift to the left", ButtonMoveVisibleTilesLeft);
+            Button buttonMoveRight = Generate.Button("Shift to the right", ButtonMoveVisibleTilesRight);
+            Button buttonMoveForward = Generate.Button("Shift forward", ButtonMoveVisibleTilesForward);
+            Button buttonMoveBack = Generate.Button("Shift back", ButtonMoveVisibleTilesBack);
+            Button buttonShowMore = Generate.Button("Expand", ShowMoreCells);
+
+            list.Items.Add(buttonShowLess);
+            list.Items.Add(buttonMoveLeft);
+            list.Items.Add(buttonMoveRight);
+            list.Items.Add(buttonMoveForward);
+            list.Items.Add(buttonMoveBack);
+            list.Items.Add(buttonShowMore);
+
+            DockPanel panel = new DockPanel();
+
+            ListBoxItem interpItem = Generate.ListBoxItem(panel);
+            list.Items.Add(interpItem);
+
+            TextBlock textInterp = Generate.TextBlock("Interpolation");
+            TextBlock textLabelScale = Generate.TextBlock("Scale:");
+            TextBox boxScale = Generate.TextBox("1");
+            Button buttonInterp = Generate.Button("Interpolate", ButtonInterpolateTiles);
+
+            textInterp.VerticalAlignment = VerticalAlignment.Top;
+            textInterp.HorizontalAlignment = HorizontalAlignment.Center;
+
+            textLabelScale.HorizontalAlignment = HorizontalAlignment.Left;
+            textLabelScale.VerticalAlignment = VerticalAlignment.Center;
+
+            boxScale.HorizontalAlignment = HorizontalAlignment.Stretch;
+            boxScale.VerticalAlignment = VerticalAlignment.Center;
+
+            buttonInterp.VerticalAlignment = VerticalAlignment.Bottom;
+
+            DockPanel.SetDock(textInterp, Dock.Top);
+            DockPanel.SetDock(textLabelScale, Dock.Top);
+            DockPanel.SetDock(boxScale, Dock.Top);
+            DockPanel.SetDock(buttonInterp, Dock.Bottom);
+
+            panel.Children.Add(textInterp);
+            panel.Children.Add(textLabelScale);
+            panel.Children.Add(boxScale);
+            panel.Children.Add(buttonInterp);
+
+            list.HorizontalAlignment = HorizontalAlignment.Stretch;
+            list.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+
+            return list;
+        }
+
+        private void ButtonInterpolateTiles(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            try
+            {
+                TextBox box = (TextBox)((DockPanel)button.Parent).Children[2];
+                float scale = float.Parse(box.Text);
+                var data = (ComplexPlaneTile)currentProperty;
+                data.Interp(scale);
+            }
+            catch(Exception ex) { }
+        }
+
+        private void ShowLessCells(object sender, RoutedEventArgs e)
+        {
+            ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(shrinkx: 1, shrinky: 1);
+            //EventInform("Mesh: amount of cells to be displayed is reduced");
+        }
+
+        private void ShowMoreCells(object sender, RoutedEventArgs e)
+        {
+            ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(shrinkx: -1, shrinky: -1);
+            //EventInform("Mesh: amount of cells to be displayed is iscreased");
+        }
+
+        private void ButtonMoveVisibleTilesLeft(object sender, RoutedEventArgs e)
+        {
+            ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(x: -1);
+        }
+
+        private void ButtonMoveVisibleTilesRight(object sender, RoutedEventArgs e)
+        {
+            ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(x: 1);
+        }
+
+        private void ButtonMoveVisibleTilesForward(object sender, RoutedEventArgs e)
+        {
+            ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(y: 1);
+        }
+
+        private void ButtonMoveVisibleTilesBack(object sender, RoutedEventArgs e)
+        {
+            ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(y: -1);
         }
 
         private Expander CreateTriangulationExpander()
@@ -731,17 +828,7 @@ namespace SceneEditor.editor
             EventInform("Item: primitive type has been switched");
         }
 
-        private void ShowLessCells(object sender, RoutedEventArgs e)
-        {
-            ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(0, 0, 0, 0, 1, 1);
-            EventInform("Mesh: amount of cells to be displayed is reduced");
-        }
-
-        private void ShowMoreCells(object sender, RoutedEventArgs e)
-        {
-            ((ComplexPlaneTile)currentProperty).MoveVisibleMesh(0, 0, 0, 0, -1, -1);
-            EventInform("Mesh: amount of cells to be displayed is iscreased");
-        }
+        
 
         private void SwitchVerticesDisplayingForTiles(object sender, RoutedEventArgs e)
         {
@@ -807,8 +894,6 @@ namespace SceneEditor.editor
         {
             editorProperties.Items.Clear();
             // cameras
-            Expander exp = Generate.Expander("Cameras");
-            exp.HorizontalContentAlignment = HorizontalAlignment.Stretch;
             ListBox list = new ListBox();
             list.HorizontalContentAlignment = HorizontalAlignment.Stretch;
             for (int i = 0; i < cameras.Length; i++)
@@ -819,12 +904,15 @@ namespace SceneEditor.editor
                 item.BorderThickness = Generate.Thickness(2);
                 list.Items.Add(item);
             }
-            exp.Content = list;
+            Expander exp = Generate.Expander("Cameras", list);
+            exp.HorizontalContentAlignment = HorizontalAlignment.Stretch;
             editorProperties.Items.Add(exp);
 
-            exp = Generate.Expander("Mesh");
-            exp.Content = CreateMeshSettings();
+            exp = Generate.Expander("Mesh", CreateMeshSettings());
             editorProperties.Items.Add(exp);
+
+            // TODO: Make it
+            //exp = Generate.Expander("Water level", CreateWaterLevelSettings());
 
             Button buttonAddSection = Generate.Button(
                 "Add section",
@@ -841,6 +929,18 @@ namespace SceneEditor.editor
 
             editorProperties.HorizontalContentAlignment = HorizontalAlignment.Stretch;
         }
+
+        //private ListBox CreateComplexPlaneTileMoveSettings(ComplexPlaneTile tileSet)
+        //{
+
+
+
+        //}
+
+        //private ListBox CreateWaterLevelSettings()
+        //{
+
+        //}
 
         public void ButtonSwitchBlending(object sender, RoutedEventArgs e)
         {
@@ -894,13 +994,14 @@ namespace SceneEditor.editor
         {
             ListBox listSet = new ListBox();
 
+            // TODO: make it (m) whole width
             listSet.Items.Add(CreateItemWithValueChangeable(
                 "Size:",
                 mesh.size,
                 MeshParamChanged
                 ));
             listSet.Items.Add(CreateItemWithValueChangeable(
-                "Step:",
+                "Step(m):",
                 mesh.step,
                 MeshParamChanged
                 ));

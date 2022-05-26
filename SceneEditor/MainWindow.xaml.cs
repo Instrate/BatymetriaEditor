@@ -41,7 +41,7 @@ namespace SceneEditor
 
         float ticker = 0;
 
-        float fps_max = 1f / 60;
+        float fps_max = 1f / 30;
         float fps_min = 1f / 5;
         float fps_lim = 1f / 30;
 
@@ -194,22 +194,6 @@ namespace SceneEditor
             GL.Enable(EnableCap.AlphaTest);
             //GL.AlphaFunc(AlphaFunction.Less, 0.5f);
 
-            // upper water
-            //GL.BlendFunc(BlendingFactor.OneMinusDstColor, BlendingFactor.SrcAlpha);
-
-            // wireframe all light
-            //GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcColor);
-
-            // wirframe all dark
-            //GL.BlendFunc(BlendingFactor.SrcColor, BlendingFactor.OneMinusSrcAlpha);
-
-            // default with wireframe
-            //GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
-
-            // same but more transperent
-            //GL.BlendFunc(BlendingFactor.OneMinusDstColor, BlendingFactor.One);
-
-            // default
             GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
 
             GL.DepthFunc(DepthFunction.Less);
@@ -255,7 +239,7 @@ namespace SceneEditor
 
         private float tickerFrames = 0;
 
-        [STAThread]
+        [MTAThread]
         private void OnRender(TimeSpan delta)
         {
             float elapsed = (float)delta.TotalSeconds;
