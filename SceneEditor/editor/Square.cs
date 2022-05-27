@@ -52,7 +52,7 @@ namespace SceneEditor.editor
         public static int offset = 11;
     }
 
-    public class Square : Transformable, IRenderable
+    public class Square : Transformable
     {
         private float[] vertices;
 

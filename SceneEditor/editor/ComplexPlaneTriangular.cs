@@ -167,26 +167,34 @@ namespace SceneEditor.editor
                 Qoptions.MaximumArea = (Math.Sqrt(3) / 4 * 0.2 * 0.2) * 1.45;
             }
 
-            var mesh = _createPolyFromPoints().Triangulate(Coptions, Qoptions);
+            IMesh? mesh = null;
+            try 
+            {
+                mesh = _createPolyFromPoints().Triangulate(Coptions, Qoptions);
+            } catch (Exception ex) { }
 
-            if (accurateTriangulation && fixArea)
+            if (mesh != null) 
             {
-                try
+                if (accurateTriangulation && fixArea)
                 {
-                    var smoother = new SimpleSmoother();
-                    smoother.Smooth(mesh, 25);
+                    try
+                    {
+                        var smoother = new SimpleSmoother();
+                        smoother.Smooth(mesh, 25);
+                        _readConnectionsFromMesh(mesh);
+                    }
+                    catch (Exception ex)
+                    {
+                        _readConnectionsFromMesh(mesh);
+                        MessageBox.Show("Failed to make mesh smoother");
+                    }
+                }
+                else
+                {
                     _readConnectionsFromMesh(mesh);
                 }
-                catch (Exception ex)
-                {
-                    _readConnectionsFromMesh(mesh);
-                    MessageBox.Show("Failed to make mesh smoother");
-                }
             }
-            else
-            {
-                _readConnectionsFromMesh(mesh);
-            }
+            
         }
 
         public void HighlightDot(int index)

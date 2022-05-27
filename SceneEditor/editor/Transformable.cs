@@ -15,15 +15,15 @@ namespace SceneEditor.editor
     {
         public Vector3 ambient = new Vector3(1);
         public Vector3 diffuse = new Vector3(1f);
-        public Vector3 specular = new Vector3(1);
-        public float shininess = 32;
+        //public Vector3 specular = new Vector3(1);
+        //public float shininess = 32;
         public float opacity = 1;
 
         public Material(
             Vector3? ambient = null,
             Vector3? diffuse = null,
-            Vector3? specular = null,
-            float? shininess = null,
+            //Vector3? specular = null,
+            //float? shininess = null,
             float? opacity = null
             )
         {
@@ -31,10 +31,10 @@ namespace SceneEditor.editor
                 this.ambient = ambient.Value;
             if(diffuse != null)
                 this.diffuse = diffuse.Value;
-            if(specular != null)
-                this.specular = specular.Value;
-            if (shininess != null)
-                this.shininess = shininess.Value;
+            //if(specular != null)
+                //this.specular = specular.Value;
+            //if (shininess != null)
+                //this.shininess = shininess.Value;
             if(opacity != null)
                 this.opacity = opacity.Value;
         }
@@ -59,12 +59,12 @@ namespace SceneEditor.editor
         private protected Transformable? parent = null;
         private protected Material material = new();
 
-        public virtual new void Move(Vector3 shifts)
-        {
-            position += shifts;
-            originShift = originShift * Matrix4.CreateTranslation(shifts);
-            TransformCombiner();
-        }
+        //public virtual new void Move(Vector3 shifts)
+        //{
+        //    position += shifts;
+        //    originShift = originShift * Matrix4.CreateTranslation(shifts);
+        //    TransformCombiner();
+        //}
 
         public virtual void Rotate(Vector3 angles)
         {

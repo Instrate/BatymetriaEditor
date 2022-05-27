@@ -1526,7 +1526,7 @@ namespace SceneEditor.editor
                     {
                         ComplexPlaneTile export = (ComplexPlaneTile)currentProperty;
                         TileDataSet data = new TileDataSet(export.Xmesh, export.Ymesh, export.DataBuffer);
-                        data.WriteStreamPointsDataset(writer);
+                        data.WriteStream(writer);
 
                     }
                     else if (currentProperty is ComplexPlaneTriangular)

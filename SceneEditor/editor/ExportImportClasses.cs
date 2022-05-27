@@ -227,7 +227,7 @@ namespace SceneEditor.editor
             writer.WriteEndObject();
         }
 
-        public void WriteStreamPointsDataset(JsonWriter writer)
+        public void WriteStream(JsonWriter writer)
         {
             writer.WriteStartObject();
             writer.WritePropertyName(nameof(PointsDataSet.Points));

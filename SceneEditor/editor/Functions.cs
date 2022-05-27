@@ -208,6 +208,8 @@ namespace SceneEditor.editor
                 f[i, 2] = points[i].Z;
             }
 
+            int numKnots = (int)Math.Min(50, 3 * Math.Sqrt(points.Length));
+
             alglib.spline2dinterpolant res;
             alglib.spline2dfitreport rep;
 
@@ -216,12 +218,20 @@ namespace SceneEditor.editor
             alglib.spline2dbuildercreate(1, out state);
 
             alglib.spline2dbuildersetpoints(state, f, points.Length);
-            alglib.spline2dbuildersetareaauto(state);
-            //alglib.spline2dbuildersetconstterm(state);
-            alglib.spline2dbuildersetlinterm(state);
-            //alglib.spline2dbuildersetgrid(state, points.Length * 5, points.Length * 5);
-            alglib.spline2dbuildersetalgoblocklls(state, 0);
-            //alglib.spline2dbuildersetalgofastddm(state, 0, 0);
+            //alglib.spline2dbuildersetareaauto(state);
+            alglib.spline2dbuildersetgrid(state, numKnots, numKnots);
+            alglib.spline2dbuildersetconstterm(state);
+           // alglib.spline2dbuildersetlinterm(state);
+            double lambda = -3;
+            alglib.spline2dbuildersetalgoblocklls(state, Math.Exp(lambda));
+            //if (points.Length < 500)
+            //{
+            //    alglib.spline2dbuildersetalgoblocklls(state, 0);
+            //}
+            //else
+            //{
+            //    alglib.spline2dbuildersetalgofastddm(state, 0, 0);
+            //}
 
             alglib.spline2dfit(state, out res, out rep);
 
