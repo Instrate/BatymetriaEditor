@@ -23,7 +23,7 @@ namespace SceneEditor.editor
             }
 
             float scaling = 0.05f;
-            float sizeScale = 100f;
+            float sizeScale = 4f;
 
             axis[0].Scale(new Vector3(sizeScale, scaling, scaling));
             axis[1].Scale(new Vector3(scaling, sizeScale, scaling));
@@ -51,48 +51,6 @@ namespace SceneEditor.editor
             {
                 c.Render(shader, primitive);
             }
-        }
-
-        public void MoveAlongWithCamera(CameraControl camera)
-        {
-
-            //Vector3 fix = new Vector3(-0.2f, -0.2f, 0);
-            //Vector3 shifts = camera.cam.Position - axis[0].position;
-
-            //foreach (var ax in axis)
-            //{
-            //    ax.Move(shifts);
-            //}
-
-
-        }
-
-        public void RotateAlongWithCamera(CameraControl camera)
-        {
-            //float pitch = camera.cam.Pitch;
-            //float yaw = camera.cam.Yaw;
-
-            //Vector3 shifts = camera.cam.Position - axis[0].position;
-
-            //Vector3 YAW = new Vector3(-1, 0, 0);
-
-            //float Yaw = MathHelper.RadiansToDegrees(Vector3.CalculateAngle(shifts, YAW));
-
-            //var x = shifts.X;
-            //var y = shifts.Y;
-            //var Yawdif = yaw - Yaw;
-
-            //Vector3 posH = new Vector3(MathF.Cos(Yawdif) * x - MathF.Sin(Yawdif) * y, MathF.Sin(Yawdif) * x + MathF.Cos(Yawdif) * y, 0);
-
-            //Console.WriteLine("Yawdif: " + Yawdif);
-            //Console.WriteLine("A: " + shifts);
-            //Console.WriteLine("pos: " + axis[0].position);
-            //Console.WriteLine("Shift: " + posH + "\n");
-
-            //foreach (var ax in axis)
-            //{
-            //    ax.Move(shifts - posH);
-            //}
         }
     }
 }

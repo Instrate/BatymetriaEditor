@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace SceneEditor.editor
 {
-    // add virtual event on object selected
     public class Moveable : IRenderable
     {
         public bool isEnabled = false;

@@ -87,7 +87,7 @@ namespace SceneEditor.editor
         private void _setupObjects()
         {
             axis = new Axis();
-            mesh = new Mesh(size: 20, step: 5, width: 0.5f);
+            mesh = new Mesh(size: 1000, step: 5, width: 0.5f);
             mesh.showMesh[1] = mesh.showMesh[2] = false;
 
             lightBubble = new Cube(pos: new Vector3() { Z = 7f, X = 0, Y = 0 });
@@ -165,17 +165,6 @@ namespace SceneEditor.editor
 
         }
 
-        // OLD: not used
-        public int[] getAttribLocations(int programHandle, string[] names)
-        {
-            int[] layouts = new int[names.Length];
-            for (int i = 0; i < names.Length; i++)
-            {
-                layouts[i] = GL.GetAttribLocation(programHandle, names[i]);
-            }
-            return layouts;
-        }
-
         private void _applyTextureUnits()
         {
             TextureLoader.UseMany(shader, textureHandlers);
@@ -219,7 +208,7 @@ namespace SceneEditor.editor
         public void Render()
         {
             var elapsed = (float)_stopwatch.Elapsed.TotalSeconds;
-            //var hue = elapsed * 0.15f % 1;
+            ////var hue = elapsed * 0.15f % 1;
             timeDelta = elapsed - elapsedTime;
             elapsedTime = elapsed;
 

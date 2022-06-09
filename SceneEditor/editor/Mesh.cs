@@ -26,12 +26,13 @@ namespace SceneEditor.editor
         public float height;
 
         public Mesh(
-            int size = 20,
-            float step = 10.0f,
+            int size = 1000,
+            float step = 5.0f,
             float height = 0,
             float width = 0.5f
             )
         {
+            size = (int)((float)size / step / 2);
             size = size % 2 == 1 ? size : size + 1;
             this.step = step;
             this.width = width;

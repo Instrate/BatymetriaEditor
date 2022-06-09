@@ -16,7 +16,6 @@ namespace SceneEditor.editor
     public class CameraControl
     {
         public Camera cam;
-        //private Vector2i _camSize;
         public float cameraSpeed = 4f;
         public float sensitivity = 0.4f;
 
@@ -25,8 +24,6 @@ namespace SceneEditor.editor
         public bool isMoved = false;
 
         Vector2 _lastPos;
-
-        //public int viewStyle = 0;
 
         public CameraControl(Vector2i size, bool isOrtogonal = false)
         {

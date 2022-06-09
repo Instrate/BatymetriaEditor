@@ -71,9 +71,9 @@ namespace SceneEditor
                 glMain.MouseDown += OnMouseButtonDown;
 
                 glMain.KeyDown += OnKeyDown;
-                glMain.KeyUp += OnKeyUp;
+                //glMain.KeyUp += OnKeyUp;
 
-                glMain.SizeChanged += onResize;
+                glMain.SizeChanged += OnResize;
 
                 // OpenGL v4.5.0 if your video card doesn't support it -> :(
                 var windowSettings = new GLWpfControlSettings { MajorVersion = 4, MinorVersion = 5, GraphicsProfile = ContextProfile.Compatability, GraphicsContextFlags = ContextFlags.Debug };
@@ -118,10 +118,10 @@ namespace SceneEditor
             switchVisibleGLStatus();
         }
 
-        private void OnKeyUp(object sender, KeyEventArgs e)
-        {
+        //private void OnKeyUp(object sender, KeyEventArgs e)
+        //{
 
-        }
+        //}
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
@@ -301,7 +301,7 @@ namespace SceneEditor
             }
         }
 
-        private void onResize(object sender, SizeChangedEventArgs e)
+        private void OnResize(object sender, SizeChangedEventArgs e)
         {
             if (sender is GLWpfControl)
             {

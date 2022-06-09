@@ -184,7 +184,6 @@ namespace SceneEditor.editor
             {
                 for (int j = 0; j < offset; j++)
                 {
-                    //Console.WriteLine("[" + i + "][" + j + "]");
                     vertices[i * offset + j] = j < 3 ? coords[i * 3 + j] : j < 6 ? color[i % 6 * 3 + j - 3] : j < 8 ? WallsCubic.texture[i * 2 + j - 6] : WallsCubic.normal[i * 3 + j - 8];
                 }
             }
@@ -275,19 +274,15 @@ namespace SceneEditor.editor
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
 
-            // coord
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), IntPtr.Zero);
             GL.EnableVertexAttribArray(0);
 
-            // color
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 3 * sizeof(float));
             GL.EnableVertexAttribArray(1);
 
-            // texture
             GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, offset * sizeof(float), 6 * sizeof(float));
             GL.EnableVertexAttribArray(2);
 
-            // normal
             GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, offset * sizeof(float), 8 * sizeof(float));
             GL.EnableVertexAttribArray(3);
         }

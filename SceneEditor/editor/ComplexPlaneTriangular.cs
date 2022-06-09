@@ -29,8 +29,6 @@ namespace SceneEditor.editor
 
         private alglib.spline2dinterpolant? interp = null;
 
-        //public new bool isEnabled;
-
         int primitiveCurrent = 1;
         float lineWidth;
         PrimitiveType[] stylesSwitcher = new PrimitiveType[]
@@ -54,10 +52,6 @@ namespace SceneEditor.editor
                 if (X == null || Y == null || Z == null)
                 {
                     Functions.GenerateRandomPoints(out data, start: -20f, end: 20f, amountLow: 100, amountHigh: 200);
-                    //if (shouldTriangulate)
-                    //    Functions.GenerateRandomPoints(out data, start: -20f, end: 20f, amountLow:100, amountHigh: 200);
-                    //else
-                    //Functions.GenerateRandomPoints(out data, start: -20f, end: 20f, amountLow: 1000, amountHigh: 3000);
                     data = Functions.FixLowHight(data);
                 }
             }
@@ -71,7 +65,6 @@ namespace SceneEditor.editor
 
             UpdateVertices();
 
-            //_generateFastTriangulationFromData();
             if (shouldTriangulate)
             {
                 generateDelaunayTriangulationFromData();
@@ -151,30 +144,26 @@ namespace SceneEditor.editor
             return poly;
         }
 
-        public void generateDelaunayTriangulationFromData(bool isConvex = false, bool fixArea = false, bool accurateTriangulation = false)
+        public bool generateDelaunayTriangulationFromData(bool isConvex = false, bool fixArea = false, bool accurateTriangulation = false)
         {
-            interp = Functions.Interpolate(data);
-            var Coptions = new ConstraintOptions();
-
-            Coptions.Convex = isConvex;
-            if (accurateTriangulation)
-            {
-                Coptions.ConformingDelaunay = true;
-            }
-            var Qoptions = new QualityOptions();
-            if (fixArea)
-            {
-                Qoptions.MaximumArea = (Math.Sqrt(3) / 4 * 0.2 * 0.2) * 1.45;
-            }
-
-            IMesh? mesh = null;
             try 
             {
-                mesh = _createPolyFromPoints().Triangulate(Coptions, Qoptions);
-            } catch (Exception ex) { }
+                interp = Functions.Interpolate(data);
+                var Coptions = new ConstraintOptions();
 
-            if (mesh != null) 
-            {
+                Coptions.Convex = isConvex;
+                if (accurateTriangulation)
+                {
+                    Coptions.ConformingDelaunay = true;
+                }
+                var Qoptions = new QualityOptions();
+                if (fixArea)
+                {
+                    Qoptions.MaximumArea = (Math.Sqrt(3) / 4 * 0.2 * 0.2) * 1.45;
+                }
+
+                var mesh = _createPolyFromPoints().Triangulate(Coptions, Qoptions);
+
                 if (accurateTriangulation && fixArea)
                 {
                     try
@@ -193,8 +182,9 @@ namespace SceneEditor.editor
                 {
                     _readConnectionsFromMesh(mesh);
                 }
-            }
-            
+
+            } catch (Exception ex) { return false; }
+            return true;
         }
 
         public void HighlightDot(int index)
@@ -257,22 +247,6 @@ namespace SceneEditor.editor
             }
             dataTriangulared = new(triangles);
             showGeometry = true;
-        }
-
-        private void _ShowConnections(Vector3[][] cons)
-        {
-            Console.WriteLine("\n Connections:");
-            for (int i = 0; i < cons.Length; i++)
-            {
-                Console.WriteLine("[" + i + "]: " + cons[i][0].ToString());
-                Vector2 parent = cons[i][0].Xy;
-                for (int j = 1; j < cons[i].Length; j++)
-                {
-                    Vector2 child = cons[i][j].Xy;
-                    Console.WriteLine("\t[" + j + "]: " + cons[i][j].ToString() + " - " + (parent - child).Length);
-                }
-                Console.WriteLine();
-            }
         }
 
         public ComplexPlaneTile ConvertToTiledByInterpolation(

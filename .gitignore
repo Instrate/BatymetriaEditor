@@ -364,3 +364,6 @@ FodyWeavers.xsd
 *.docx
 *.doc
 *.vsdx
+*.pptx
+*.svg
+*.pdf

@@ -116,7 +116,6 @@ namespace SceneEditor.editor
 
         public void MeshCompatibleRange()
         {
-            // appropriate limit for 2Gb of VRAM
             int limit = 30;
             int xfactor = 0;
             int yfactor = 0;
@@ -136,8 +135,6 @@ namespace SceneEditor.editor
             int rows = Xmesh.Length - 1;
             int cols = Ymesh.Length - 1;
 
-            // shrink
-            // x
             if (shrinkx != 0 && Range[1] + shrinkx * 2 < Range[3])
             {
                 if (Range[1] + shrinkx >= 0)
@@ -149,7 +146,6 @@ namespace SceneEditor.editor
                     Range[3] -= shrinkx;
                 }
             }
-            // y
             if (shrinky != 0 && Range[0] + shrinky * 2 < Range[2])
             {
                 if (Range[0] + shrinky >= 0)
@@ -162,22 +158,17 @@ namespace SceneEditor.editor
                 }
             }
 
-            // shift
-            // x
             int temp = Range[1] + x;
             Range[1] = temp >= 0 && temp < Range[3] ? temp : Range[1];
 
             temp = Range[3] + x;
             Range[3] = temp > Range[1] && temp < rows ? temp : Range[3];
 
-            // y
             temp = Range[0] + y;
             Range[0] = temp >= 0 && temp < Range[2] ? temp : Range[0];
 
             temp = Range[2] + y;
             Range[2] = temp > Range[0] && temp < cols ? temp : Range[2];
-
-            //scale
 
             int dx = Range[3] - Range[1];
             int dy = Range[2] - Range[0];
@@ -185,16 +176,10 @@ namespace SceneEditor.editor
             int cx = Range[0] + dx / 2;
             int cy = Range[1] + dy / 2;
 
-            //Range[0] = (int) (cx - dx * scalex * 0.5 - 1);
-            //Range[1] = (int) (cy - dy * scaley * 0.5 - 1);
-            //Range[2] = (int) (cx + dx * scalex * 0.5);
-            //Range[3] = (int) (cy + dy * scaley * 0.5);
-
             Range[0] = Range[0] < 0 ? 0 : Range[0];
             Range[1] = Range[1] < 0 ? 0 : Range[1];
             Range[2] = Range[2] >= cols ? cols - 1 : Range[2];
             Range[3] = Range[3] >= rows ? rows - 1 : Range[3];
-            //Console.WriteLine(Range);
         }
 
         public void ResetMeshVisibility()
@@ -234,7 +219,6 @@ namespace SceneEditor.editor
 
             dots = new Dot[Xmesh.Length * Ymesh.Length];
 
-            //rewatch
             for (int i = 0; i <= rows; i++)
             {
                 for(int j = 0; j <= cols; j++)
@@ -280,7 +264,8 @@ namespace SceneEditor.editor
                     }
                 }
             }
-            
+
+            position = new Vector3(0, 0, min);
             _range = new Vector2(min, max);
         }
 
@@ -318,7 +303,6 @@ namespace SceneEditor.editor
             {
                 var rows = Xmesh.Length - 1;
                 var cols = Ymesh.Length - 1;
-                //var amount = tiles.Length;
                 GL.LineWidth(lineWidth);
                 GL.PointSize(lineWidth * 5);
                                 

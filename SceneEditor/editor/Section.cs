@@ -1,4 +1,5 @@
 ﻿using LearnOpenTK.Common;
+using Newtonsoft.Json;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System;
@@ -6,47 +7,6 @@ using System.Collections.Generic;
 
 namespace SceneEditor.editor
 {
-    public static class Use
-    {
-        public static void ShowArray(string name, float[] arr)
-        {
-            Console.WriteLine("Array " + name + ":\n");
-            for (int i = 0; i < arr.Length; i++)
-            {
-                Console.WriteLine("[" + i.ToString() + "]: " + arr[i].ToString() + "");
-            }
-            Console.WriteLine("\n");
-        }
-
-        public static void ShowVectors(string name, Vector3[] v)
-        {
-            Console.WriteLine("Vectors " + name + ":\n");
-            for (int i = 0; i < v.Length; i++)
-            {
-                Console.WriteLine("[" + i.ToString() + "]: " + v[i].ToString() + "");
-            }
-            Console.WriteLine("\n");
-        }
-
-        public static void ShowArray(string name, float[][] arr)
-        {
-            Console.WriteLine("Matrix " + name + ":\n");
-            for (int i = 0; i < arr.Length; i++)
-            {
-                string line = "";
-                for (int j = 0; j < arr[i].Length; j++)
-                {
-                    line += " " + arr[i][j].ToString();
-                    if ((j + 1) % 15 == 0)
-                    {
-                        line += " \\/\n";
-                    }
-                }
-                Console.WriteLine(line + "\n");
-            }
-            Console.WriteLine("\n");
-        }
-    }
 
     public class LineFunction
     {
@@ -215,7 +175,6 @@ namespace SceneEditor.editor
             B = -(arr[0] * arr[5] - arr[2] * arr[3]);
             C = arr[0] * arr[4] - arr[1] * arr[3];
             D = A * (-1f) * a.X + B * (-1f) * a.Y + C * (-1f) * a.Z;
-
         }
 
         public PlaneFunction(float A, float B, float C, float D)
@@ -224,13 +183,6 @@ namespace SceneEditor.editor
             this.B = B;
             this.C = C;
             this.D = D;
-        }
-
-        public void ShowFunction()
-        {
-            Console.WriteLine("Plane function:");
-            Console.WriteLine("(" + A + ")x+(" + B + ")y+(" + C + ")z+(" + D + ")= 0");
-            Console.WriteLine();
         }
     }
 
@@ -258,9 +210,6 @@ namespace SceneEditor.editor
         public bool showPolar = false;
 
         private float[][] funcPolarArgs;
-        //Line[] funcSphere;
-        //bool hasSphere = false;
-        //float[][] funcSphereArgs;
 
         public bool intersected = false;
 
@@ -302,18 +251,11 @@ namespace SceneEditor.editor
             showPolar = false;
         }
 
-        // recheck formulae
         public Vector3[]? IntersectTiled(float[] X, float[] Y, float[][] Data)
         {
-
-
             int cols = X.Length - 1;
             int rows = Y.Length - 1;
 
-            //float dx = X[1] - X[0];
-            //float dy = Y[1] - Y[0];
-
-            // hard stuff appears
             float xmax = MathF.Max(chars[0].X, chars[1].X);
             xmax = X[cols] < xmax ? X[cols] : xmax;
 
@@ -357,7 +299,6 @@ namespace SceneEditor.editor
                 data[i] = new float[y.Length];
             }
 
-            //fill data
             for (int j = jjs; j <= jje; j++)
             {
                 y[j - jjs] = Y[j];
@@ -371,12 +312,6 @@ namespace SceneEditor.editor
                     data[i - iis][j - jjs] = Data[i][j];
                 }
             }
-
-            //Use.ShowArray("X", x);
-            //Use.ShowArray("Y", y);
-            //Use.ShowArray("Data", data);
-
-            // get lines' params
             int amount = (x.Length - 1) * y.Length + (y.Length - 1) * x.Length;
             LineFunction[] lines = new LineFunction[amount];
 
@@ -395,12 +330,8 @@ namespace SceneEditor.editor
                     lines[(x.Length - 1) * y.Length + i * (y.Length - 1) + j] = new LineFunction(new float[] { x[i], x[i], y[j], y[j + 1], data[i][j], data[i][j + 1] });
                 }
             }
-
-            // create working area mesh
             _assignAreaMesh(lines);
 
-
-            // convert result
             List<Vector3> res = new List<Vector3>();
             for (int i = 0; i < amount; i++)
             {
@@ -413,7 +344,6 @@ namespace SceneEditor.editor
                 }
             }
 
-            // create dots for the result displaying
             amount = res.Count;
             if (amount != 0)
             {
@@ -455,24 +385,6 @@ namespace SceneEditor.editor
             return (line1.AngleBetweenLines(new Vector3(line.m1, line.p1, line.l1)) - MathF.PI / 2) / 2;
         }
 
-        public void ShowPolarFuncs()
-        {
-            if (intersected)
-            {
-                Console.WriteLine("Polar functions:\n\tx(r,phi)=r*cos(phi);\n\ty(r,phi)=r*sin(phi);\n");
-                for(int i = 0; i < funcPolarArgs.Length; i++)
-                {
-                    float r = funcPolarArgs[i][0];
-                    float p = funcPolarArgs[i][1];
-                    Console.WriteLine("[" + i + "]:\n\tx=" + r + "*cos(" + p + ");\n\ty=" + r + "*sin(" + p + ");\n");
-                }
-            }
-            else
-            {
-                Console.WriteLine("\n!Do an intersection!\n");
-            }
-        }
-
         private void CountPolarFunction()
         {
             if (intersected)
@@ -494,11 +406,6 @@ namespace SceneEditor.editor
                         
                         rotated[i] = rotated[i].Rotate(angle);
 
-                        //for (int j = 1; j < accuracyStrength; j++)
-                        //{
-                        //    angle = _countAngleToRotateYZ(rotated[i].start, rotated[i].end);
-                        //    rotated[i] = rotated[i].Rotate(angle);
-                        //}
                         funcPolar[i] = new Line(
                             new Vector3(0, rotated[i].start.Y, rotated[i].start.Z),
                             new Vector3(0, rotated[i].end.Y, rotated[i].end.Z),
@@ -507,17 +414,6 @@ namespace SceneEditor.editor
                             );
                     }
                     
-                    // TODO: recheck it
-                    //for (int i = 0; i < areaMesh.Length; i++)
-                    //{
-                    //    Vector3 start, end;
-                    //    start = areaMesh[i].start;
-                    //    end = areaMesh[i].end;
-                    //    var line = new LineFunction(new float[] { start.X, end.X, start.Y, end.Y, start.Z, end.Z });
-                    //    line.Rotate(angle);
-                    //    areaMesh[i] = new Line(line.start, line.end, ((Vector4)Color4.Cyan).Xyz, width: 3);
-                    //}
-
                     funcPolarArgs = new float[dots.Length][];
                     for(int i = 0; i < funcPolarArgs.Length; i++)
                     {
@@ -537,17 +433,28 @@ namespace SceneEditor.editor
                         funcPolarArgs[i][0] = MathF.Sqrt(x * x + y * y);
                         funcPolarArgs[i][1] = MathF.Atan(y / x);
                     }
-                    ShowPolarFuncs();
                     hasPolar = true;
                     showPolar = true;
                 }
             }
         }
 
-        // maybe later
-        private void CountSphericalFunction()
+        public void ExportWriteStreamPolarArgs(JsonWriter writer)
         {
-
+            writer.WriteStartObject();
+            writer.WritePropertyName("Args");
+            writer.WriteStartArray();
+            foreach (var f in funcPolarArgs)
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName("r");
+                writer.WriteValue(f[0]);
+                writer.WritePropertyName("phi");
+                writer.WriteValue(f[1]);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
 
         public void SwitchPlaneDisplaying()

@@ -31,19 +31,14 @@ void main()
 	gl_Position = transformed * model * view * projection;
 	FragPos = vec3(model * transformed);	
 
-	//Normal = vec3(transform[0][0], transform[1][1], transform[2][2]) * aNormal mat3(model_cramble);
 	Normal = aNormal;
 
 	vertexColor = aColor;
 	
-	//vec2 pixelPlacement = transformed.xy;
-	//LightPos = vec3(pixelPlacement, 10);
-	//lightPos = LightPos + vec3(pixelPlacement + vec2(aPos.x, aPos.y), 0);
 	lightPos = LightPos;
 
 	TexCoord = aTexCoord;
 
-	//height = transformed.z / transformed.length;
 	height = aPos.z / aPos.length + transform[3][2];
 
 	TextureGradRange = textureGradRange;
