@@ -131,15 +131,10 @@ namespace SceneEditor.editor
         }
 
         
-
-        
         [MTAThread]
         public void OnResize(Size windowSizeNew)
         {
             selfSize = windowSizeNew;
-
-            //Console.WriteLine("size: ");
-            //Console.WriteLine(selfSize);
 
             cameras[activeCam].cam.AspectRatio = (float)(selfSize.Width / selfSize.Height);
 
@@ -222,7 +217,7 @@ namespace SceneEditor.editor
                 _applyShaderSettings();
                 _applyTextureUnits();
                 _applyRenderQueue();
-                GL.Finish();
+                //GL.Finish();
 
                 isRendered = true;
             }

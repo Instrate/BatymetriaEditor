@@ -128,6 +128,11 @@ namespace LearnOpenTK.Common
             return GL.GetAttribLocation(Handle, attribName);
         }
 
+        public int GetUniformLocation(string uniformName)
+        {
+            return _uniformLocations[uniformName];
+        }
+
         // Uniform setters
         // Uniforms are variables that can be set by user code, instead of reading them from the VBO.
         // You use VBOs for vertex-related data, and uniforms for almost everything else.
@@ -144,7 +149,7 @@ namespace LearnOpenTK.Common
         /// <param name="data">The data to set</param>
         public void SetInt(string name, int data)
         {
-            GL.UseProgram(Handle);
+            //GL.UseProgram(Handle);
             GL.Uniform1(_uniformLocations[name], data);
         }
 
@@ -155,7 +160,7 @@ namespace LearnOpenTK.Common
         /// <param name="data">The data to set</param>
         public void SetFloat(string name, float data)
         {
-            GL.UseProgram(Handle);
+            //GL.UseProgram(Handle);
             GL.Uniform1(_uniformLocations[name], data);
         }
 
@@ -171,7 +176,7 @@ namespace LearnOpenTK.Common
         /// </remarks>
         public void SetMatrix4(string name, Matrix4 data)
         {
-            GL.UseProgram(Handle);
+            //GL.UseProgram(Handle);
             GL.UniformMatrix4(_uniformLocations[name], true, ref data);
         }
 
@@ -182,7 +187,7 @@ namespace LearnOpenTK.Common
         /// <param name="data">The data to set</param>
         public void SetVector3(string name, Vector3 data)
         {
-            GL.UseProgram(Handle);
+            //GL.UseProgram(Handle);
             GL.Uniform3(_uniformLocations[name], data);
         }
     }

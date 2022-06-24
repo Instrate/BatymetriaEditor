@@ -96,10 +96,10 @@ namespace SceneEditor.editor
 
         private protected override void _prepareRendering(Shader shader)
         {
-            var id = GL.GetUniformLocation(shader.Handle, "transform");
+            var id = shader.GetUniformLocation("transform");
             GL.UniformMatrix4(id, false, ref transform);
 
-            int attr = GL.GetUniformLocation(shader.Handle, "textureGradRange");
+            int attr = shader.GetUniformLocation("textureGradRange");
             if(parent == null)
             {
                 GL.Uniform2(attr, ref _range);

@@ -43,7 +43,7 @@ namespace SceneEditor.editor
 
         private protected virtual void _prepareRendering(Shader shader)
         {
-            var id = GL.GetUniformLocation(shader.Handle, "transform");
+            var id = shader.GetUniformLocation("transform");
             GL.UniformMatrix4(id, false, ref transform);
         }
 

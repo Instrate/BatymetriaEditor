@@ -29,7 +29,6 @@ namespace SceneEditor.editor
             GL.BindTexture(TextureTarget.Texture2D, handle);
             using (var image = new Bitmap(path))
             {
-
                 var data = image.LockBits(
                     new Rectangle(0, 0, image.Width, image.Height),
                     ImageLockMode.ReadOnly,
@@ -78,8 +77,8 @@ namespace SceneEditor.editor
                 return;
             }
 
-            shader.Use();
-            int attrLoc = GL.GetUniformLocation(shader.Handle, "textures[0]");
+            //shader.Use();
+            int attrLoc = shader.GetUniformLocation("textures[0]");
 
             GL.Uniform1(attrLoc, textureHandlers.Length, textureHandlers);
             for (int i = 0; i < textureHandlers.Length; i++)
